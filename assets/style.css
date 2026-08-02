@@ -346,27 +346,31 @@ body {
 
 /* Schwebt unter der Kategorienleiste, rechtsbündig unter dem aufgeklappten
    Symbol. Den Abstand zum rechten Rand setzt zeigeMerkmale() in app.js. */
+/* Untereinander am rechten Rand, direkt unter der Symbolleiste. Ohne Karte
+   darunter — jeder Chip trägt seinen eigenen Hintergrund und hebt sich über
+   einen Schatten von den Kartenkacheln ab. */
 .merkmale {
-  /* Absolut statt im Fluss: Als Flex-Kind würde die Breite der Karte auf die
-     Zonenbreite zurückwirken und die Ausrichtung um einige Pixel verziehen. */
   position: absolute;
-  top: calc(100% + 6px);
-  right: var(--merkmal-rechts, 0px);
-  padding: 8px 12px;
-  max-width: min(70vw, 460px);
-  justify-content: flex-end;
-  border: 1px solid var(--linie);
-  border-radius: 12px;
-  background: rgba(255, 253, 249, 0.96);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  top: calc(100% + 8px);
+  right: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
   pointer-events: auto;
-  transition: right .22s ease;
 }
 
-/* Nur angesehen, noch nicht ausgewählt: etwas zurückgenommen. */
-.merkmale.vorschau {
+.merkmale .merkmal-kat {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.merkmale .chip.merkmal {
+  box-shadow: 0 1px 5px rgba(0,0,0,.16);
+}
+
+/* Nur angesehen, noch nicht ausgewählt. */
+.merkmale.vorschau .chip.merkmal {
   border-style: dashed;
 }
 
@@ -1372,7 +1376,6 @@ body.setzt-position #karte { cursor: crosshair; }
     opacity: 0;
     margin-right: 0;
   }
-  .merkmale { padding: 0 14px 10px; }
   .einstellungen { right: 12px; }
   .buehne {
     grid-template-columns: 1fr;

@@ -1020,27 +1020,6 @@
      Zone verlässt. Dann zeigt die Leiste wieder die gewählte Kategorie. */
   var vorschauKategorie = null;
 
-  /* Schiebt die Merkmalleiste unter das zugehörige Symbol. Gemessen wird die
-     rechte Kante: Die Leiste ist rechtsbündig, ein Chip wächst beim Aufklappen
-     nach links — die rechte Kante bleibt also stehen. */
-  function setzeMerkmalPosition(kat) {
-    var zone = document.getElementById("kat-zone");
-    var chip = document.querySelector('[data-kategorie="' + kat + '"]');
-    var box = document.getElementById("merkmale");
-    if (!zone || !chip || !box) { return; }
-    var zoneRect = zone.getBoundingClientRect();
-    var abstand = Math.max(0, Math.round(
-      zoneRect.right - chip.getBoundingClientRect().right));
-
-    /* Bei den linken Symbolen würde die Karte sonst über den Kartenrand
-       hinausragen — dann rückt sie so weit nach rechts, wie sie muss. */
-    box.style.setProperty("--merkmal-rechts", abstand + "px");
-    var hoechstens = Math.max(0, Math.round(zoneRect.width - box.getBoundingClientRect().width));
-    if (abstand > hoechstens) {
-      box.style.setProperty("--merkmal-rechts", hoechstens + "px");
-    }
-  }
-
   function zeichneMerkmale() {
     var box = document.getElementById("merkmale");
     box.innerHTML = "";
@@ -1087,10 +1066,6 @@
       });
       box.appendChild(gruppe);
     });
-
-    /* Erst jetzt ausrichten — vorher hätte die Karte noch keine Breite, und
-       die Begrenzung zum linken Kartenrand ließe sich nicht rechnen. */
-    setzeMerkmalPosition(kats[0]);
   }
 
   /* Verlässt der Zeiger die Zone, fällt die Vorschau zurück auf die gewählte
@@ -1118,16 +1093,6 @@
     zone.addEventListener("mouseenter", halten, true);
     zone.addEventListener("mouseover", halten);
     zone.addEventListener("mouseleave", loslassen);
-
-    /* Beim Wechsel von einem Symbol zum nächsten klappt das vorige noch zu.
-       Solange das läuft, steht das Ziel weiter links, als es am Ende steht —
-       deshalb nach dem Ende der Animation nachmessen. */
-    zone.addEventListener("transitionend", function (e) {
-      if (e.propertyName !== "max-width") { return; }
-      var kat = vorschauKategorie ||
-        Object.keys(MERKMALE).filter(function (k) { return aktiveKategorien.has(k); })[0];
-      if (kat) { setzeMerkmalPosition(kat); }
-    });
     zone.addEventListener("focusout", function (e) {
       if (!zone.contains(e.relatedTarget)) { loslassen(); }
     });
