@@ -839,6 +839,11 @@ body {
   color: var(--weiss);
 }
 
+/* ---------- Ortsblatt (nur schmale Fenster) ----------
+   Am großen Schirm gibt es das Popup an der Karte; das Blatt darf dort unter
+   keinen Umständen auftauchen. Sichtbar wird es erst im Medienblock unten. */
+.ort-blatt { display: none; }
+
 /* ---------- Tagesplan: schwebender Knopf und Overlay ---------- */
 
 /* Sitzt in .karten-aktionen unten rechts. */
@@ -1086,6 +1091,7 @@ body {
   /* Der Name springt dann auf, statt aufzurollen. */
   .kat-chip .name { transition: none; }
   .kat-zone::before { transition: none; }
+  .ort-blatt { transition: none; }
 }
 
 /* ---------- Karte: Marker und Popup ---------- */
@@ -1611,6 +1617,90 @@ body.setzt-position #karte { cursor: crosshair; }
   }
   body { height: auto; min-height: 100%; }
   .buehne { min-height: 0; }
+
+  /* ----- Ortsblatt: fährt beim Antippen eines Pins von unten herein ----- */
+  .ort-blatt {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1250;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-radius: 16px 16px 0 0;
+    background: var(--weiss);
+    box-shadow: 0 -6px 24px rgba(0,0,0,.22);
+    transform: translateY(100%);
+    transition: transform 0.2s ease;
+  }
+  .ort-blatt.offen { transform: translateY(0); }
+  .ort-blatt[hidden] { display: none; }
+
+  .blatt-schliessen {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 999px;
+    background: var(--papier-tief);
+    font-size: 15px;
+    color: var(--tinte);
+    cursor: pointer;
+  }
+
+  .blatt-kopf {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-right: 40px;
+  }
+  .blatt-kopf h3 {
+    margin: 0 0 2px;
+    font-size: 19px;
+    line-height: 1.25;
+  }
+  .blatt-bild {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .blatt-bild img { width: 100%; height: 100%; object-fit: cover; }
+  .blatt-text {
+    margin: 10px 0 0;
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+
+  .blatt-aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .blatt-knopf {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 15px;
+    border-radius: 999px;
+    background: var(--papier-tief);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tinte);
+    text-decoration: none;
+  }
+  .blatt-aktionen .plan-knopf {
+    padding: 9px 15px;
+    font-size: 14px;
+    border-radius: 999px;
+  }
+
+  /* Solange das Blatt offen ist, treten die Kartenknöpfe zurück. */
+  body:has(.ort-blatt.offen) .karten-aktionen { visibility: hidden; }
 
   /* Knöpfe und Overlay bleiben in der Kartenecke, nur etwas näher am Rand. */
   .karten-aktionen { right: 12px; bottom: 16px; gap: 6px; }

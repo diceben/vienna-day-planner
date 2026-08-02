@@ -360,6 +360,17 @@
     aktualisiere();
     aktualisiereMarkerIcons();
     zeichneLinie();
+
+    /* Das Ortsblatt hängt an keinem der obigen Neuzeichner — sein Knopf muss
+       von Hand nachgezogen werden, sonst steht dort weiter „+ Zum Tag“. */
+    var blatt = document.getElementById("ort-blatt");
+    var knopf = blatt && !blatt.hidden ? blatt.querySelector(".plan-knopf") : null;
+    if (knopf) {
+      var drin = imPlan(knopf.dataset.id);
+      knopf.classList.toggle("drin", drin);
+      knopf.setAttribute("aria-pressed", drin ? "true" : "false");
+      knopf.textContent = drin ? "✓ Im Tag" : "+ Zum Tag";
+    }
   }
 
   function planEntfernen(id) {
@@ -955,9 +966,15 @@
       var m = L.marker([ort.lat, ort.lng], {
         icon: symbol(ort, false), title: ort.name, riseOnHover: true
       });
-      /* Reichlich Rand oben, damit das hohe Popup samt Bild hineinpasst. */
-      m.bindPopup(popupInhalt(ort), { autoPanPadding: L.point(24, 90) });
-      m.on("click", function () { waehle(ort.id, false); });
+      /* Auf dem Handy tritt das Ortsblatt an die Stelle des Popups. Es gar
+         nicht erst zu binden ist der einzige saubere Weg — Leaflet öffnet ein
+         gebundenes Popup beim Klick von sich aus, noch bevor unser eigener
+         Zuhörer an die Reihe kommt.
+         Reichlich Rand oben, damit das hohe Popup samt Bild hineinpasst. */
+      if (!istHandy()) {
+        m.bindPopup(popupInhalt(ort), { autoPanPadding: L.point(24, 90) });
+      }
+      m.on("click", function () { waehle(ort.id, false, "karte"); });
       markerNach[ort.id] = m;
     });
   }
@@ -1249,7 +1266,7 @@
         if (tun === "loeschen") { loesche(ort.id); return; }
         /* Erneuter Klick auf den offenen Eintrag klappt ihn wieder zu. */
         if (gewaehlt === ort.id) { abwaehlen(); return; }
-        waehle(ort.id, true);
+        waehle(ort.id, true, "liste");
       });
 
       ul.appendChild(li);
@@ -1258,16 +1275,88 @@
     document.getElementById("leer").hidden = liste.length > 0;
   }
 
-  function waehle(id, karteBewegen) {
+  /* Eine Frage der Breite, nicht des Zeigers: Auch ein Tablet mit Maus zeigt
+     die Liste unter der Karte und soll deshalb das Ortsblatt bekommen. */
+  function istHandy() {
+    return window.matchMedia("(max-width: 900px)").matches;
+  }
+
+  /* Das Blatt, das auf dem Handy statt des Popups von unten hereinfährt.
+     Baut aus denselben Teilen wie der Listeneintrag. */
+  function zeichneOrtBlatt(ort) {
+    var blatt = document.getElementById("ort-blatt");
+    if (!blatt) { return; }
+    var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
+    blatt.style.setProperty("--ton", k.farbe);
+
+    var aktionen = "";
+    if (ort.website) {
+      aktionen += '<a class="blatt-knopf" href="' + entschaerfe(ort.website) +
+        '" target="_blank" rel="noopener">🌐 Website</a>';
+    }
+    aktionen += '<a class="blatt-knopf" href="' + routenLink(ort) +
+      '" target="_blank" rel="noopener">🧭 Route</a>';
+    aktionen += planKnopf(ort.id);
+
+    blatt.innerHTML =
+      '<button type="button" class="blatt-schliessen" data-tun="schliessen" aria-label="Schließen">✕</button>' +
+      '<div class="blatt-kopf">' + miniatur(ort, "blatt-bild") +
+      '<div><h3>' + entschaerfe(ort.name) + "</h3>" +
+      '<p class="adresse">' + entschaerfe(ort.adresse) + "</p></div></div>" +
+      '<p class="blatt-text">' + entschaerfe(ort.beschreibung) + "</p>" +
+      '<div class="blatt-aktionen">' + aktionen + "</div>";
+
+    blatt.hidden = false;
+    /* Erst im nächsten Bild einblenden, sonst gibt es keinen Übergang. */
+    window.requestAnimationFrame(function () { blatt.classList.add("offen"); });
+  }
+
+  function schliesseOrtBlatt() {
+    var blatt = document.getElementById("ort-blatt");
+    if (!blatt) { return; }
+    blatt.classList.remove("offen");
+    blatt.hidden = true;
+  }
+
+  /* Der Pin soll über dem Blatt sichtbar bleiben, nicht darunter liegen. */
+  function zeigePinUeberBlatt(ort) {
+    var blatt = document.getElementById("ort-blatt");
+    var hoehe = blatt && !blatt.hidden ? blatt.getBoundingClientRect().height : 0;
+    karte.setView([ort.lat, ort.lng], Math.max(karte.getZoom(), 15), { animate: false });
+    if (hoehe > 0) { karte.panBy([0, hoehe / 2], { animate: true, duration: 0.4 }); }
+  }
+
+  /* `quelle` unterscheidet Pin von Listeneintrag. Auf dem Handy soll ein Tipp
+     in der Liste dort bleiben — der Eintrag klappt auf, sonst passiert nichts.
+     Das Ortsblatt kommt nur aus der Karte. */
+  function waehle(id, karteBewegen, quelle) {
     gewaehlt = id;
     hervorgehoben = id;
     var ort = orte.find(function (o) { return o.id === id; });
     if (!ort) { return; }
+    var handy = istHandy();
 
     Object.keys(markerNach).forEach(function (mid) {
       var o = orte.find(function (x) { return x.id === mid; });
       if (o) { markerNach[mid].setIcon(symbol(o, mid === id)); }
     });
+
+    function markiereEintrag() {
+      document.querySelectorAll(".eintrag").forEach(function (li) {
+        li.classList.toggle("aktiv", li.dataset.id === id);
+      });
+    }
+
+    /* Karte angetippt: Das Blatt fährt herein, die Seite bleibt stehen —
+       vorher sprang sie hinunter zur Liste und die Karte war weg. */
+    if (handy && quelle !== "liste") {
+      zeichneOrtBlatt(ort);
+      zeigePinUeberBlatt(ort);
+      markiereEintrag();
+      return;
+    }
+
+    if (handy) { markiereEintrag(); return; }
 
     if (markerNach[id]) { markerNach[id].openPopup(); }
 
@@ -1283,9 +1372,7 @@
       }, 700);
     }
 
-    document.querySelectorAll(".eintrag").forEach(function (li) {
-      li.classList.toggle("aktiv", li.dataset.id === id);
-    });
+    markiereEintrag();
     var aktiv = document.querySelector('.eintrag[data-id="' + id + '"]');
     if (aktiv) { aktiv.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
   }
@@ -1303,7 +1390,20 @@
     document.querySelectorAll(".eintrag.aktiv").forEach(function (li) {
       li.classList.remove("aktiv");
     });
+    schliesseOrtBlatt();
   }
+
+  /* Klicks im Ortsblatt laufen wie in der Liste über Delegation. */
+  (function verdrahteOrtBlatt() {
+    var blatt = document.getElementById("ort-blatt");
+    if (!blatt) { return; }
+    blatt.addEventListener("click", function (e) {
+      if (e.target.closest("a")) { return; }
+      if (e.target.closest("[data-tun='schliessen']")) { abwaehlen(); return; }
+      var knopf = e.target.closest(".plan-knopf");
+      if (knopf) { planUmschalten(knopf.dataset.id); }
+    });
+  })();
 
   /* ------------------------------------------------------------------
      Neu zeichnen
@@ -2051,7 +2151,18 @@
 
   if (window.location.hash === "#bearbeiten") { schalteBearbeiten(true); }
 
-  window.addEventListener("resize", function () { karte.invalidateSize(); });
+  /* Ob ein Popup gebunden wird, entscheidet sich beim Bauen der Marker. Wandert
+     das Fenster über die Schwelle, müssen sie deshalb neu gebaut werden. */
+  var warHandy = istHandy();
+  window.addEventListener("resize", function () {
+    karte.invalidateSize();
+    if (istHandy() !== warHandy) {
+      warHandy = istHandy();
+      abwaehlen();
+      baueMarker();
+      aktualisiere();
+    }
+  });
 
   /* Auf dem Handy stehen Suche und Kategorien fest am oberen Rand. Sobald die
      Ortsliste darunter hochwandert, bräuchten sie einen Grund, sich vom Text
