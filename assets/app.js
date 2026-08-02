@@ -1020,6 +1020,9 @@
      Zone verlässt. Dann zeigt die Leiste wieder die gewählte Kategorie. */
   var vorschauKategorie = null;
 
+  /* Hat das Gerät einen Zeiger, der schweben kann? Auf Touchscreens nicht. */
+  var kannSchweben = window.matchMedia("(hover: hover)").matches;
+
   function zeichneMerkmale() {
     var box = document.getElementById("merkmale");
     box.innerHTML = "";
@@ -1075,7 +1078,7 @@
   var vorschauVerdrahtet = false;
 
   function verdrahteVorschau() {
-    if (vorschauVerdrahtet) { return; }
+    if (vorschauVerdrahtet || !kannSchweben) { return; }
     var zone = document.getElementById("kat-zone");
     if (!zone) { return; }
     vorschauVerdrahtet = true;
@@ -1130,14 +1133,20 @@
         aktualisiere();
       });
 
-      /* Überfahren und Tastaturfokus zeigen die Merkmale schon vorab. */
-      function vorschauAn() {
-        if (vorschauKategorie === schluessel) { return; }
-        vorschauKategorie = schluessel;
-        zeichneMerkmale();
+      /* Überfahren und Tastaturfokus zeigen die Merkmale schon vorab — aber
+         nur auf Geräten mit echtem Zeiger. Auf einem Touchscreen schickt der
+         erste Tipper ein erfundenes mouseenter voraus; ändert sich dadurch der
+         Inhalt, verschluckt Safari den darauffolgenden Klick, und man müsste
+         zweimal tippen, um eine Kategorie zu wählen. */
+      if (kannSchweben) {
+        function vorschauAn() {
+          if (vorschauKategorie === schluessel) { return; }
+          vorschauKategorie = schluessel;
+          zeichneMerkmale();
+        }
+        b.addEventListener("mouseenter", vorschauAn);
+        b.addEventListener("focus", vorschauAn);
       }
-      b.addEventListener("mouseenter", vorschauAn);
-      b.addEventListener("focus", vorschauAn);
 
       behaelter.appendChild(b);
     });
@@ -2043,4 +2052,22 @@
   if (window.location.hash === "#bearbeiten") { schalteBearbeiten(true); }
 
   window.addEventListener("resize", function () { karte.invalidateSize(); });
+
+  /* Auf dem Handy stehen Suche und Kategorien fest am oberen Rand. Sobald die
+     Ortsliste darunter hochwandert, bräuchten sie einen Grund, sich vom Text
+     abzuheben — den bekommen sie über diese Klasse, und nur dann. Über der
+     Karte bleibt der Kopfbereich durchsichtig. */
+  (function scrollZustand() {
+    var laeuft = false;
+    function pruefe() {
+      laeuft = false;
+      document.body.classList.toggle("gescrollt", window.scrollY > 8);
+    }
+    window.addEventListener("scroll", function () {
+      if (laeuft) { return; }
+      laeuft = true;
+      window.requestAnimationFrame(pruefe);
+    }, { passive: true });
+    pruefe();
+  })();
 })();

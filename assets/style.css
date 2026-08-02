@@ -376,7 +376,6 @@ body {
   transition: max-width .22s ease, opacity .16s ease, margin-right .22s ease;
 }
 
-.kat-chip:hover .name,
 .kat-chip:focus-visible .name,
 .kat-chip[aria-pressed="true"] .name {
   max-width: 14rem;
@@ -384,7 +383,17 @@ body {
   margin-right: 6px;
 }
 
-.kat-chip:hover { border-color: var(--ton, var(--tinte-leise)); }
+/* Nur für echte Zeiger. Auf einem Touchscreen bliebe der Hover-Zustand nach
+   dem Tippen kleben, und das Aufklappen beim ersten Tipper kostet dort den
+   Klick — siehe kannSchweben in app.js. */
+@media (hover: hover) {
+  .kat-chip:hover .name {
+    max-width: 14rem;
+    opacity: 1;
+    margin-right: 6px;
+  }
+  .kat-chip:hover { border-color: var(--ton, var(--tinte-leise)); }
+}
 
 .kat-chip[aria-pressed="true"] {
   background: var(--ton, var(--tinte));
@@ -1076,6 +1085,7 @@ body {
   .standort-punkt::after { animation: none; }
   /* Der Name springt dann auf, statt aufzurollen. */
   .kat-chip .name { transition: none; }
+  .kat-zone::before { transition: none; }
 }
 
 /* ---------- Karte: Marker und Popup ---------- */
@@ -1420,8 +1430,10 @@ body.setzt-position #karte { cursor: crosshair; }
 
 @media (max-width: 900px) {
   /* ----- Kopfzeile schwebt über der Karte, wie bei Kartendiensten üblich ----- */
+  /* Fest am oberen Rand: Suche und Kategorien bleiben beim Scrollen stehen,
+     auch wenn die Ortsliste unter der Karte hochwandert. */
   .topbar {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -1478,11 +1490,41 @@ body.setzt-position #karte { cursor: crosshair; }
 
   /* ----- Kategorien: waagrecht scrollbare Reihe mit Namen ----- */
   .kat-zone {
-    top: 62px;
+    position: fixed;
+    top: 68px;
     left: 0;
     right: 0;
+    z-index: 1150;
     align-items: stretch;
   }
+
+  /* Über der Karte bleibt der Kopfbereich durchsichtig. Erst wenn die
+     Ortsliste darunter hochwandert, legt sich ein papierfarbener Streifen
+     dahinter — sonst liest man zwischen den Pillen hindurch Textfetzen.
+     Reicht bis zum Fensterrand hinauf, also auch hinter die Suchpille, und
+     läuft nach unten weich aus. */
+  .kat-zone::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -68px;
+    bottom: -22px;
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+    background: linear-gradient(
+      to bottom,
+      var(--papier) 0%,
+      var(--papier) 88%,
+      rgba(247, 244, 238, 0) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  body.gescrollt .kat-zone::before { opacity: 1; }
   .kat-leiste {
     justify-content: flex-start;
     gap: 6px;
@@ -1499,15 +1541,20 @@ body.setzt-position #karte { cursor: crosshair; }
   /* Hier tragen die Chips ihren Namen dauerhaft — die Reihe scrollt ja.
      Und das Symbol steht vorn: Es klappt nichts mehr auf, also gibt es keinen
      Grund für die umgekehrte Reihenfolge des großen Schirms. */
-  .kat-chip { height: 34px; padding: 0 12px; flex-direction: row-reverse; }
+  .kat-chip {
+    height: 40px;
+    padding: 0 15px;
+    font-size: 14.5px;
+    flex-direction: row-reverse;
+  }
   .kat-chip .name {
     max-width: none;
     opacity: 1;
     margin-right: 0;
-    margin-left: 7px;
+    margin-left: 8px;
     transition: none;
   }
-  .kat-chip .sym { font-size: 15px; }
+  .kat-chip .sym { font-size: 17px; }
 
   .zaehler-chip {
     display: inline-flex;
@@ -1540,7 +1587,11 @@ body.setzt-position #karte { cursor: crosshair; }
     flex-wrap: nowrap;
     gap: 6px;
   }
-  .merkmale .chip.merkmal { white-space: nowrap; }
+  .merkmale .chip.merkmal {
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 8px 14px;
+  }
 
   /* ----- Leaflets Bedienelemente aus dem Weg ----- */
   /* Auf dem Handy wird gezoomt, nicht geklickt — die Knöpfe stünden nur

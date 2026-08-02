@@ -167,6 +167,8 @@ Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was ma
 - Darunter die **Kategorien als beschriftete Chips** in einer waagrecht scrollbaren Reihe, Symbol vorn, Name dahinter. Der Scrollbalken ist ausgeblendet, gescrollt wird trotzdem. Erster Chip ist die Trefferzahl.
 - Ist eine Kategorie gewählt, erscheint darunter eine **zweite scrollbare Reihe** mit ihren Merkmalen.
 - **Leaflets Zoomknöpfe sind ausgeblendet** — auf dem Handy wird mit zwei Fingern gezoomt, und die Knöpfe stünden genau unter der Suchleiste im Weg. Der Standortknopf (◉) rutscht nach unten links.
+- Suchleiste und Chips **bleiben beim Scrollen stehen**. Sobald die Ortsliste unter ihnen hochwandert, legt sich ein papierfarbener Streifen dahinter, der nach unten weich ausläuft — sonst läse man zwischen den Pillen hindurch Textfetzen. Über der Karte, also ganz oben, bleibt alles durchsichtig.
+- **Kein Überfahren:** Auf einem Touchscreen gibt es keine Merkmal-Vorschau, der erste Tipper wählt direkt aus. Das ist kein Schönheitsentscheid — ein Touchgerät schickt vor dem Klick ein erfundenes `mouseenter`, und wenn das den Inhalt verändert, verschluckt Safari den darauffolgenden Klick. Man müsste zweimal tippen. Die Weiche dafür ist `kannSchweben` in `assets/app.js`, gestützt auf `matchMedia("(hover: hover)")`; die passenden CSS-Regeln liegen in `@media (hover: hover)`.
 
 Am großen Schirm bleibt es beim Gegenteil: Dort sind die Kategorien reine Symbole, die beim Überfahren aufrollen, und die Merkmale stehen untereinander am rechten Rand.
 
