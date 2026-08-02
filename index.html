@@ -13,10 +13,16 @@
 
 <div class="topbar" role="search">
   <div class="toolbar">
-    <input type="search" id="suche" class="toolbar-suche" placeholder="Suchen…" aria-label="Orte durchsuchen" autocomplete="off">
-    <div class="toolbar-status">
-      <span id="trefferzahl"></span>
-      <button type="button" id="zuruecksetzen" class="icon-knopf" title="Filter zurücksetzen" aria-label="Filter zurücksetzen">⟲</button>
+    <p class="marke">vienna day planner</p>
+    <div class="kopf-rechts">
+      <div class="toolbar-status">
+        <span id="trefferzahl"></span>
+        <button type="button" id="zuruecksetzen" class="icon-knopf" title="Filter zurücksetzen" aria-label="Filter zurücksetzen">⟲</button>
+      </div>
+      <div class="suchfeld">
+        <span class="such-lupe" aria-hidden="true">🔍</span>
+        <input type="search" id="suche" class="toolbar-suche" placeholder="Suchen…" aria-label="Orte durchsuchen" autocomplete="off">
+      </div>
       <button type="button" id="einstellungen-knopf" class="gear" aria-expanded="false" aria-haspopup="true" aria-label="Weitere Filter">
         <span aria-hidden="true">⚙</span><span id="gear-zahl" class="gear-zahl" hidden></span>
       </button>

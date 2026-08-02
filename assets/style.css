@@ -46,36 +46,85 @@ body {
 
 /* ---------- Toolbar ---------- */
 
+/* Transparent und ohne Unterkante: Die Leiste ist kein eigener Balken mehr,
+   sondern Titel links und schwebende Bedienelemente rechts. Was dazwischen
+   liegt, bleibt bewusst frei. */
 .topbar {
   position: relative;
   flex: 0 0 auto;
-  border-bottom: 1px solid var(--linie);
-  background: var(--papier-tief);
+  background: transparent;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 9px 20px;
+  /* Rechts 12 px, damit das Zahnrad exakt auf der Kante der Symbolleiste
+     über der Karte sitzt (.kat-zone steht ebenfalls auf right: 12px). */
+  padding: 9px 12px 9px 20px;
 }
 
-.toolbar-suche {
-  flex: 0 0 auto;
-  width: 190px;
-  padding: 7px 13px;
+.marke {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tinte);
+  white-space: nowrap;
+}
+
+.kopf-rechts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Pille aus Lupe und Eingabefeld — dieselbe schwebende Behandlung wie
+   .route-knopf und .kat-chip. */
+.suchfeld {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 13px;
+  height: 32px;
   border: 1px solid var(--linie);
   border-radius: 999px;
-  background: var(--weiss);
+  background: rgba(255, 253, 249, 0.94);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  box-shadow: 0 1px 5px rgba(0,0,0,.14);
+}
+
+/* Der Fokusring gehört auf die Pille, sonst liegen zwei Rahmen übereinander. */
+.suchfeld:focus-within {
+  outline: 2px solid var(--tinte);
+  outline-offset: 1px;
+}
+
+.such-lupe {
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.75;
+}
+
+/* Sitzt randlos in .suchfeld; Rahmen, Hintergrund und Fokusring trägt die Pille. */
+.toolbar-suche {
+  flex: 1 1 auto;
+  width: 176px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
   font: inherit;
   font-size: 13.5px;
   color: inherit;
 }
 
-.toolbar-suche:focus {
-  outline: 2px solid var(--tinte);
-  outline-offset: 1px;
-}
+.toolbar-suche:focus { outline: none; }
 
 .toolbar-status {
   flex: 0 0 auto;
@@ -103,6 +152,14 @@ body {
 }
 
 .icon-knopf:hover { border-color: var(--tinte-leise); }
+
+/* Auf der transparenten Kopfzeile brauchen die runden Knöpfe denselben
+   Schatten wie die übrigen schwebenden Bedienelemente, sonst wirken sie
+   flach aufgeklebt. */
+.topbar .icon-knopf,
+.topbar .gear {
+  box-shadow: 0 1px 5px rgba(0,0,0,.14);
+}
 
 /* ---------- Routenvorschlag ---------- */
 
@@ -441,7 +498,8 @@ body {
 .einstellungen {
   position: absolute;
   top: 46px;
-  right: 16px;
+  /* Bündig mit dem Zahnrad darüber. */
+  right: 12px;
   z-index: 1300;
   width: min(320px, calc(100vw - 40px));
   padding: 14px 16px;
@@ -1357,8 +1415,14 @@ body.setzt-position #karte { cursor: crosshair; }
 /* ---------- Schmale Fenster ---------- */
 
 @media (max-width: 900px) {
-  .toolbar { flex-wrap: wrap; padding: 9px 14px; gap: 9px; }
-  .toolbar-suche { flex: 1 1 140px; width: auto; }
+  /* Rechts 10 px wie .kat-zone auf schmalen Fenstern. */
+  .toolbar { flex-wrap: nowrap; padding: 9px 10px 9px 14px; gap: 9px; }
+  .marke { font-size: 16px; }
+  /* Die Suchpille gibt als Erste nach, damit Titel, Zähler und Zahnrad
+     nebeneinander bleiben. */
+  .kopf-rechts { flex: 1 1 auto; justify-content: flex-end; }
+  .suchfeld { flex: 1 1 140px; min-width: 96px; }
+  .toolbar-suche { width: auto; }
   /* Neun Symbole zu je 30 px passen damit auch auf ein 360-px-Display. */
   /* Abstand zu Leaflets Zoomknöpfen oben links. */
   .kat-zone { top: 10px; left: 56px; right: 10px; }
@@ -1376,7 +1440,7 @@ body.setzt-position #karte { cursor: crosshair; }
     opacity: 0;
     margin-right: 0;
   }
-  .einstellungen { right: 12px; }
+  .einstellungen { right: 10px; }
   .buehne {
     grid-template-columns: 1fr;
     grid-template-rows: 58vh auto;

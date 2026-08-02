@@ -136,7 +136,7 @@ Die Logik: innerhalb einer Dimension gilt oder (Italienisch + Griechisch zeigt b
 
 Die Merkmale je Kategorie stehen in `assets/app.js` unter `MERKMALE`. Die meisten hängen an einem Eintrag im Feld `tags` (z. B. `kueche-italienisch`, `genre-jazz`, `thema-kunst`) und lassen sich im Bearbeiten-Formular anhaken. Ein paar werden aus anderen Feldern abgeleitet und tragen keinen Tag: Kostenlos/Mit Eintritt aus `preis`, Indoor/Outdoor aus `indoor`, Gruppe/Duo aus `allein`.
 
-**Zahnrad.** Rechts neben „Zurücksetzen“ öffnet ein Rädchen zwei Gruppen von Schaltern, die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
+**Zahnrad.** Ganz rechts in der Kopfzeile öffnet ein Rädchen zwei Gruppen von Schaltern, die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
 
 Oben die sechs universellen Schalter (Tabelle unten), darunter die Eigenschaften aus dem Feld `labels`: Barrierefrei, LGBTQ+-freundlich, Hunde willkommen, Reizarm & ruhig, Vegan & vegetarisch, Geheimtipp. Mehrere Eigenschaften werden mit und verknüpft — wer barrierefrei und vegan wählt, sieht nur Orte, auf die beides zutrifft.
 
@@ -152,6 +152,12 @@ Oben die sechs universellen Schalter (Tabelle unten), darunter die Eigenschaften
 | Wenig gehen | kaum Fußweg verlangen (`gehen: "wenig"`) |
 
 Das Suchfeld greift auf Name, Adresse und Beschreibung zu.
+
+## Kopfzeile
+
+Die Leiste ganz oben hat keinen eigenen Hintergrund und keine Unterkante — sie ist kein Balken, sondern ein Titel links und schwebende Bedienelemente rechts: Trefferzahl, Zurücksetzen, die Suchpille mit Lupe und das Zahnrad. Deren rechte Kante liegt auf derselben Linie wie die Kategoriensymbole über der Karte; beide sitzen 12 Pixel vom Rand (auf schmalen Fenstern 10).
+
+Die Mitte bleibt bewusst leer. Der Platz ist für später vorgesehen.
 
 ## Auf GitHub Pages veröffentlichen
 
