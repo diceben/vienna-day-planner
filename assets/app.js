@@ -1,0 +1,1946 @@
+/* Wien-Karte — Anwendungslogik
+   Daten kommen aus daten.js (globale Konstante ORTE).
+   Bearbeitete Stände liegen im localStorage und lassen sich als neue
+   daten.js exportieren. */
+
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------
+     Konfiguration
+     ------------------------------------------------------------------ */
+
+  var KATEGORIEN = {
+    fruehstueck:       { titel: "Frühstückscafés",        farbe: "#c08a2e", zeichen: "🥐" },
+    restaurant:        { titel: "Restaurants",            farbe: "#b23a2a", zeichen: "🍽️" },
+    sehenswuerdigkeit: { titel: "Sehenswürdigkeiten",     farbe: "#1b7fa8", zeichen: "🏰" },
+    museum:            { titel: "Museen & Ausstellungen", farbe: "#7a3f86", zeichen: "🏛️" },
+    musik:             { titel: "Musik",                  farbe: "#3b4a8c", zeichen: "🎵" },
+    event:             { titel: "Events",                 farbe: "#a8336a", zeichen: "🎭" },
+    aktivitaet:        { titel: "Aktivitäten",            farbe: "#2f7355", zeichen: "🎯" }
+  };
+
+  /* Labels: Eigenschaften eines Ortes, schaltbar im Zahnrad-Popover. */
+  var LABELS = {
+    barrierefrei: { titel: "Barrierefrei",        zeichen: "♿" },
+    lgbtq:        { titel: "LGBTQ+-freundlich",   zeichen: "🏳️‍🌈" },
+    hunde:        { titel: "Hunde willkommen",    zeichen: "🐕" },
+    reizarm:      { titel: "Reizarm & ruhig",     zeichen: "🔇" },
+    vegan:        { titel: "Vegan & vegetarisch", zeichen: "🌱" },
+    geheimtipp:   { titel: "Geheimtipp",          zeichen: "🤫" }
+  };
+
+  /* ------------------------------------------------------------------
+     Routenvorschlag
+     ------------------------------------------------------------------
+     Jede Kategorie trägt einen Zeitwert in Punkten, jedes Zeitfenster ein
+     Budget. Weil die Orte keine Öffnungszeiten führen, leitet sich die
+     Tageszeit aus der Kategorie ab — eine Faustregel, kein Fahrplan. */
+  var ROUTE = {
+    punkte: {
+      fruehstueck: 1,
+      restaurant: 2,
+      sehenswuerdigkeit: 2,
+      aktivitaet: 2,
+      museum: 3,
+      musik: 3,
+      event: 3
+    },
+
+    /* In welchen Tagesabschnitten eine Kategorie infrage kommt. */
+    phasen: {
+      fruehstueck: ["morgens"],
+      museum: ["tagsueber"],
+      sehenswuerdigkeit: ["tagsueber"],
+      aktivitaet: ["tagsueber"],
+      restaurant: ["tagsueber", "abends"],
+      musik: ["abends"],
+      event: ["abends"]
+    },
+
+    /* Reihenfolge im fertigen Tag. */
+    rang: {
+      fruehstueck: 1,
+      sehenswuerdigkeit: 2,
+      museum: 2,
+      aktivitaet: 3,
+      restaurant: 4,
+      musik: 5,
+      event: 5
+    },
+
+    /* Der Tag wird in vier Abschnitte gegliedert. */
+    abschnitte: [
+      { id: "vormittag",  titel: "Vormittags" },
+      { id: "mittag",     titel: "Mittags" },
+      { id: "nachmittag", titel: "Nachmittags" },
+      { id: "abend",      titel: "Abends" }
+    ],
+
+    fenster: {
+      ganztag:    { titel: "Ganztag",             budget: 8, phasen: ["morgens", "tagsueber", "abends"], mindestens: ["fruehstueck", "restaurant"] },
+      vormittag:  { titel: "Morgens bis mittags", budget: 4, phasen: ["morgens", "tagsueber"],           mindestens: ["fruehstueck"] },
+      abend:      { titel: "Nur Abend",           budget: 5, phasen: ["abends"],                         mindestens: ["restaurant"] }
+    },
+
+    /* Höchstzahl je Kategorie in einer Route. Man frühstückt einmal und
+       geht an einem Abend in ein Konzert, nicht in zwei. */
+    hoechstens: {
+      fruehstueck: 1,
+      museum: 2,
+      restaurant: 2,
+      musik: 1,
+      event: 1
+    },
+
+    umkreisMeter: 3000,
+    /* Fällt der Standort aus, wird ab hier gerechnet. */
+    ersatzStart: [48.2082, 16.3730]
+  };
+
+  /* Aktivitäten im Trockenen laufen auch abends, ein Bogenparcours nicht. */
+  function phasenVon(ort, kategorie) {
+    var p = (ROUTE.phasen[kategorie] || []).slice();
+    if (kategorie === "aktivitaet" && ort.indoor === true && p.indexOf("abends") === -1) {
+      p.push("abends");
+    }
+    return p;
+  }
+
+  /* Schlüssel aus früheren Fassungen. Ein lokal gespeicherter Stand mit
+     diesen Werten ist überholt und wird beim Laden verworfen. */
+  var ALTE_SCHLUESSEL = ["kulinarik", "kultur", "vorfuehrung", "lokale"];
+
+  /* Primäre Kategorie plus die Zweitkategorien aus `weitere`. */
+  function kategorienVon(ort) {
+    var liste = [ort.kategorie];
+    (ort.weitere || []).forEach(function (k) {
+      if (liste.indexOf(k) === -1) { liste.push(k); }
+    });
+    return liste.filter(function (k) { return !!KATEGORIEN[k]; });
+  }
+
+  /* Universelle Schalter — liegen hinter dem Zahnrad, gelten für alle Kategorien. */
+  var SCHALTER = [
+    { id: "regen",     titel: "Bei Regen",        pruef: function (o) { return o.indoor === true; } },
+    { id: "ruhig",     titel: "Wenig Andrang",    pruef: function (o) { return o.andrang === "ruhig"; } },
+    { id: "allein",    titel: "Allein machbar",   pruef: function (o) { return o.allein === true; } },
+    { id: "gruppe",    titel: "Für Gruppen",      pruef: function (o) { return o.gruppe === true; } },
+    { id: "guenstig",  titel: "Gratis / günstig", pruef: function (o) { return o.preis === "kostenlos" || o.preis === "guenstig"; } },
+    { id: "wenigGehen", titel: "Wenig gehen",     pruef: function (o) { return o.gehen === "wenig"; } }
+  ];
+
+  function hatTag(t) { return function (o) { return (o.tags || []).indexOf(t) !== -1; }; }
+
+  /* Kategoriespezifische Merkmale. Chips mit `tag` filtern über die Tag-Liste
+     und sind im Formular anhakbar; Chips mit `test` werten andere Felder aus
+     (Preis, indoor, allein) und werden nur gefiltert, nicht gepflegt. */
+  var MERKMALE = {
+    fruehstueck: [
+      { id: "sitzen", chips: [ { label: "Draußensitzen", tag: "draussen" } ] },
+      { id: "stil", chips: [ { label: "Klassisch", tag: "fr-klassisch" }, { label: "Fancy", tag: "fr-fancy" } ] },
+      { id: "ende", chips: [ { label: "bis Mittag", tag: "fr-mittag" }, { label: "bis Nachmittag", tag: "fr-nachmittag" } ] }
+    ],
+    restaurant: [
+      { id: "kueche", chips: [
+        { label: "Traditionell", tag: "kueche-traditionell" },
+        { label: "Italienisch", tag: "kueche-italienisch" },
+        { label: "Asiatisch", tag: "kueche-asiatisch" },
+        { label: "Griechisch", tag: "kueche-griechisch" },
+        { label: "Indisch", tag: "kueche-indisch" },
+        { label: "Fast Food", tag: "kueche-fastfood" },
+        { label: "Steak & Burger", tag: "kueche-steakburger" }
+      ] },
+      { id: "stil", chips: [ { label: "Fancy", tag: "fancy" } ] }
+    ],
+    sehenswuerdigkeit: [
+      { id: "preis", chips: [
+        { label: "Kostenlos", test: function (o) { return o.preis === "kostenlos"; } },
+        { label: "Mit Eintritt", test: function (o) { return o.preis !== "kostenlos"; } }
+      ] }
+    ],
+    museum: [
+      { id: "thema", chips: [
+        { label: "Kunst", tag: "thema-kunst" },
+        { label: "Natur", tag: "thema-natur" },
+        { label: "Geschichte", tag: "thema-geschichte" },
+        { label: "Technik", tag: "thema-technik" },
+        { label: "Musik", tag: "thema-musik" },
+        { label: "Angewandte Kunst", tag: "thema-angewandt" }
+      ] }
+    ],
+    musik: [
+      { id: "genre", chips: [
+        { label: "Klassik", tag: "genre-klassik" },
+        { label: "Jazz", tag: "genre-jazz" },
+        { label: "Pop/Rock", tag: "genre-poprock" },
+        { label: "Metal", tag: "genre-metal" }
+      ] },
+      { id: "groesse", chips: [
+        { label: "Kleine Location", tag: "loc-klein" },
+        { label: "Große Location", tag: "loc-gross" }
+      ] },
+      { id: "wetter", chips: [
+        { label: "Indoor", test: function (o) { return o.indoor === true; } },
+        { label: "Outdoor", test: function (o) { return o.indoor === false; } }
+      ] }
+    ],
+    event: [
+      { id: "art", chips: [
+        { label: "Theater", tag: "event-theater" },
+        { label: "Oper", tag: "event-oper" },
+        { label: "Ballett", tag: "event-ballett" },
+        { label: "Kabarett", tag: "event-kabarett" },
+        { label: "Musical", tag: "event-musical" }
+      ] }
+    ],
+    aktivitaet: [
+      { id: "wetter", chips: [
+        { label: "Indoor", test: function (o) { return o.indoor === true; } },
+        { label: "Outdoor", test: function (o) { return o.indoor === false; } }
+      ] },
+      { id: "typ", chips: [
+        { label: "Sport", tag: "akt-sport" },
+        { label: "Logik & Rätsel", tag: "akt-logik" }
+      ] },
+      { id: "sozial", chips: [
+        { label: "Gruppe", test: function (o) { return o.allein === false; } },
+        { label: "Duo / allein", test: function (o) { return o.allein === true; } }
+      ] }
+    ]
+  };
+
+  /* Jedem Chip einen eindeutigen Schlüssel und eine einheitliche test-Funktion geben. */
+  Object.keys(MERKMALE).forEach(function (kat) {
+    MERKMALE[kat].forEach(function (dim) {
+      dim.chips.forEach(function (chip, i) {
+        chip.key = kat + ":" + dim.id + ":" + i;
+        if (!chip.test) { chip.test = hatTag(chip.tag); }
+      });
+    });
+  });
+
+  var SPEICHER = "wien-karte-orte";
+  var PLAN_SPEICHER = "wien-karte-plan";
+
+  /* ------------------------------------------------------------------
+     Zustand
+     ------------------------------------------------------------------ */
+
+  var orte = ladeOrte();
+  var plan = ladePlan();
+  var planLinie = null;
+  var ziehIndex = null;
+  var aktiveKategorien = new Set();
+  var aktiveSchalter = new Set();
+  var aktiveLabels = new Set();
+  var aktiveFacetten = new Set();
+  var suchtext = "";
+  var markerNach = {};
+  var gewaehlt = null;
+  /* Ort, der trotz Tagesplan-Filter farbig bleibt, weil er gerade
+     angeklickt wurde. Wird beim Herausnehmen aus dem Plan gelöscht. */
+  var hervorgehoben = null;
+  var bearbeiten = false;
+  var formularId = null;
+  var wartetAufKlick = false;
+  var markerVorschau = null;
+
+  function ladeOrte() {
+    try {
+      var roh = window.localStorage.getItem(SPEICHER);
+      if (roh) {
+        var geparst = JSON.parse(roh);
+        /* Überholt, wenn ein Eintrag noch alte Kategorien trägt oder das
+           Feld `tags` fehlt (Stand von vor den Merkmalen). Dann verwerfen,
+           damit der Datenbestand aus daten.js greift. */
+        var veraltet = Array.isArray(geparst) && geparst.some(function (o) {
+          return ALTE_SCHLUESSEL.indexOf(o.kategorie) !== -1 || !("tags" in o);
+        });
+        if (veraltet) { window.localStorage.removeItem(SPEICHER); }
+        else if (Array.isArray(geparst) && geparst.length) { return geparst; }
+      }
+    } catch (e) { /* localStorage gesperrt oder Inhalt kaputt */ }
+    return JSON.parse(JSON.stringify(ORTE));
+  }
+
+  function hatEigenenStand() {
+    try { return !!window.localStorage.getItem(SPEICHER); } catch (e) { return false; }
+  }
+
+  function speichere() {
+    try { window.localStorage.setItem(SPEICHER, JSON.stringify(orte)); }
+    catch (e) { window.alert("Der Browser lässt das Speichern nicht zu. Exportiere die Datei, sonst gehen die Änderungen beim Neuladen verloren."); }
+    zeigeMerker();
+  }
+
+  /* ------------------------------------------------------------------
+     Tagesplan
+     ------------------------------------------------------------------
+     Der Plan ist eine Liste von Einträgen { id, abschnitt } in einem
+     eigenen Speicher, getrennt von den Orten. `abschnitt` ist null,
+     solange die Zuordnung aus Kategorie und Position abgeleitet wird;
+     zieht man einen Eintrag auf eine Überschrift, wird sie festgesetzt.
+     Der Plan lebt nur in diesem Browser. */
+
+  function ladePlan() {
+    try {
+      var roh = window.localStorage.getItem(PLAN_SPEICHER);
+      if (roh) {
+        var geparst = JSON.parse(roh);
+        if (Array.isArray(geparst)) {
+          /* Frühere Fassungen speicherten bloße ids. */
+          return geparst.map(function (x) {
+            if (typeof x === "string") { return { id: x, abschnitt: null }; }
+            if (x && typeof x.id === "string") { return { id: x.id, abschnitt: x.abschnitt || null }; }
+            return null;
+          }).filter(Boolean);
+        }
+      }
+    } catch (e) { /* egal */ }
+    return [];
+  }
+
+  /* Einträge ohne passenden Ort fallen still heraus, etwa nach dem Löschen. */
+  function bereinigePlan() {
+    plan = plan.filter(function (e) {
+      return orte.some(function (o) { return o.id === e.id; });
+    });
+  }
+
+  function speicherePlan() {
+    try { window.localStorage.setItem(PLAN_SPEICHER, JSON.stringify(plan)); }
+    catch (e) { /* Speicher gesperrt: Plan bleibt für diese Sitzung im Arbeitsspeicher */ }
+  }
+
+  function planPosition(id) {
+    for (var i = 0; i < plan.length; i += 1) {
+      if (plan[i].id === id) { return i; }
+    }
+    return -1;
+  }
+
+  function imPlan(id) { return planPosition(id) !== -1; }
+
+  function planUmschalten(id) {
+    var i = planPosition(id);
+    if (i === -1) {
+      plan.push({ id: id, abschnitt: null });
+    } else {
+      plan.splice(i, 1);
+      /* Herausgenommen heißt: der Ort soll sofort zurücktreten. */
+      if (hervorgehoben === id) { hervorgehoben = null; }
+    }
+    speicherePlan();
+    zeichnePlan();
+    aktualisiere();
+    aktualisiereMarkerIcons();
+    zeichneLinie();
+  }
+
+  function planEntfernen(id) {
+    var i = planPosition(id);
+    if (i === -1) { return; }
+    plan.splice(i, 1);
+    if (hervorgehoben === id) { hervorgehoben = null; }
+    speicherePlan();
+    zeichnePlan();
+    aktualisiere();
+    aktualisiereMarkerIcons();
+    zeichneLinie();
+  }
+
+  function planLeeren() {
+    if (!plan.length) { return; }
+    if (!window.confirm("Den ganzen Tagesplan leeren?")) { return; }
+    plan = [];
+    speicherePlan();
+    zeichnePlan();
+    aktualisiere();
+    aktualisiereMarkerIcons();
+    zeichneLinie();
+  }
+
+  function planOrte() {
+    return plan.map(function (e) {
+      return orte.find(function (o) { return o.id === e.id; });
+    }).filter(Boolean);
+  }
+
+  function zeichnePlan() {
+    var ol = document.getElementById("plan-liste");
+    var leer = document.getElementById("plan-leer");
+    var fuss = document.getElementById("plan-fuss");
+    var zahl = document.getElementById("plan-zahl");
+    if (!ol) { return; }
+
+    ol.innerHTML = "";
+    var liste = planOrte();
+    zahl.textContent = liste.length;
+    zahl.hidden = liste.length === 0;
+    leer.hidden = liste.length > 0;
+    fuss.hidden = liste.length === 0;
+
+    /* Alle vier Abschnitte bleiben stehen, auch leere — der Tag ist ein
+       Gerüst, in das man einsortiert. */
+    var abschnitte = abschnitteFuer(liste);
+
+    var ausgegeben = 0;
+    ROUTE.abschnitte.forEach(function (abschnitt) {
+      var drin = [];
+      liste.forEach(function (ort, i) {
+        if (abschnitte[i] === abschnitt.id) { drin.push({ ort: ort, index: i }); }
+      });
+
+      var kopf = document.createElement("li");
+      kopf.className = "plan-abschnitt" + (drin.length ? "" : " leer");
+      kopf.textContent = abschnitt.titel;
+
+      /* Ein Eintrag lässt sich auf die Überschrift ziehen und landet dann
+         am Anfang dieses Abschnitts — auch wenn er noch leer ist. */
+      var einfuegePos = ausgegeben;
+      kopf.addEventListener("dragover", function (e) {
+        if (ziehIndex === null) { return; }
+        e.preventDefault();
+        if (e.dataTransfer) { e.dataTransfer.dropEffect = "move"; }
+        kopf.classList.add("ueber");
+      });
+      kopf.addEventListener("dragleave", function () { kopf.classList.remove("ueber"); });
+      kopf.addEventListener("drop", function (e) {
+        e.preventDefault();
+        kopf.classList.remove("ueber");
+        if (ziehIndex === null) { return; }
+        var ziel = ziehIndex < einfuegePos ? einfuegePos - 1 : einfuegePos;
+        var bewegt = plan.splice(ziehIndex, 1)[0];
+        /* Der Abschnitt wird hier ausdrücklich gesetzt und bleibt dann
+           auch dann bestehen, wenn die Kategorie etwas anderes nahelegt. */
+        bewegt.abschnitt = abschnitt.id;
+        plan.splice(ziel, 0, bewegt);
+        speicherePlan();
+        zeichnePlan();
+        aktualisiereMarkerIcons();
+        zeichneLinie();
+      });
+
+      ol.appendChild(kopf);
+      drin.forEach(function (eintrag) {
+        ol.appendChild(planEintrag(eintrag.ort, eintrag.index, abschnitt.id));
+      });
+      ausgegeben += drin.length;
+    });
+
+    var route = document.getElementById("plan-route");
+    if (route) {
+      if (liste.length) {
+        var stopps = liste.map(function (o) { return encodeURIComponent(o.name + ", " + o.adresse); });
+        route.href = "https://www.google.com/maps/dir/" + stopps.join("/");
+      } else {
+        route.removeAttribute("href");
+      }
+    }
+  }
+
+  /* Ein Eintrag der Tagesplan-Liste. `i` ist die Position im Plan und
+     bleibt maßgeblich fürs Umsortieren, `abschnittId` der Abschnitt, in
+     dem der Eintrag gerade steht. */
+  function planEintrag(ort, i, abschnittId) {
+    var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
+    var li = document.createElement("li");
+    li.className = "plan-eintrag";
+    li.draggable = true;
+    li.dataset.id = ort.id;
+    li.dataset.index = i;
+    li.dataset.abschnitt = abschnittId;
+    li.innerHTML =
+      '<span class="plan-griff" aria-hidden="true">⠿</span>' +
+      '<span class="plan-nr" style="background:' + k.farbe + '">' + (i + 1) + "</span>" +
+      '<span class="plan-name">' + entschaerfe(ort.name) + "</span>" +
+      '<button type="button" class="plan-weg" title="Aus dem Plan nehmen" aria-label="Aus dem Plan nehmen">✕</button>';
+
+    li.querySelector(".plan-weg").addEventListener("click", function (e) {
+      e.stopPropagation();
+      planEntfernen(ort.id);
+    });
+    li.addEventListener("click", function (e) {
+      if (e.target.closest(".plan-weg")) { return; }
+      waehle(ort.id, true);
+    });
+
+    /* Ohne dataTransfer.setData startet Firefox den Ziehvorgang gar nicht. */
+    li.addEventListener("dragstart", function (e) {
+      ziehIndex = i;
+      li.classList.add("zieht");
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", ort.id); } catch (fehler) { /* ältere Browser */ }
+      }
+    });
+    li.addEventListener("dragend", function () { li.classList.remove("zieht"); ziehIndex = null; });
+    li.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      if (e.dataTransfer) { e.dataTransfer.dropEffect = "move"; }
+      li.classList.add("ueber");
+    });
+    li.addEventListener("dragleave", function () { li.classList.remove("ueber"); });
+    li.addEventListener("drop", function (e) {
+      e.preventDefault();
+      li.classList.remove("ueber");
+      if (ziehIndex === null || ziehIndex === i) { return; }
+      /* Beim Ablegen auf einem Eintrag zählt der Abschnitt, in dem er
+         gerade steht — nicht der gespeicherte, der oft leer ist. */
+      var zielAbschnitt = li.dataset.abschnitt || null;
+      var bewegt = plan.splice(ziehIndex, 1)[0];
+      bewegt.abschnitt = zielAbschnitt;
+      plan.splice(i, 0, bewegt);
+      speicherePlan();
+      zeichnePlan();
+      aktualisiereMarkerIcons();
+      zeichneLinie();
+    });
+
+    return li;
+  }
+
+  /* ------------------------------------------------------------------
+     Eigener Standort
+     ------------------------------------------------------------------
+     Roter Punkt plus Genauigkeitskreis über die Standortabfrage des
+     Browsers. Läuft nur über https (GitHub Pages), nicht per file://. */
+
+  var standortMarker = null;
+  var standortKreis = null;
+  var standortWatch = null;
+
+  function standortUmschalten(knopf) {
+    if (standortWatch !== null) { standortAus(knopf); return; }
+    if (!navigator.geolocation) {
+      window.alert("Dein Browser kann den Standort nicht bestimmen.");
+      return;
+    }
+    knopf.classList.add("laedt");
+    standortWatch = navigator.geolocation.watchPosition(
+      function (pos) { standortGesetzt(pos, knopf); },
+      function (fehler) { standortFehler(fehler, knopf); },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+    );
+  }
+
+  function standortGesetzt(pos, knopf) {
+    knopf.classList.remove("laedt");
+    knopf.classList.add("aktiv");
+    var ll = [pos.coords.latitude, pos.coords.longitude];
+    var erst = standortMarker === null;
+
+    if (erst) {
+      standortMarker = L.marker(ll, {
+        icon: L.divIcon({ className: "", html: '<div class="standort-punkt"></div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
+        zIndexOffset: 2000,
+        interactive: false,
+        keyboard: false
+      }).addTo(karte);
+      standortKreis = L.circle(ll, {
+        radius: pos.coords.accuracy, color: "#e03131", weight: 1,
+        fillColor: "#e03131", fillOpacity: 0.12, interactive: false
+      }).addTo(karte);
+      karte.flyTo(ll, Math.max(karte.getZoom(), 15), { duration: 0.6 });
+    } else {
+      standortMarker.setLatLng(ll);
+      standortKreis.setLatLng(ll).setRadius(pos.coords.accuracy);
+    }
+  }
+
+  function standortFehler(fehler, knopf) {
+    standortAus(knopf);
+    var text = "Der Standort ließ sich nicht bestimmen.";
+    if (fehler && fehler.code === 1) { text = "Der Zugriff auf den Standort wurde abgelehnt. In den Browser-Einstellungen lässt er sich wieder erlauben."; }
+    else if (fehler && fehler.code === 3) { text = "Die Standortbestimmung hat zu lange gebraucht. Versuch es noch einmal."; }
+    window.alert(text);
+  }
+
+  function standortAus(knopf) {
+    if (standortWatch !== null) { navigator.geolocation.clearWatch(standortWatch); standortWatch = null; }
+    if (standortMarker) { karte.removeLayer(standortMarker); standortMarker = null; }
+    if (standortKreis) { karte.removeLayer(standortKreis); standortKreis = null; }
+    if (knopf) { knopf.classList.remove("laedt", "aktiv"); }
+  }
+
+  var StandortSteuerung = L.Control.extend({
+    options: { position: "topleft" },
+    onAdd: function () {
+      var c = L.DomUtil.create("div", "leaflet-bar standort-steuerung");
+      var a = L.DomUtil.create("a", "", c);
+      a.href = "#";
+      a.setAttribute("role", "button");
+      a.setAttribute("aria-label", "Meinen Standort zeigen");
+      a.title = "Meinen Standort zeigen";
+      a.innerHTML = "◉";
+      L.DomEvent.on(a, "click", function (e) {
+        L.DomEvent.preventDefault(e);
+        L.DomEvent.stopPropagation(e);
+        standortUmschalten(a);
+      });
+      return c;
+    }
+  });
+
+  /* Linie über die Karte in der Reihenfolge des Plans. */
+  function zeichneLinie() {
+    if (planLinie) { karte.removeLayer(planLinie); planLinie = null; }
+    var liste = planOrte();
+    if (liste.length < 2) { return; }
+    var punkte = liste.map(function (o) { return [o.lat, o.lng]; });
+    planLinie = L.polyline(punkte, {
+      color: "#1d1a16", weight: 2, opacity: 0.6, dashArray: "5,7"
+    }).addTo(karte);
+  }
+
+  /* ------------------------------------------------------------------
+     Route berechnen
+     ------------------------------------------------------------------ */
+
+  /* Gerechnet wird ab dem eigenen Standort, sonst ab der Innenstadt. */
+  function routeStart() {
+    if (standortMarker) {
+      var ll = standortMarker.getLatLng();
+      return [ll.lat, ll.lng];
+    }
+    return ROUTE.ersatzStart;
+  }
+
+  function meter(a, b) {
+    return L.latLng(a[0], a[1]).distanceTo(L.latLng(b[0], b[1]));
+  }
+
+  /* Orte, die zu Kategorieauswahl, Zeitfenster und Umkreis passen.
+     Deckt ein Ort mehrere gewählte Kategorien ab, zählt die früheste. */
+  function routeKandidaten(vorgaben) {
+    var fenster = ROUTE.fenster[vorgaben.fenster];
+    var start = routeStart();
+    var treffer = [];
+
+    orte.forEach(function (ort) {
+      var passende = kategorienVon(ort).filter(function (k) {
+        if (vorgaben.kategorien.indexOf(k) === -1) { return false; }
+        return phasenVon(ort, k).some(function (p) {
+          return fenster.phasen.indexOf(p) !== -1;
+        });
+      });
+      if (!passende.length) { return; }
+
+      passende.sort(function (a, b) {
+        return (ROUTE.rang[a] || 9) - (ROUTE.rang[b] || 9);
+      });
+      var kat = passende[0];
+      var d = meter(start, [ort.lat, ort.lng]);
+      if (vorgaben.umkreis && d > ROUTE.umkreisMeter) { return; }
+
+      treffer.push({
+        ort: ort, kategorie: kat,
+        punkte: ROUTE.punkte[kat] || 2,
+        abStart: d
+      });
+    });
+
+    return treffer;
+  }
+
+  /* Baut einen Tagesvorschlag. Rückgabe entweder { fehler, … } oder
+     { stopps, summe, budget }. */
+  function routeBerechnen(vorgaben) {
+    var fenster = ROUTE.fenster[vorgaben.fenster];
+    var kandidaten = routeKandidaten(vorgaben);
+
+    if (!kandidaten.length) {
+      return { fehler: "leer", umkreis: vorgaben.umkreis };
+    }
+
+    /* Pflichtkategorien, die gewählt sind, aber keinen Kandidaten haben. */
+    var unerfuellbar = fenster.mindestens.filter(function (k) {
+      if (vorgaben.kategorien.indexOf(k) === -1) { return false; }
+      return !kandidaten.some(function (c) { return c.kategorie === k; });
+    });
+    if (unerfuellbar.length) {
+      return { fehler: "pflicht", fehlend: unerfuellbar, umkreis: vorgaben.umkreis };
+    }
+
+    var gewaehlt = [];
+    var summe = 0;
+    var proKategorie = {};
+    var letzter = routeStart();
+
+    /* Zwischen zwei Restaurants muss etwas liegen — sonst stünden Mittag-
+       und Abendessen unmittelbar hintereinander. */
+    function hatZwischenstopp() {
+      return gewaehlt.some(function (g) {
+        return ["museum", "sehenswuerdigkeit", "aktivitaet"].indexOf(g.kategorie) !== -1;
+      });
+    }
+
+    function frei(c) {
+      if (gewaehlt.indexOf(c) !== -1) { return false; }
+      if (summe + c.punkte > fenster.budget) { return false; }
+      var max = ROUTE.hoechstens[c.kategorie];
+      if (max && (proKategorie[c.kategorie] || 0) >= max) { return false; }
+      if (c.kategorie === "restaurant" && (proKategorie.restaurant || 0) >= 1 && !hatZwischenstopp()) {
+        return false;
+      }
+      return true;
+    }
+
+    /* Unter den drei nächstgelegenen einen zufällig — hält die Wege kurz
+       und macht „Neu würfeln“ sinnvoll. */
+    function nimmNahen(liste) {
+      var nah = liste.slice().sort(function (a, b) {
+        return meter(letzter, [a.ort.lat, a.ort.lng]) - meter(letzter, [b.ort.lat, b.ort.lng]);
+      }).slice(0, 3);
+      var c = nah[Math.floor(Math.random() * nah.length)];
+      gewaehlt.push(c);
+      summe += c.punkte;
+      proKategorie[c.kategorie] = (proKategorie[c.kategorie] || 0) + 1;
+      letzter = [c.ort.lat, c.ort.lng];
+    }
+
+    fenster.mindestens.forEach(function (k) {
+      if (vorgaben.kategorien.indexOf(k) === -1) { return; }
+      var moegliche = kandidaten.filter(function (c) { return c.kategorie === k && frei(c); });
+      if (moegliche.length) { nimmNahen(moegliche); }
+    });
+
+    /* Abwechslung geht vor: erst Kategorien, die noch fehlen. Sonst
+       gewinnen die Restaurants, weil es von ihnen am meisten gibt. */
+    var schutz = 0;
+    while (summe < fenster.budget && schutz < 40) {
+      schutz += 1;
+      var moegliche = kandidaten.filter(frei);
+      if (!moegliche.length) { break; }
+      var neue = moegliche.filter(function (c) { return !proKategorie[c.kategorie]; });
+      nimmNahen(neue.length ? neue : moegliche);
+    }
+
+    /* Grobe Reihenfolge, danach die Verteilung auf die Tagesabschnitte. */
+    gewaehlt.sort(function (a, b) {
+      var r = (ROUTE.rang[a.kategorie] || 9) - (ROUTE.rang[b.kategorie] || 9);
+      return r !== 0 ? r : a.abStart - b.abStart;
+    });
+    verteileAbschnitte(gewaehlt, vorgaben.fenster);
+
+    /* Innerhalb eines Abschnitts zählt erst die Tageslogik — das Frühstück
+       kommt vor der Sehenswürdigkeit —, danach die Nähe. */
+    var folge = ROUTE.abschnitte.map(function (a) { return a.id; });
+    gewaehlt.sort(function (a, b) {
+      var r = folge.indexOf(a.abschnitt) - folge.indexOf(b.abschnitt);
+      if (r !== 0) { return r; }
+      var rang = (ROUTE.rang[a.kategorie] || 9) - (ROUTE.rang[b.kategorie] || 9);
+      return rang !== 0 ? rang : a.abStart - b.abStart;
+    });
+
+    return {
+      stopps: gewaehlt,
+      summe: summe,
+      budget: fenster.budget,
+      kandidaten: kandidaten.length
+    };
+  }
+
+  /* Abschnitte für den Tagesplan. Festgesetzte Werte gewinnen; die
+     übrigen werden aus Kategorie und Lage zum Mittagessen abgeleitet
+     und dürfen dabei nie hinter einen festgesetzten zurückfallen. */
+  function abschnitteFuer(orteListe) {
+    var stopps = orteListe.map(function (o) {
+      return { ort: o, kategorie: o.kategorie };
+    });
+    verteileAbschnitte(stopps, "ganztag", true);
+
+    var folge = ROUTE.abschnitte.map(function (a) { return a.id; });
+    var mindestens = 0;
+    return stopps.map(function (s, i) {
+      var gesetzt = plan[i] && plan[i].abschnitt;
+      var abschnitt = gesetzt && folge.indexOf(gesetzt) !== -1 ? gesetzt : s.abschnitt;
+      var idx = folge.indexOf(abschnitt);
+      if (idx < mindestens) { abschnitt = folge[mindestens]; }
+      else { mindestens = idx; }
+      return abschnitt;
+    });
+  }
+
+  function abschnittTitel(id) {
+    var a = ROUTE.abschnitte.filter(function (x) { return x.id === id; })[0];
+    return a ? a.titel : "";
+  }
+
+  /* Weist jedem Stopp einen Tagesabschnitt zu. Das erste Restaurant wird
+     zum Mittagessen, ein zweites zum Abendessen; Museen und Ähnliches
+     verteilen sich auf Vormittag und Nachmittag. */
+  function verteileAbschnitte(stopps, fensterId, nachPosition) {
+    var restaurants = 0;
+    var tagsueber = 0;
+    var mittagVergeben = false;
+
+    stopps.forEach(function (c) {
+      var k = c.kategorie;
+
+      if (fensterId === "abend") { c.abschnitt = "abend"; return; }
+
+      if (k === "fruehstueck") { c.abschnitt = "vormittag"; return; }
+      if (k === "musik" || k === "event") { c.abschnitt = "abend"; return; }
+
+      if (k === "restaurant") {
+        restaurants += 1;
+        if (restaurants === 1) { c.abschnitt = "mittag"; mittagVergeben = true; }
+        else { c.abschnitt = "abend"; }
+        return;
+      }
+
+      /* Museum, Sehenswürdigkeit, Aktivität. Bei einer vorgegebenen
+         Reihenfolge (Tagesplan) entscheidet die Lage zum Mittagessen,
+         beim frisch gebauten Vorschlag die Verteilung auf beide Hälften. */
+      if (fensterId === "vormittag") { c.abschnitt = "vormittag"; return; }
+      if (nachPosition) {
+        c.abschnitt = mittagVergeben ? "nachmittag" : "vormittag";
+      } else {
+        tagsueber += 1;
+        c.abschnitt = tagsueber === 1 ? "vormittag" : "nachmittag";
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Karte
+     ------------------------------------------------------------------ */
+
+  var karte = L.map("karte", { zoomControl: true, scrollWheelZoom: true })
+    .setView([48.2082, 16.3730], 13);
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  }).addTo(karte);
+
+  karte.on("click", function (e) {
+    if (wartetAufKlick) {
+      setzeFormularfeld("lat", e.latlng.lat.toFixed(7));
+      setzeFormularfeld("lng", e.latlng.lng.toFixed(7));
+      wartetAufKlick = false;
+      document.body.classList.remove("setzt-position");
+    }
+  });
+
+  function symbol(ort, gross) {
+    var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
+    var pos = planPosition(ort.id);
+    var geplant = pos !== -1 ? " geplant" : "";
+    var nummer = pos !== -1 ? '<b class="pin-nr">' + (pos + 1) + "</b>" : "";
+
+    /* Sobald etwas im Plan liegt, treten alle übrigen Orte zurück.
+       Ausnahme ist der gerade angeklickte Ort — nimmt man ihn aber aus
+       dem Plan, verfällt diese Ausnahme und er graut sofort aus. */
+    if (plan.length && pos === -1 && ort.id !== hervorgehoben) { geplant = " gedimmt"; }
+
+    /* Mit Foto ein runder Bildpunkt, ohne Foto der bisherige Tropfen.
+       Die Nummer sitzt im Wrapper, damit sie weder rotiert noch
+       vom runden Bildzuschnitt beschnitten wird. */
+    if (ort.bild) {
+      var d = gross ? 44 : 36;
+      return L.divIcon({
+        className: "",
+        html: '<div class="pinwrap">' +
+          '<div class="bildpin' + (gross ? " gross" : "") + geplant + '" style="border-color:' + k.farbe +
+          ";background:" + k.farbe + '">' +
+          '<span>' + k.zeichen + "</span>" +
+          '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">' +
+          "</div>" + nummer + "</div>",
+        iconSize: [d, d],
+        iconAnchor: [d / 2, d / 2],
+        popupAnchor: [0, -(d / 2) - 2]
+      });
+    }
+
+    var b = gross ? 38 : 30;
+    return L.divIcon({
+      className: "",
+      html: '<div class="pinwrap">' +
+        '<div class="pin' + (gross ? " gross" : "") + geplant + '" style="background:' + k.farbe + '"><span>' + k.zeichen + "</span></div>" +
+        nummer + "</div>",
+      iconSize: [b, b],
+      iconAnchor: [b / 2, gross ? 38 : 30],
+      popupAnchor: [0, -28]
+    });
+  }
+
+  /* Icons neu setzen, wenn sich der Plan ändert (Nummer und Hervorhebung). */
+  function aktualisiereMarkerIcons() {
+    Object.keys(markerNach).forEach(function (id) {
+      var o = orte.find(function (x) { return x.id === id; });
+      if (!o) { return; }
+      markerNach[id].setIcon(symbol(o, id === gewaehlt));
+      markerNach[id].setPopupContent(popupInhalt(o));
+      /* Geplante Orte nach vorn, damit sie nicht verdeckt werden. */
+      markerNach[id].setZIndexOffset(imPlan(id) ? 500 : 0);
+    });
+  }
+
+  /* Miniatur für Liste und Popup: Foto, sonst farbiges Feld mit Symbol. */
+  function miniatur(ort, klasse) {
+    var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
+    return '<div class="' + klasse + '" style="background:' + k.farbe + '">' +
+      "<span>" + k.zeichen + "</span>" +
+      (ort.bild ? '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">' : "") +
+      "</div>";
+  }
+
+  /* Plus-/Haken-Knopf zum Ein- und Auslegen in den Tagesplan. */
+  function planKnopf(id) {
+    var drin = imPlan(id);
+    var titel = drin ? "Aus dem Tagesplan nehmen" : "Zum Tagesplan hinzufügen";
+    return '<button type="button" class="plan-knopf' + (drin ? " drin" : "") +
+      '" data-id="' + id + '"' +
+      ' aria-pressed="' + (drin ? "true" : "false") + '"' +
+      ' title="' + titel + '" aria-label="' + titel + '">' +
+      (drin ? "✓ Im Tag" : "+ Zum Tag") + "</button>";
+  }
+
+  function routenLink(ort) {
+    return "https://www.google.com/maps/dir/?api=1&destination=" +
+      encodeURIComponent(ort.name + ", " + ort.adresse);
+  }
+
+  function popupInhalt(ort) {
+    var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
+    var teile = [];
+    if (ort.bild) {
+      teile.push('<span class="popup-bild"><img src="' + entschaerfe(ort.bild) +
+        '" alt="" onerror="this.parentNode.remove()"></span>');
+    }
+    teile.push('<span class="popup-titel">' + entschaerfe(ort.name) + "</span>");
+    teile.push('<span class="popup-adresse">' + entschaerfe(ort.adresse) + "</span>");
+    teile.push("<span>" + entschaerfe(ort.beschreibung) + "</span>");
+    var links = [];
+    if (ort.website) {
+      links.push('<a href="' + entschaerfe(ort.website) + '" target="_blank" rel="noopener" style="color:' + k.farbe + '">Website</a>');
+    }
+    links.push('<a href="' + routenLink(ort) + '" target="_blank" rel="noopener" style="color:' + k.farbe + '">Route</a>');
+    teile.push('<span class="popup-links">' + links.join("") + "</span>");
+    teile.push('<span class="popup-plan">' + planKnopf(ort.id) + "</span>");
+    return teile.join("");
+  }
+
+  function baueMarker() {
+    Object.keys(markerNach).forEach(function (id) { karte.removeLayer(markerNach[id]); });
+    markerNach = {};
+    orte.forEach(function (ort) {
+      var m = L.marker([ort.lat, ort.lng], {
+        icon: symbol(ort, false), title: ort.name, riseOnHover: true
+      });
+      /* Reichlich Rand oben, damit das hohe Popup samt Bild hineinpasst. */
+      m.bindPopup(popupInhalt(ort), { autoPanPadding: L.point(24, 90) });
+      m.on("click", function () { waehle(ort.id, false); });
+      markerNach[ort.id] = m;
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Filter
+     ------------------------------------------------------------------ */
+
+  function sichtbare() {
+    var suche = suchtext.trim().toLowerCase();
+    return orte.filter(function (ort) {
+      if (aktiveKategorien.size) {
+        var trifft = kategorienVon(ort).some(function (k) { return aktiveKategorien.has(k); });
+        if (!trifft) { return false; }
+      }
+      if (!passtFacetten(ort)) { return false; }
+      var alleSchalter = SCHALTER.every(function (s) {
+        return !aktiveSchalter.has(s.id) || s.pruef(ort);
+      });
+      if (!alleSchalter) { return false; }
+      /* Mehrere Eigenschaften werden mit und verknüpft. */
+      var labelsOk = true;
+      aktiveLabels.forEach(function (l) {
+        if ((ort.labels || []).indexOf(l) === -1) { labelsOk = false; }
+      });
+      if (!labelsOk) { return false; }
+      if (suche) {
+        var heuhaufen = (ort.name + " " + ort.adresse + " " + ort.beschreibung).toLowerCase();
+        if (heuhaufen.indexOf(suche) === -1) { return false; }
+      }
+      return true;
+    });
+  }
+
+  /* Innerhalb einer Dimension oder, über Dimensionen und, je Kategorie getrennt.
+     Ein Ort besteht, wenn eine seiner aktiven Kategorien alle deren aktive
+     Dimensionen erfüllt. */
+  function passtFacetten(ort) {
+    if (!aktiveFacetten.size) { return true; }
+    var cats = kategorienVon(ort).filter(function (c) { return aktiveKategorien.has(c); });
+    if (!cats.length) { return true; }
+    return cats.some(function (c) {
+      return (MERKMALE[c] || []).every(function (dim) {
+        var aktivInDim = dim.chips.filter(function (ch) { return aktiveFacetten.has(ch.key); });
+        if (!aktivInDim.length) { return true; }
+        return aktivInDim.some(function (ch) { return ch.test(ort); });
+      });
+    });
+  }
+
+  /* Facetten wegwerfen, deren Kategorie nicht mehr gewählt ist. */
+  function bereinigeFacetten() {
+    Array.from(aktiveFacetten).forEach(function (key) {
+      var kat = key.split(":")[0];
+      if (!aktiveKategorien.has(kat)) { aktiveFacetten.delete(key); }
+    });
+  }
+
+  function zeichneMerkmale() {
+    var box = document.getElementById("merkmale");
+    box.innerHTML = "";
+    var kats = Object.keys(MERKMALE).filter(function (k) { return aktiveKategorien.has(k); });
+    if (!kats.length) { box.hidden = true; return; }
+    box.hidden = false;
+    var mehrere = kats.length > 1;
+
+    kats.forEach(function (kat) {
+      var gruppe = document.createElement("div");
+      gruppe.className = "merkmal-kat";
+      if (mehrere) {
+        var titel = document.createElement("span");
+        titel.className = "merkmal-titel";
+        titel.textContent = KATEGORIEN[kat].titel;
+        gruppe.appendChild(titel);
+      }
+      MERKMALE[kat].forEach(function (dim) {
+        dim.chips.forEach(function (chip) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "chip merkmal";
+          b.style.setProperty("--ton", KATEGORIEN[kat].farbe);
+          b.setAttribute("aria-pressed", aktiveFacetten.has(chip.key) ? "true" : "false");
+          b.textContent = chip.label;
+          b.addEventListener("click", function () {
+            if (aktiveFacetten.has(chip.key)) { aktiveFacetten.delete(chip.key); }
+            else { aktiveFacetten.add(chip.key); }
+            aktualisiere();
+          });
+          gruppe.appendChild(b);
+        });
+      });
+      box.appendChild(gruppe);
+    });
+  }
+
+  function zeichneFilter() {
+    var behaelter = document.getElementById("kategorien");
+    behaelter.innerHTML = "";
+    Object.keys(KATEGORIEN).forEach(function (schluessel) {
+      var k = KATEGORIEN[schluessel];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.style.setProperty("--ton", k.farbe);
+      b.setAttribute("aria-pressed", "false");
+      b.dataset.kategorie = schluessel;
+      b.innerHTML = '<span class="punkt"></span>' + k.titel;
+      b.addEventListener("click", function () {
+        /* Nur eine Kategorie zur Zeit: erneut klicken schaltet ab. */
+        if (aktiveKategorien.has(schluessel)) { aktiveKategorien.clear(); }
+        else { aktiveKategorien.clear(); aktiveKategorien.add(schluessel); }
+        aktualisiere();
+      });
+      behaelter.appendChild(b);
+    });
+
+    var labelbox = document.getElementById("label-schalter");
+    labelbox.innerHTML = "";
+    Object.keys(LABELS).forEach(function (l) {
+      var d = LABELS[l];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip schalt";
+      b.setAttribute("aria-pressed", "false");
+      b.dataset.label = l;
+      b.innerHTML = '<span class="schalt-zeichen" aria-hidden="true">' + d.zeichen + "</span>" + d.titel;
+      b.addEventListener("click", function () {
+        if (aktiveLabels.has(l)) { aktiveLabels.delete(l); }
+        else { aktiveLabels.add(l); }
+        aktualisiere();
+      });
+      labelbox.appendChild(b);
+    });
+
+    var schalterbox = document.getElementById("schalter");
+    schalterbox.innerHTML = "";
+    SCHALTER.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip schalt";
+      b.setAttribute("aria-pressed", "false");
+      b.dataset.schalter = s.id;
+      b.textContent = s.titel;
+      b.addEventListener("click", function () {
+        if (aktiveSchalter.has(s.id)) { aktiveSchalter.delete(s.id); }
+        else { aktiveSchalter.add(s.id); }
+        aktualisiere();
+      });
+      schalterbox.appendChild(b);
+    });
+  }
+
+  function spiegleFilterZustand() {
+    document.querySelectorAll("[data-kategorie]").forEach(function (b) {
+      b.setAttribute("aria-pressed", aktiveKategorien.has(b.dataset.kategorie) ? "true" : "false");
+    });
+    document.querySelectorAll("[data-schalter]").forEach(function (b) {
+      b.setAttribute("aria-pressed", aktiveSchalter.has(b.dataset.schalter) ? "true" : "false");
+    });
+    document.querySelectorAll("[data-label]").forEach(function (b) {
+      b.setAttribute("aria-pressed", aktiveLabels.has(b.dataset.label) ? "true" : "false");
+    });
+  }
+
+  function aktualisiereGearZahl() {
+    var span = document.getElementById("gear-zahl");
+    if (!span) { return; }
+    var summe = aktiveSchalter.size + aktiveLabels.size;
+    span.textContent = summe ? String(summe) : "";
+    span.hidden = summe === 0;
+  }
+
+  /* ------------------------------------------------------------------
+     Liste
+     ------------------------------------------------------------------ */
+
+  function zeichneListe(liste) {
+    var ul = document.getElementById("liste");
+    ul.innerHTML = "";
+    liste.forEach(function (ort) {
+      var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
+      var li = document.createElement("li");
+      li.className = "eintrag" + (gewaehlt === ort.id ? " aktiv" : "");
+      li.style.setProperty("--ton", k.farbe);
+      li.dataset.id = ort.id;
+
+      /* Aktionen rechts in der Kopfzeile: Website, Route, dann Tagesplan. */
+      var aktionen = "";
+      if (ort.website) {
+        aktionen += '<a class="aktion-icon" href="' + entschaerfe(ort.website) + '" target="_blank" rel="noopener" title="Website" aria-label="Website">🌐</a>';
+      }
+      aktionen += '<a class="aktion-icon" href="' + routenLink(ort) + '" target="_blank" rel="noopener" title="Route in Google Maps" aria-label="Route in Google Maps">🧭</a>';
+      aktionen += planKnopf(ort.id);
+
+      li.innerHTML = miniatur(ort, "miniatur") +
+        '<div class="eintrag-text">' +
+        '<div class="eintrag-kopf"><h3>' + entschaerfe(ort.name) + "</h3>" +
+        '<div class="eintrag-aktionen">' + aktionen + "</div></div>" +
+        '<p class="adresse">' + entschaerfe(ort.adresse) + "</p>" +
+        '<p class="text">' + entschaerfe(ort.beschreibung) + "</p></div>" +
+        '<div class="eintrag-werkzeug">' +
+        '<button type="button" data-tun="bearbeiten" title="Bearbeiten">✎</button>' +
+        '<button type="button" data-tun="loeschen" title="Löschen">✕</button></div>';
+
+      li.addEventListener("click", function (e) {
+        if (e.target.closest("a")) { return; }
+        if (e.target.closest(".plan-knopf")) { planUmschalten(ort.id); return; }
+        var tun = e.target.dataset ? e.target.dataset.tun : null;
+        if (tun === "bearbeiten") { oeffneFormular(ort.id); return; }
+        if (tun === "loeschen") { loesche(ort.id); return; }
+        /* Erneuter Klick auf den offenen Eintrag klappt ihn wieder zu. */
+        if (gewaehlt === ort.id) { abwaehlen(); return; }
+        waehle(ort.id, true);
+      });
+
+      ul.appendChild(li);
+    });
+
+    document.getElementById("leer").hidden = liste.length > 0;
+  }
+
+  function waehle(id, karteBewegen) {
+    gewaehlt = id;
+    hervorgehoben = id;
+    var ort = orte.find(function (o) { return o.id === id; });
+    if (!ort) { return; }
+
+    Object.keys(markerNach).forEach(function (mid) {
+      var o = orte.find(function (x) { return x.id === mid; });
+      if (o) { markerNach[mid].setIcon(symbol(o, mid === id)); }
+    });
+
+    if (markerNach[id]) { markerNach[id].openPopup(); }
+
+    if (karteBewegen) {
+      karte.flyTo([ort.lat, ort.lng], Math.max(karte.getZoom(), 15), { duration: 0.6 });
+      /* Der Flug überschreibt das Nachrücken, das Leaflet beim Öffnen des
+         Popups vornimmt. Also nach der Animation noch einmal anstoßen,
+         damit das hohe Popup samt Bild nicht oben abgeschnitten wird. */
+      window.setTimeout(function () {
+        if (gewaehlt === id && markerNach[id] && markerNach[id].isPopupOpen()) {
+          markerNach[id].openPopup();
+        }
+      }, 700);
+    }
+
+    document.querySelectorAll(".eintrag").forEach(function (li) {
+      li.classList.toggle("aktiv", li.dataset.id === id);
+    });
+    var aktiv = document.querySelector('.eintrag[data-id="' + id + '"]');
+    if (aktiv) { aktiv.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  }
+
+  /* Auswahl aufheben: Eintrag klappt zu, der Marker wird wieder klein. */
+  function abwaehlen() {
+    var vorher = gewaehlt;
+    gewaehlt = null;
+    hervorgehoben = null;
+    if (vorher && markerNach[vorher]) {
+      var o = orte.find(function (x) { return x.id === vorher; });
+      if (o) { markerNach[vorher].setIcon(symbol(o, false)); }
+      markerNach[vorher].closePopup();
+    }
+    document.querySelectorAll(".eintrag.aktiv").forEach(function (li) {
+      li.classList.remove("aktiv");
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Neu zeichnen
+     ------------------------------------------------------------------ */
+
+  function aktualisiere() {
+    bereinigeFacetten();
+    zeichneMerkmale();
+    var liste = sichtbare();
+    spiegleFilterZustand();
+    aktualisiereGearZahl();
+    zeichneListe(liste);
+
+    var sichtbareIds = {};
+    liste.forEach(function (o) { sichtbareIds[o.id] = true; });
+    Object.keys(markerNach).forEach(function (id) {
+      var m = markerNach[id];
+      if (sichtbareIds[id]) { if (!karte.hasLayer(m)) { m.addTo(karte); } }
+      else if (karte.hasLayer(m)) { karte.removeLayer(m); }
+    });
+
+    var zahl = document.getElementById("trefferzahl");
+    zahl.textContent = liste.length === orte.length
+      ? orte.length + " Orte"
+      : liste.length + " von " + orte.length + " Orten";
+  }
+
+  /* ------------------------------------------------------------------
+     Bearbeiten
+     ------------------------------------------------------------------ */
+
+  function schalteBearbeiten(an) {
+    bearbeiten = an;
+    document.body.classList.toggle("bearbeiten", an);
+    document.getElementById("bearbeiten-schalter").textContent = an ? "Bearbeiten beenden" : "Bearbeiten";
+    var panel = document.getElementById("bearbeiten-panel");
+    if (an) { zeichneWerkzeugleiste(); panel.hidden = false; }
+    else { panel.hidden = true; formularId = null; loescheVorschau(); }
+    if (an && window.location.hash !== "#bearbeiten") { window.location.hash = "bearbeiten"; }
+    if (!an && window.location.hash === "#bearbeiten") {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+    aktualisiere();
+  }
+
+  function zeichneWerkzeugleiste() {
+    loescheVorschau();
+    var panel = document.getElementById("bearbeiten-panel");
+    panel.innerHTML =
+      "<h2>Bearbeiten-Modus</h2>" +
+      '<p class="hinweis">Änderungen liegen zunächst nur in diesem Browser. Exportiere daten.js und ersetze damit die Datei im Projektordner.</p>' +
+      '<div class="knopfreihe">' +
+      '<button type="button" class="knopf" id="neu">Neuen Ort anlegen</button>' +
+      '<button type="button" class="knopf leise" id="export">daten.js exportieren</button>' +
+      '<button type="button" class="knopf leise" id="verwerfen">Änderungen verwerfen</button>' +
+      "</div>";
+    document.getElementById("neu").addEventListener("click", function () { oeffneFormular(null); });
+    document.getElementById("export").addEventListener("click", exportiere);
+    document.getElementById("verwerfen").addEventListener("click", verwirf);
+  }
+
+  function feld(name, beschriftung, wert, typ) {
+    return '<label class="feld"><span>' + beschriftung + "</span>" +
+      '<input type="' + (typ || "text") + '" name="' + name + '" value="' + entschaerfe(wert == null ? "" : String(wert)) + '"></label>';
+  }
+
+  function auswahl(name, beschriftung, wert, optionen) {
+    var html = '<label class="feld"><span>' + beschriftung + "</span><select name=\"" + name + '">';
+    optionen.forEach(function (paar) {
+      html += '<option value="' + paar[0] + '"' + (String(wert) === paar[0] ? " selected" : "") + ">" + paar[1] + "</option>";
+    });
+    return html + "</select></label>";
+  }
+
+  /* Merkmal-Kästchen für die anhakbaren Tags der gewählten Kategorie.
+     Nur Chips mit `tag` (nicht die abgeleiteten wie Preis oder Indoor). */
+  function merkmalfeld(kategorie, gewaehlteTags) {
+    var dims = MERKMALE[kategorie] || [];
+    var kaestchen = [];
+    dims.forEach(function (dim) {
+      dim.chips.forEach(function (chip) {
+        if (!chip.tag) { return; }
+        var an = gewaehlteTags.indexOf(chip.tag) !== -1;
+        kaestchen.push('<label class="kaestchen"><input type="checkbox" name="tag" value="' +
+          chip.tag + '"' + (an ? " checked" : "") + "> " + chip.label + "</label>");
+      });
+    });
+    var inhalt = kaestchen.length
+      ? '<div class="mehrfach">' + kaestchen.join("") + "</div>"
+      : '<p class="hinweis" style="margin:0">Diese Kategorie hat keine anhakbaren Merkmale; sie ergeben sich aus Preis, Regen und den Ja/Nein-Feldern unten.</p>';
+    return '<div class="feld" id="merkmalfeld"><span>Merkmale</span>' + inhalt + "</div>";
+  }
+
+  /* Label-Kästchen für die Farbbänder. */
+  function labelfeld(gewaehlte) {
+    var kaestchen = Object.keys(LABELS).map(function (l) {
+      var an = gewaehlte.indexOf(l) !== -1;
+      return '<label class="kaestchen"><input type="checkbox" name="label" value="' + l + '"' +
+        (an ? " checked" : "") + "> " + LABELS[l].zeichen + " " + LABELS[l].titel + "</label>";
+    }).join("");
+    return '<div class="feld"><span>Labels — erscheinen als Farbbänder</span>' +
+      '<div class="mehrfach">' + kaestchen + "</div></div>";
+  }
+
+  /* Zweitkategorien: ein Ort kann in mehreren Filtern auftauchen,
+     die Farbe des Pins richtet sich weiter nach der ersten. */
+  function mehrfachfeld(gewaehlteWeitere) {
+    var kaestchen = Object.keys(KATEGORIEN).map(function (s) {
+      var an = gewaehlteWeitere.indexOf(s) !== -1;
+      return '<label class="kaestchen"><input type="checkbox" name="weitere" value="' + s + '"' +
+        (an ? " checked" : "") + "> " + KATEGORIEN[s].titel + "</label>";
+    }).join("");
+    return '<div class="feld"><span>Zusätzlich in (optional)</span>' +
+      '<div class="mehrfach">' + kaestchen + "</div></div>";
+  }
+
+  function oeffneFormular(id) {
+    formularId = id;
+    var ort = id ? orte.find(function (o) { return o.id === id; }) : null;
+    var o = ort || {
+      name: "", kategorie: "fruehstueck", weitere: [], tags: [], labels: [],
+      adresse: "", beschreibung: "", website: "", bild: "",
+      lat: "", lng: "", indoor: true, andrang: "ruhig", allein: true, gruppe: true,
+      preis: "mittel", gehen: "wenig"
+    };
+
+    var kategorieOptionen = Object.keys(KATEGORIEN).map(function (k) {
+      return [k, KATEGORIEN[k].titel];
+    });
+
+    var panel = document.getElementById("bearbeiten-panel");
+    panel.innerHTML =
+      "<h2>" + (ort ? "Ort bearbeiten" : "Neuer Ort") + "</h2>" +
+      '<p class="hinweis">Adresse eintragen und die Position daraus holen, oder sie direkt auf der Karte anklicken.</p>' +
+      '<form id="ort-formular">' +
+      feld("name", "Name", o.name) +
+      auswahl("kategorie", "Kategorie", o.kategorie, kategorieOptionen) +
+      mehrfachfeld(o.weitere || []) +
+      merkmalfeld(o.kategorie, o.tags || []) +
+      labelfeld(o.labels || []) +
+      feld("adresse", "Adresse", o.adresse) +
+      '<label class="feld"><span>Beschreibung</span><textarea name="beschreibung">' + entschaerfe(o.beschreibung) + "</textarea></label>" +
+      feld("website", "Website", o.website, "url") +
+      feld("bild", "Miniaturbild — Pfad wie bilder/riesenrad.jpg oder URL, leer lassen ist erlaubt", o.bild) +
+      '<input type="hidden" name="lat" value="' + entschaerfe(o.lat) + '">' +
+      '<input type="hidden" name="lng" value="' + entschaerfe(o.lng) + '">' +
+      '<div class="position"><span id="position-stand"></span></div>' +
+      '<div class="knopfreihe">' +
+      '<button type="button" class="knopf leise" id="geocode">Position aus Adresse holen</button>' +
+      '<button type="button" class="knopf leise" id="aufkarte">Auf Karte setzen</button>' +
+      "</div>" +
+      '<div class="feld-paar">' +
+      auswahl("indoor", "Bei Regen", String(o.indoor), [["true", "drinnen"], ["false", "im Freien"]]) +
+      auswahl("andrang", "Andrang", o.andrang, [["ruhig", "eher ruhig"], ["belebt", "gut besucht"]]) +
+      "</div>" +
+      '<div class="feld-paar">' +
+      auswahl("allein", "Allein machbar", String(o.allein), [["true", "ja"], ["false", "nein"]]) +
+      auswahl("gruppe", "Für Gruppen", String(o.gruppe), [["true", "ja"], ["false", "nein"]]) +
+      "</div>" +
+      '<div class="feld-paar">' +
+      auswahl("preis", "Preis", o.preis, [["kostenlos", "kostenlos"], ["guenstig", "günstig"], ["mittel", "mittel"], ["hoch", "teurer"]]) +
+      auswahl("gehen", "Weg", o.gehen, [["wenig", "wenig gehen"], ["viel", "viel gehen"]]) +
+      "</div>" +
+      '<div class="knopfreihe">' +
+      '<button type="submit" class="knopf">Speichern</button>' +
+      '<button type="button" class="knopf leise" id="abbrechen">Abbrechen</button>' +
+      "</div></form>";
+
+    document.getElementById("abbrechen").addEventListener("click", function () {
+      wartetAufKlick = false;
+      document.body.classList.remove("setzt-position");
+      zeichneWerkzeugleiste();
+    });
+    document.getElementById("aufkarte").addEventListener("click", function () {
+      wartetAufKlick = true;
+      document.body.classList.add("setzt-position");
+    });
+    document.getElementById("geocode").addEventListener("click", sucheKoordinaten);
+    document.getElementById("ort-formular").addEventListener("submit", speichereFormular);
+
+    /* Wechselt die Kategorie, passen sich die Merkmal-Kästchen an. */
+    document.querySelector('#ort-formular [name="kategorie"]').addEventListener("change", function (e) {
+      var neu = merkmalfeld(e.target.value, []);
+      var alt = document.getElementById("merkmalfeld");
+      var huelle = document.createElement("div");
+      huelle.innerHTML = neu;
+      alt.replaceWith(huelle.firstChild);
+    });
+
+    zeigePositionsstand();
+    panel.scrollIntoView({ block: "nearest" });
+  }
+
+  function setzeFormularfeld(name, wert) {
+    var f = document.querySelector('#ort-formular [name="' + name + '"]');
+    if (f) { f.value = wert; }
+    zeigePositionsstand();
+  }
+
+  function zeigePositionsstand() {
+    var anzeige = document.getElementById("position-stand");
+    if (!anzeige) { return; }
+    var lat = parseFloat((document.querySelector('#ort-formular [name="lat"]') || {}).value);
+    var lng = parseFloat((document.querySelector('#ort-formular [name="lng"]') || {}).value);
+    if (isNaN(lat) || isNaN(lng)) {
+      anzeige.textContent = "Position noch nicht gesetzt.";
+      anzeige.className = "offen";
+    } else {
+      anzeige.textContent = "Position gesetzt.";
+      anzeige.className = "";
+      if (markerVorschau) { karte.removeLayer(markerVorschau); }
+      markerVorschau = L.circleMarker([lat, lng], {
+        radius: 9, color: "#1d1a16", weight: 2, fillColor: "#f7f4ee", fillOpacity: 1
+      }).addTo(karte);
+    }
+  }
+
+  function loescheVorschau() {
+    if (markerVorschau) { karte.removeLayer(markerVorschau); markerVorschau = null; }
+  }
+
+  function sucheKoordinaten() {
+    var adresse = (document.querySelector('#ort-formular [name="adresse"]') || {}).value || "";
+    if (!adresse.trim()) { window.alert("Bitte zuerst eine Adresse eintragen."); return; }
+    var knopf = document.getElementById("geocode");
+    knopf.textContent = "Suche läuft …";
+    knopf.disabled = true;
+    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=at&q=" + encodeURIComponent(adresse))
+      .then(function (a) { return a.json(); })
+      .then(function (treffer) {
+        if (treffer && treffer.length) {
+          setzeFormularfeld("lat", Number(treffer[0].lat).toFixed(7));
+          setzeFormularfeld("lng", Number(treffer[0].lon).toFixed(7));
+          karte.setView([Number(treffer[0].lat), Number(treffer[0].lon)], 16);
+        } else {
+          window.alert("Zu dieser Adresse wurde nichts gefunden. Setz die Position auf der Karte.");
+        }
+      })
+      .catch(function () {
+        window.alert("Die Adresssuche ist nicht erreichbar. Setz die Position auf der Karte.");
+      })
+      .then(function () {
+        knopf.textContent = "Position aus Adresse holen";
+        knopf.disabled = false;
+      });
+  }
+
+  function speichereFormular(e) {
+    e.preventDefault();
+    var f = e.target;
+    var lat = parseFloat(f.lat.value);
+    var lng = parseFloat(f.lng.value);
+    if (!f.name.value.trim()) { window.alert("Der Ort braucht einen Namen."); return; }
+    if (isNaN(lat) || isNaN(lng)) { window.alert("Der Ort hat noch keine Position. Hol sie aus der Adresse oder klick sie auf der Karte an."); return; }
+
+    var weitere = Array.prototype.slice.call(f.querySelectorAll('input[name="weitere"]:checked'))
+      .map(function (e) { return e.value; })
+      .filter(function (k) { return k !== f.kategorie.value; });
+
+    var tags = Array.prototype.slice.call(f.querySelectorAll('input[name="tag"]:checked'))
+      .map(function (e) { return e.value; });
+
+    var gewaehlteLabels = Object.keys(LABELS).filter(function (l) {
+      return !!f.querySelector('input[name="label"][value="' + l + '"]:checked');
+    });
+
+    var neuerOrt = {
+      id: formularId || eindeutigeId(f.name.value),
+      name: f.name.value.trim(),
+      kategorie: f.kategorie.value,
+      weitere: weitere,
+      tags: tags,
+      labels: gewaehlteLabels,
+      adresse: f.adresse.value.trim(),
+      beschreibung: f.beschreibung.value.trim(),
+      website: f.website.value.trim(),
+      bild: f.bild.value.trim(),
+      lat: lat,
+      lng: lng,
+      indoor: f.indoor.value === "true",
+      andrang: f.andrang.value,
+      allein: f.allein.value === "true",
+      gruppe: f.gruppe.value === "true",
+      preis: f.preis.value,
+      gehen: f.gehen.value
+    };
+
+    if (formularId) {
+      var i = orte.findIndex(function (o) { return o.id === formularId; });
+      orte[i] = neuerOrt;
+    } else {
+      orte.push(neuerOrt);
+    }
+
+    speichere();
+    baueMarker();
+    zeichneWerkzeugleiste();
+    aktualisiere();
+    waehle(neuerOrt.id, true);
+  }
+
+  function loesche(id) {
+    var ort = orte.find(function (o) { return o.id === id; });
+    if (!ort) { return; }
+    if (!window.confirm("„" + ort.name + "“ wirklich aus der Liste nehmen?")) { return; }
+    orte = orte.filter(function (o) { return o.id !== id; });
+    bereinigePlan();
+    speichere();
+    speicherePlan();
+    baueMarker();
+    aktualisiere();
+    zeichnePlan();
+    zeichneLinie();
+  }
+
+  function eindeutigeId(name) {
+    var basis = name.toLowerCase()
+      .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "ort";
+    var id = basis;
+    var n = 2;
+    while (orte.some(function (o) { return o.id === id; })) { id = basis + "-" + n; n += 1; }
+    return id;
+  }
+
+  function exportiere() {
+    var kopf = [
+      "/* ---------------------------------------------------------------",
+      "   Wien-Karte — Datenbestand",
+      "   ---------------------------------------------------------------",
+      "   Exportiert aus dem Bearbeiten-Modus der Seite.",
+      "   Diese Datei ersetzt daten.js im Projektordner.",
+      "",
+      "   Felder je Ort:",
+      "     id           eindeutige Kennung, wird beim Anlegen vergeben",
+      "     name         Anzeigename",
+      "     kategorie    fruehstueck | restaurant | sehenswuerdigkeit | museum",
+      "                  | musik | event | aktivitaet — bestimmt Farbe und Symbol",
+      "     weitere      Liste weiterer Kategorien, meist leer",
+      "     tags         Merkmale für die kategoriespezifischen Filter",
+      "     labels       Eigenschaften als Farbbänder, sh. LABELS in app.js",
+      "     bild         Miniaturbild: Pfad wie bilder/riesenrad.jpg oder URL",
+      "     adresse      Straße, PLZ und Wien",
+      "     beschreibung ein bis zwei Sätze",
+      "     website      vollständige URL oder leerer String",
+      "     lat, lng     Koordinaten in Dezimalgrad, setzt das Formular selbst",
+      "     indoor       true, wenn der Ort bei Regen funktioniert",
+      "     andrang      ruhig | belebt",
+      "     allein       true, wenn man allein hingehen kann",
+      "     gruppe       true, wenn es in der Gruppe funktioniert",
+      "     preis        kostenlos | guenstig | mittel | hoch",
+      "     gehen        wenig | viel",
+      "   --------------------------------------------------------------- */",
+      "",
+      "const ORTE = "
+    ].join("\n");
+    var inhalt = kopf + JSON.stringify(orte, null, 2) + ";\n";
+    var blob = new Blob([inhalt], { type: "text/javascript;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "daten.js";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  function verwirf() {
+    if (!window.confirm("Alle lokalen Änderungen verwerfen und wieder den Stand aus daten.js verwenden?")) { return; }
+    try { window.localStorage.removeItem(SPEICHER); } catch (e) { /* egal */ }
+    orte = JSON.parse(JSON.stringify(ORTE));
+    baueMarker();
+    zeichneWerkzeugleiste();
+    aktualisiere();
+    zeigeMerker();
+  }
+
+  function zeigeMerker() {
+    var alt = document.querySelector(".merker");
+    if (alt) { alt.remove(); }
+    if (!hatEigenenStand()) { return; }
+
+    /* Deckt sich der lokale Stand mit daten.js, ist die Kopie überflüssig.
+       Das passiert, sobald die exportierte Datei im Ordner liegt. */
+    if (normalisiere(orte) === normalisiere(ORTE)) {
+      try { window.localStorage.removeItem(SPEICHER); } catch (e) { /* egal */ }
+      return;
+    }
+
+    var leiste = document.createElement("div");
+    leiste.className = "merker";
+    leiste.innerHTML = "<span>Du siehst einen lokal gespeicherten Stand, nicht den Inhalt von daten.js.</span>" +
+      '<span class="merker-knoepfe">' +
+      '<button type="button" data-tun="export">Exportieren</button>' +
+      '<button type="button" data-tun="verwerfen">Verwerfen</button></span>';
+    leiste.querySelector('[data-tun="export"]').addEventListener("click", exportiere);
+    leiste.querySelector('[data-tun="verwerfen"]').addEventListener("click", verwirf);
+    document.querySelector(".liste-spalte").prepend(leiste);
+  }
+
+  /* Vergleichsform: Reihenfolge der Orte und der Felder darf abweichen. */
+  function normalisiere(liste) {
+    var kopie = liste.map(function (o) {
+      var sortiert = {};
+      Object.keys(o).sort().forEach(function (s) { sortiert[s] = o[s]; });
+      return sortiert;
+    });
+    kopie.sort(function (a, b) { return String(a.id) < String(b.id) ? -1 : String(a.id) > String(b.id) ? 1 : 0; });
+    return JSON.stringify(kopie);
+  }
+
+  /* ------------------------------------------------------------------
+     Routen-Popup
+     ------------------------------------------------------------------ */
+
+  var routeKategorien = new Set(["fruehstueck", "sehenswuerdigkeit", "restaurant"]);
+  var routeFenster = "ganztag";
+  var routeUmkreis = false;
+  var routeVorgaben = null;
+  var routeErgebnis = null;
+
+  function zeichneRouteEingabe() {
+    var katbox = document.getElementById("route-kategorien");
+    katbox.innerHTML = "";
+    Object.keys(KATEGORIEN).forEach(function (schluessel) {
+      var k = KATEGORIEN[schluessel];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.style.setProperty("--ton", k.farbe);
+      b.dataset.routeKat = schluessel;
+      b.innerHTML = '<span class="punkt"></span>' + k.titel +
+        ' <span class="route-punktwert">' + (ROUTE.punkte[schluessel] || 2) + "</span>";
+      b.addEventListener("click", function () {
+        if (routeKategorien.has(schluessel)) { routeKategorien.delete(schluessel); }
+        else { routeKategorien.add(schluessel); }
+        spiegleRouteEingabe();
+      });
+      katbox.appendChild(b);
+    });
+
+    var fensterbox = document.getElementById("route-fenster");
+    fensterbox.innerHTML = "";
+    Object.keys(ROUTE.fenster).forEach(function (schluessel) {
+      var f = ROUTE.fenster[schluessel];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip schalt";
+      b.dataset.routeFenster = schluessel;
+      b.innerHTML = f.titel + ' <span class="route-punktwert">' + f.budget + "</span>";
+      b.addEventListener("click", function () {
+        routeFenster = schluessel;
+        spiegleRouteEingabe();
+      });
+      fensterbox.appendChild(b);
+    });
+
+    document.getElementById("route-umkreis").addEventListener("click", function () {
+      routeUmkreis = !routeUmkreis;
+      spiegleRouteEingabe();
+    });
+
+    spiegleRouteEingabe();
+  }
+
+  function spiegleRouteEingabe() {
+    document.querySelectorAll("[data-route-kat]").forEach(function (b) {
+      b.setAttribute("aria-pressed", routeKategorien.has(b.dataset.routeKat) ? "true" : "false");
+    });
+    document.querySelectorAll("[data-route-fenster]").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.routeFenster === routeFenster ? "true" : "false");
+    });
+    var u = document.getElementById("route-umkreis");
+    u.setAttribute("aria-pressed", routeUmkreis ? "true" : "false");
+    document.getElementById("route-berechnen").disabled = routeKategorien.size === 0;
+  }
+
+  /* Prüft vor dem Rechnen, ob dem Zeitfenster eine Pflichtkategorie fehlt. */
+  function routeStarten() {
+    var fenster = ROUTE.fenster[routeFenster];
+    var kategorien = Array.from(routeKategorien);
+
+    /* Ohne bekannten Standort gäbe es keinen Bezugspunkt für die 3 km. */
+    if (routeUmkreis && !standortMarker) {
+      window.alert("Für den Umkreis fehlt dein Standort. Schalt ihn links oben auf der Karte über ◉ ein, dann noch einmal berechnen.");
+      return;
+    }
+
+    var fehlend = fenster.mindestens.filter(function (k) {
+      return kategorien.indexOf(k) === -1;
+    });
+    if (fehlend.length) {
+      var namen = fehlend.map(function (k) { return KATEGORIEN[k].titel; }).join(" und ");
+      var frage = "Zeitfenster „" + fenster.titel + "“ ohne " + namen + "?\n\n" +
+        "OK: dazunehmen.\nAbbrechen: so lassen, wie ausgewählt.";
+      if (window.confirm(frage)) {
+        fehlend.forEach(function (k) { routeKategorien.add(k); });
+        kategorien = Array.from(routeKategorien);
+        spiegleRouteEingabe();
+      }
+    }
+
+    routeVorgaben = { kategorien: kategorien, fenster: routeFenster, umkreis: routeUmkreis };
+    routeWuerfeln();
+  }
+
+  function routeWuerfeln() {
+    routeErgebnis = routeBerechnen(routeVorgaben);
+    zeigeRouteErgebnis();
+  }
+
+  /* Knöpfe im Ergebnisbereich müssen die Ausbreitung stoppen: „Neu würfeln“
+     ersetzt den Inhalt, danach fände der globale Schließen-Handler den
+     geklickten Knopf nicht mehr im Popup und würde es zumachen. */
+  function ergebnisKnopf(box, tun, fn) {
+    var b = box.querySelector('[data-tun="' + tun + '"]');
+    if (!b) { return; }
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      fn();
+    });
+  }
+
+  function zeigeRouteErgebnis() {
+    var box = document.getElementById("route-ergebnis");
+    var eingabe = document.getElementById("route-eingabe");
+    var e = routeErgebnis;
+
+    if (e.fehler) {
+      var text = e.fehler === "leer"
+        ? "Zu dieser Auswahl gibt es keinen einzigen Ort."
+        : "Für " + e.fehlend.map(function (k) { return KATEGORIEN[k].titel; }).join(" und ") +
+          " findet sich hier nichts.";
+      if (e.umkreis) { text += " Der Umkreis von 3 km ist eng — ohne ihn sieht es besser aus."; }
+      else { text += " Nimm eine Kategorie dazu oder wechsle das Zeitfenster."; }
+      box.innerHTML = '<p class="route-fehler">' + entschaerfe(text) + "</p>" +
+        '<div class="knopfreihe"><button type="button" class="knopf leise" data-tun="zurueck">Zurück</button></div>';
+      box.hidden = false;
+      eingabe.hidden = true;
+      ergebnisKnopf(box, "zurueck", routeZurueck);
+      return;
+    }
+
+    /* Nach Tagesabschnitt gruppiert, die Nummerierung läuft durch. */
+    var nummer = 0;
+    var zeilen = ROUTE.abschnitte.map(function (abschnitt) {
+      var drin = e.stopps.filter(function (c) { return c.abschnitt === abschnitt.id; });
+      if (!drin.length) { return ""; }
+      var punkte = drin.map(function (c) {
+        var k = KATEGORIEN[c.kategorie];
+        nummer += 1;
+        return '<li class="route-stopp">' +
+          '<span class="route-nr" style="background:' + k.farbe + '">' + nummer + "</span>" +
+          '<span class="route-stopp-text"><b>' + entschaerfe(c.ort.name) + "</b>" +
+          '<span class="route-stopp-kat">' + k.titel + " · " + c.punkte +
+          (c.punkte === 1 ? " Punkt" : " Punkte") + "</span></span></li>";
+      }).join("");
+      return '<li class="route-abschnitt">' + abschnitt.titel + "</li>" + punkte;
+    }).join("");
+
+    var knapp = e.summe < e.budget
+      ? '<p class="route-knapp">Mehr war mit dieser Auswahl nicht drin — ' +
+        e.summe + " von " + e.budget + " Punkten.</p>"
+      : "";
+
+    var knoepfe = plan.length
+      ? '<button type="button" class="knopf" data-tun="ersetzen">Plan ersetzen</button>' +
+        '<button type="button" class="knopf leise" data-tun="anhaengen">Anhängen</button>'
+      : '<button type="button" class="knopf" data-tun="ersetzen">In den Tagesplan</button>';
+
+    box.innerHTML =
+      '<div class="route-summe">' + e.stopps.length + " Stopps · " + e.summe + " von " + e.budget + " Punkten</div>" +
+      '<ol class="route-liste">' + zeilen + "</ol>" + knapp +
+      '<div class="knopfreihe">' + knoepfe +
+      '<button type="button" class="knopf leise" data-tun="wuerfeln">Neu würfeln</button>' +
+      '<button type="button" class="textknopf" data-tun="zurueck">Verwerfen</button></div>';
+    box.hidden = false;
+    eingabe.hidden = true;
+
+    ergebnisKnopf(box, "ersetzen", function () { routeUebernehmen("ersetzen"); });
+    ergebnisKnopf(box, "anhaengen", function () { routeUebernehmen("anhaengen"); });
+    ergebnisKnopf(box, "wuerfeln", routeWuerfeln);
+    ergebnisKnopf(box, "zurueck", routeZurueck);
+  }
+
+  function routeZurueck() {
+    document.getElementById("route-ergebnis").hidden = true;
+    document.getElementById("route-eingabe").hidden = false;
+    routeErgebnis = null;
+  }
+
+  function routeUebernehmen(modus) {
+    if (!routeErgebnis || routeErgebnis.fehler) { return; }
+    /* Die Route kennt ihre Tagesabschnitte schon — sie wandern mit. */
+    var neu = routeErgebnis.stopps.map(function (c) {
+      return { id: c.ort.id, abschnitt: c.abschnitt || null };
+    });
+
+    if (modus === "ersetzen") {
+      plan = neu;
+    } else {
+      neu.forEach(function (e) { if (!imPlan(e.id)) { plan.push(e); } });
+    }
+
+    hervorgehoben = null;
+    speicherePlan();
+    zeichnePlan();
+    aktualisiere();
+    aktualisiereMarkerIcons();
+    zeichneLinie();
+
+    routeZurueck();
+    routePopupZeigen(false);
+
+    /* Den fertigen Tag gleich zeigen und die Stopps ins Bild rücken. */
+    planOverlayZeigen(true);
+    var punkte = planOrte().map(function (o) { return [o.lat, o.lng]; });
+    if (punkte.length > 1) { karte.fitBounds(L.latLngBounds(punkte), { padding: [60, 60] }); }
+  }
+
+  /* ------------------------------------------------------------------
+     Hilfsmittel
+     ------------------------------------------------------------------ */
+
+  function entschaerfe(text) {
+    return String(text)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  /* ------------------------------------------------------------------
+     Start
+     ------------------------------------------------------------------ */
+
+  document.getElementById("suche").addEventListener("input", function (e) {
+    suchtext = e.target.value;
+    aktualisiere();
+  });
+
+  document.getElementById("zuruecksetzen").addEventListener("click", function () {
+    aktiveKategorien.clear();
+    aktiveSchalter.clear();
+    aktiveLabels.clear();
+    aktiveFacetten.clear();
+    suchtext = "";
+    document.getElementById("suche").value = "";
+    aktualisiere();
+    karte.flyTo([48.2082, 16.3730], 13, { duration: 0.6 });
+  });
+
+  var einstellungenKnopf = document.getElementById("einstellungen-knopf");
+  einstellungenKnopf.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var panel = document.getElementById("einstellungen");
+    var offen = panel.hidden;
+    panel.hidden = !offen;
+    einstellungenKnopf.setAttribute("aria-expanded", offen ? "true" : "false");
+  });
+  document.addEventListener("click", function (e) {
+    var panel = document.getElementById("einstellungen");
+    if (panel.hidden) { return; }
+    if (!panel.contains(e.target) && e.target !== einstellungenKnopf) {
+      panel.hidden = true;
+      einstellungenKnopf.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.getElementById("bearbeiten-schalter").addEventListener("click", function () {
+    schalteBearbeiten(!bearbeiten);
+  });
+
+  /* Plan-Knopf im Karten-Popup: dort greift die Listen-Behandlung nicht,
+     darum ein eigener delegierter Klick auf dem Kartenbereich. */
+  document.getElementById("karte").addEventListener("click", function (e) {
+    var knopf = e.target.closest(".plan-knopf");
+    if (knopf) { e.stopPropagation(); planUmschalten(knopf.dataset.id); }
+  });
+
+  document.getElementById("plan-leeren").addEventListener("click", planLeeren);
+
+  var planFab = document.getElementById("plan-fab");
+  var planOverlay = document.getElementById("plan-overlay");
+  function planOverlayZeigen(auf) {
+    planOverlay.hidden = !auf;
+    planFab.setAttribute("aria-expanded", auf ? "true" : "false");
+    planFab.classList.toggle("offen", auf);
+  }
+  planFab.addEventListener("click", function (e) {
+    e.stopPropagation();
+    planOverlayZeigen(planOverlay.hidden);
+  });
+  document.getElementById("plan-schliessen").addEventListener("click", function () {
+    planOverlayZeigen(false);
+  });
+  document.addEventListener("click", function (e) {
+    if (planOverlay.hidden) { return; }
+    if (!planOverlay.contains(e.target) && !planFab.contains(e.target)) { planOverlayZeigen(false); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !planOverlay.hidden) { planOverlayZeigen(false); }
+  });
+
+  var routeKnopf = document.getElementById("route-knopf");
+  var routePopup = document.getElementById("route-popup");
+  function routePopupZeigen(auf) {
+    routePopup.hidden = !auf;
+    routeKnopf.setAttribute("aria-expanded", auf ? "true" : "false");
+    routeKnopf.classList.toggle("offen", auf);
+    if (auf) { planOverlayZeigen(false); }
+  }
+  routeKnopf.addEventListener("click", function (e) {
+    e.stopPropagation();
+    routePopupZeigen(routePopup.hidden);
+  });
+  document.getElementById("route-schliessen").addEventListener("click", function () {
+    routePopupZeigen(false);
+  });
+  document.getElementById("route-berechnen").addEventListener("click", routeStarten);
+  document.addEventListener("click", function (e) {
+    if (routePopup.hidden) { return; }
+    if (!routePopup.contains(e.target) && !routeKnopf.contains(e.target)) { routePopupZeigen(false); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !routePopup.hidden) { routePopupZeigen(false); }
+  });
+
+  karte.addControl(new StandortSteuerung());
+
+  bereinigePlan();
+  speicherePlan();
+
+  zeichneFilter();
+  zeichneRouteEingabe();
+  baueMarker();
+  aktualisiere();
+  zeichnePlan();
+  zeichneLinie();
+  zeigeMerker();
+
+  if (window.location.hash === "#bearbeiten") { schalteBearbeiten(true); }
+
+  window.addEventListener("resize", function () { karte.invalidateSize(); });
+})();

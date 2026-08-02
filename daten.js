@@ -1,0 +1,1745 @@
+/* ---------------------------------------------------------------
+   Wien-Karte — Datenbestand
+   ---------------------------------------------------------------
+   Diese Datei enthält alle Orte. Sie lässt sich von Hand bearbeiten
+   oder über den Bearbeiten-Modus der Seite (Adresse mit #bearbeiten
+   aufrufen) und dort per Export neu erzeugen.
+
+   ⚠️  ACHTUNG — das Feld `labels` enthält derzeit ERFUNDENE Testdaten.
+   Sie dienen nur dazu, den Filter zu prüfen. Ob ein Ort
+   wirklich barrierefrei ist, Hunde erlaubt oder nur Bargeld nimmt, wurde
+   NICHT recherchiert. Vor einer Veröffentlichung müssen diese Werte
+   geprüft und ersetzt werden — eine falsche Angabe bei „barrierefrei“
+   schickt jemanden im Rollstuhl vor eine Treppe.
+
+   Felder je Ort:
+     id           eindeutige Kennung, wird beim Anlegen vergeben
+     name         Anzeigename
+     kategorie    fruehstueck | restaurant | sehenswuerdigkeit | museum
+                  | musik | event | aktivitaet — bestimmt die Farbe
+     weitere      Liste weiterer Kategorien, meist leer
+     tags         Merkmale für die kategoriespezifischen Filter
+     labels       Eigenschaften, schaltbar im Zahnrad-Popover. Mögliche
+                  Werte stehen in assets/app.js unter LABELS.
+     adresse      Straße, PLZ und Wien
+     beschreibung ein bis zwei Sätze
+     website      vollständige URL oder leerer String
+     bild         Miniaturbild: Pfad wie bilder/riesenrad.jpg oder URL
+     lat, lng     Koordinaten in Dezimalgrad, setzt das Formular selbst
+     indoor       true, wenn der Ort bei Regen funktioniert
+     andrang      ruhig | belebt
+     allein       true, wenn man allein hingehen kann
+     gruppe       true, wenn es in der Gruppe funktioniert
+     preis        kostenlos | guenstig | mittel | hoch
+     gehen        wenig | viel
+   --------------------------------------------------------------- */
+
+const ORTE = [
+  {
+    "id": "cafe-landtmann",
+    "name": "Café Landtmann",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-klassisch",
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "lgbtq",
+      "hunde"
+    ],
+    "adresse": "Universitätsring 4, 1010 Wien",
+    "beschreibung": "Kaffeehaus von 1873 gegenüber dem Burgtheater. Freud und Mahler saßen hier, heute die Leute aus dem Parlament nebenan.",
+    "website": "https://landtmann.at",
+    "bild": "bilder/cafe-landtmann.jpg",
+    "lat": 48.2115624,
+    "lng": 16.3614497,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "kurkonditorei-oberlaa",
+    "name": "Kurkonditorei Oberlaa",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-klassisch",
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Neuer Markt 16, 1010 Wien",
+    "beschreibung": "Konditorei am Neuen Markt, wenige Schritte vom Stephansdom entfernt. Die Mehlspeisen sind der Grund herzukommen.",
+    "website": "https://oberlaa-wien.at",
+    "bild": "",
+    "lat": 48.2067216,
+    "lng": 16.3707002,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-merkur",
+    "name": "Cafe Merkur",
+    "kategorie": "fruehstueck",
+    "weitere": [
+      "restaurant"
+    ],
+    "tags": [
+      "fr-klassisch",
+      "fr-mittag"
+    ],
+    "labels": [
+      "hunde",
+      "reizarm"
+    ],
+    "adresse": "Lammgasse 1",
+    "beschreibung": "Gemütliches Cafe mit internationalen Speisen",
+    "website": "https://www.cafemerkur.at/",
+    "bild": "",
+    "lat": 48.2121217,
+    "lng": 16.3519936,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-hummel",
+    "name": "Café Hummel",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-klassisch",
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Josefstädter Straße 66, 1080 Wien",
+    "beschreibung": "Großes Kaffeehaus an der Josefstädter Straße mit Schanigarten. Am Wochenende gibt es Frühstück bis 14 Uhr.",
+    "website": "https://cafehummel.at",
+    "bild": "bilder/cafe-hummel.jpg",
+    "lat": 48.2107443,
+    "lng": 16.3437818,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-schopenhauer",
+    "name": "Café Schopenhauer",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-klassisch",
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Staudgasse 1, 1180 Wien",
+    "beschreibung": "Kaffeehaus im achtzehnten Bezirk, mit Bücherwänden an den Wänden und ohne Hektik. Abseits der Touristenrouten.",
+    "website": "https://cafeschopenhauer.at",
+    "bild": "",
+    "lat": 48.2235831,
+    "lng": 16.3467208,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "vollpension",
+    "name": "Vollpension",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-klassisch",
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Schleifmühlgasse 16, 1040 Wien",
+    "beschreibung": "Generationencafé, in dem Pensionistinnen und Pensionisten die Mehlspeisen backen und ausgeben. Am Wochenende ohne Reservierung schwierig.",
+    "website": "https://vollpension.wien",
+    "bild": "",
+    "lat": 48.1976603,
+    "lng": 16.365035,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "ulrich",
+    "name": "ULRICH",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-fancy",
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Sankt-Ulrichs-Platz 1, 1070 Wien",
+    "beschreibung": "Frühstück am Ulrichsplatz, im Sommer unter Bäumen im Schanigarten. Die Karte läuft bis in den Nachmittag.",
+    "website": "https://ulrichwien.at",
+    "bild": "",
+    "lat": 48.2044064,
+    "lng": 16.3529253,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-drechsler",
+    "name": "Café Drechsler",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-fancy",
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Linke Wienzeile 22, 1060 Wien",
+    "beschreibung": "Kaffeehaus direkt am Naschmarkt, hell und modern eingerichtet. Praktisch vor einem Marktbummel.",
+    "website": "https://drechsler-wien.at",
+    "bild": "",
+    "lat": 48.1984344,
+    "lng": 16.3623585,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "phil",
+    "name": "phil",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-fancy",
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "barrierefrei"
+    ],
+    "adresse": "Gumpendorfer Straße 10–12, 1060 Wien",
+    "beschreibung": "Café und Buchladen in einem, samt Möbeln aus zweiter Hand. Frühstück den ganzen Tag.",
+    "website": "https://phil.info",
+    "bild": "",
+    "lat": 48.200393,
+    "lng": 16.3612765,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "pane-e-cafe",
+    "name": "Pane e Cafe",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-klassisch",
+      "fr-mittag"
+    ],
+    "labels": [
+      "barrierefrei",
+      "lgbtq"
+    ],
+    "adresse": "Elisabethstraße 26, 1010 Wien",
+    "beschreibung": "Kleines Café zwischen Oper und Karlsplatz mit italienischem Einschlag. Sperrt um acht Uhr auf.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2031696,
+    "lng": 16.3633172,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "beisl-sigmundsgasse",
+    "name": "Beisl in der Sigmundsgasse",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell"
+    ],
+    "labels": [
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Sigmundsgasse 12, 1070 Wien",
+    "beschreibung": "Kleines Wirtshaus am Spittelberg mit Wiener Hausmannskost zu Preisen, die im siebten Bezirk selten geworden sind. Mittags oft voll, eine Reservierung hilft.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2035345,
+    "lng": 16.3535453,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "griechenbeisl",
+    "name": "Griechenbeisl",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Fleischmarkt 11, 1010 Wien",
+    "beschreibung": "Gasthaus am Fleischmarkt, dessen Gasträume bis ins 15. Jahrhundert zurückgehen. Deutlich touristisch, die Küche hält das Niveau trotzdem.",
+    "website": "https://griechenbeisl.at",
+    "bild": "bilder/griechenbeisl.jpg",
+    "lat": 48.2107463,
+    "lng": 16.3772648,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "gasthaus-reinthaler",
+    "name": "Gasthaus Reinthaler",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell"
+    ],
+    "labels": [
+      "geheimtipp"
+    ],
+    "adresse": "Gluckgasse 5, 1010 Wien",
+    "beschreibung": "Beisl hinter der Kärntner Straße, wo Schnitzel und Gulasch noch zweistellig kosten. Wirtshausbetrieb ohne jede Inszenierung.",
+    "website": "https://gasthausreinthaler.at",
+    "bild": "",
+    "lat": 48.2055017,
+    "lng": 16.3690442,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "wiener-wiazhaus",
+    "name": "Wiener Wiazhaus",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell"
+    ],
+    "labels": [
+      "geheimtipp"
+    ],
+    "adresse": "Karlsgasse 22, 1040 Wien",
+    "beschreibung": "Wirtshaus nahe dem Karlsplatz mit Retro-Einrichtung und regionaler Karte. Öffnet erst am Abend.",
+    "website": "",
+    "bild": "",
+    "lat": 48.1967941,
+    "lng": 16.3692091,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "scharfer-rene",
+    "name": "Würstelstand Zum scharfen René",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-fastfood"
+    ],
+    "labels": [],
+    "adresse": "Schwarzenbergplatz 15, 1040 Wien",
+    "beschreibung": "Würstelstand am Schwarzenbergplatz, bekannt für seine scharfen Saucen. Eine Käsekrainer im Stehen gehört zu Wien wie die Melange.",
+    "website": "https://zumscharfenrene.at",
+    "bild": "",
+    "lat": 48.200345,
+    "lng": 16.3745899,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "weingut-wailand",
+    "name": "Weingut Wailand",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell"
+    ],
+    "labels": [
+      "reizarm",
+      "vegan"
+    ],
+    "adresse": "Kahlenberger Straße 220, 1190 Wien",
+    "beschreibung": "Buschenschank mitten im Weingarten am Nussberg, mit Blick über die Stadt. Geöffnet von März bis November und nur bei gutem Wetter.",
+    "website": "https://www.wailandwein.at",
+    "bild": "",
+    "lat": 48.2589174,
+    "lng": 16.3658899,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "naschmarkt",
+    "name": "Naschmarkt",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-fastfood"
+    ],
+    "labels": [
+      "barrierefrei",
+      "lgbtq"
+    ],
+    "adresse": "Linke Wienzeile, 1060 Wien",
+    "beschreibung": "Marktzeile zwischen Karlsplatz und Kettenbrückengasse mit Ständen für Obst, Gewürze und Meze. Samstags kommt am westlichen Ende der Flohmarkt dazu.",
+    "website": "",
+    "bild": "bilder/naschmarkt.jpg",
+    "lat": 48.1981802,
+    "lng": 16.3626217,
+    "indoor": false,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "viel"
+  },
+  {
+    "id": "kolonitz-beisl",
+    "name": "Kolonitz Beisl",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell"
+    ],
+    "labels": [
+      "barrierefrei",
+      "lgbtq"
+    ],
+    "adresse": "Bechardgasse 2, 1030 Wien",
+    "beschreibung": "Beisl im dritten Bezirk, zehn Gehminuten vom Hundertwasserhaus. Große Portionen zu kleinen Preisen, die Gäste kommen aus der Nachbarschaft.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2096691,
+    "lng": 16.3900381,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "restaurant-cavaliere",
+    "name": "Restaurant Cavaliere",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-italienisch"
+    ],
+    "labels": [
+      "barrierefrei"
+    ],
+    "adresse": "Köllnerhofgasse 4, 1010 Wien",
+    "beschreibung": "Italiener in der Altstadt nahe dem Schwedenplatz, Pasta und Pizza zu Preisen, die man in der Lage nicht erwartet. Abends gut gefüllt.",
+    "website": "https://cavaliere.at",
+    "bild": "",
+    "lat": 48.2102211,
+    "lng": 16.3757049,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "papaya",
+    "name": "Papaya",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-asiatisch"
+    ],
+    "labels": [
+      "barrierefrei",
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Neustiftgasse 40, 1070 Wien",
+    "beschreibung": "Kleines Lokal in der Neustiftgasse mit thailändischer und südostasiatischer Küche. Öffnet erst zu Mittag.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2054605,
+    "lng": 16.3499978,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "thanos-taverna",
+    "name": "Thanos Taverna",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-griechisch"
+    ],
+    "labels": [
+      "barrierefrei",
+      "lgbtq",
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Otto-Bauer-Gasse 11, 1060 Wien",
+    "beschreibung": "Familiäre griechische Taverne in Mariahilf, mit Gyros und Mezedes. Eng, laut, gut.",
+    "website": "",
+    "bild": "",
+    "lat": 48.1956984,
+    "lng": 16.3487473,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "sri-nataraja",
+    "name": "Sri Nataraja",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-indisch"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Neustiftgasse 50, 1070 Wien",
+    "beschreibung": "Indisches Lokal in der Neustiftgasse, die Currys reichen von mild bis ernsthaft scharf. Viel für Vegetarier.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2058184,
+    "lng": 16.3485888,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "arizona-burger",
+    "name": "Arizona Burger & Bar",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-steakburger"
+    ],
+    "labels": [],
+    "adresse": "Landstraßer Hauptstraße 103, 1030 Wien",
+    "beschreibung": "Burgerlokal in der Landstraße mit amerikanischer Schlagseite. Große Portionen, am Wochenende langer Andrang.",
+    "website": "",
+    "bild": "",
+    "lat": 48.1981193,
+    "lng": 16.3951716,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "pita-box",
+    "name": "Pita BOX",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-fastfood"
+    ],
+    "labels": [
+      "barrierefrei"
+    ],
+    "adresse": "Taborstraße 38, 1020 Wien",
+    "beschreibung": "Streetfood in der Taborstraße, Döner und Falafel zum Mitnehmen. Auch die vegane Variante taugt.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2186664,
+    "lng": 16.3810679,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "meissl-schadn",
+    "name": "Meissl & Schadn",
+    "kategorie": "restaurant",
+    "weitere": [],
+    "tags": [
+      "kueche-traditionell",
+      "fancy"
+    ],
+    "labels": [
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Schubertring 10, 1010 Wien",
+    "beschreibung": "Gehobene Wiener Küche am Ring, das Schnitzel gilt als eines der besten der Stadt. Preislich das obere Ende.",
+    "website": "https://meisslundschadn.at",
+    "bild": "",
+    "lat": 48.2023756,
+    "lng": 16.3750341,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "hoch",
+    "gehen": "wenig"
+  },
+  {
+    "id": "schloss-schoenbrunn",
+    "name": "Schloss Schönbrunn",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Schönbrunner Schloßstraße 47, 1130 Wien",
+    "beschreibung": "Sommerresidenz der Habsburger im Westen der Stadt. Der Park mit Gloriette kostet keinen Eintritt, das Schloss schon.",
+    "website": "https://schoenbrunn.at",
+    "bild": "bilder/schloss-schoenbrunn.jpg",
+    "lat": 48.1849894,
+    "lng": 16.3115684,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "stephansdom",
+    "name": "Stephansdom",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [],
+    "adresse": "Stephansplatz 3, 1010 Wien",
+    "beschreibung": "Gotisches Wahrzeichen mitten im ersten Bezirk. Der Südturm hat 343 Stufen und dafür den besseren Blick als der Lift im Nordturm.",
+    "website": "https://stephanskirche.at",
+    "bild": "bilder/stephansdom.jpg",
+    "lat": 48.2082849,
+    "lng": 16.3729562,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "kostenlos",
+    "gehen": "viel"
+  },
+  {
+    "id": "hundertwasserhaus",
+    "name": "Hundertwasserhaus",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "lgbtq"
+    ],
+    "adresse": "Kegelgasse 36–38, 1030 Wien",
+    "beschreibung": "Gemeindebau von Friedensreich Hundertwasser mit unebenen Böden und bewachsenem Dach. Von außen zu besichtigen, drinnen wird gewohnt.",
+    "website": "",
+    "bild": "bilder/hundertwasserhaus.jpg",
+    "lat": 48.2073844,
+    "lng": 16.3939411,
+    "indoor": false,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "kostenlos",
+    "gehen": "wenig"
+  },
+  {
+    "id": "theseustempel",
+    "name": "Theseustempel",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Volksgarten, 1010 Wien",
+    "beschreibung": "Nachbau eines griechischen Tempels im Volksgarten, errichtet in den 1820er-Jahren. Im Sommer stellt das Kunsthistorische Museum darin eine einzelne Skulptur aus.",
+    "website": "https://khm.at",
+    "bild": "bilder/theseustempel.jpg",
+    "lat": 48.2084114,
+    "lng": 16.3616871,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "kostenlos",
+    "gehen": "wenig"
+  },
+  {
+    "id": "karlskirche",
+    "name": "Karlskirche",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "barrierefrei"
+    ],
+    "adresse": "Karlsplatz 10, 1040 Wien",
+    "beschreibung": "Kuppelkirche aus dem 18. Jahrhundert am Karlsplatz. Ein Aufzug führt auf 32 Meter hinauf, direkt vor die Deckenfresken.",
+    "website": "https://karlskirche.at",
+    "bild": "bilder/karlskirche.jpg",
+    "lat": 48.1982785,
+    "lng": 16.3718951,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "zentralfriedhof",
+    "name": "Wiener Zentralfriedhof",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "barrierefrei",
+      "lgbtq",
+      "geheimtipp"
+    ],
+    "adresse": "Simmeringer Hauptstraße 234, 1110 Wien",
+    "beschreibung": "Parkfriedhof im elften Bezirk, auf dem Beethoven und Falco liegen. Der Eintritt kostet nichts, Zeit dafür umso mehr.",
+    "website": "https://www.friedhoefewien.at/zentralfriedhof",
+    "bild": "bilder/zentralfriedhof.jpg",
+    "lat": 48.1542414,
+    "lng": 16.4423712,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "kostenlos",
+    "gehen": "viel"
+  },
+  {
+    "id": "ankeruhr",
+    "name": "Ankeruhr",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "lgbtq"
+    ],
+    "adresse": "Hoher Markt 10, 1010 Wien",
+    "beschreibung": "Jugendstiluhr über der Gasse am Hohen Markt. Zu jeder vollen Stunde schiebt sich eine historische Figur durchs Bild, um zwölf ziehen alle zwölf vorbei.",
+    "website": "",
+    "bild": "bilder/ankeruhr.jpg",
+    "lat": 48.2109441,
+    "lng": 16.3733515,
+    "indoor": false,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "kostenlos",
+    "gehen": "wenig"
+  },
+  {
+    "id": "donauturm",
+    "name": "Donauturm",
+    "kategorie": "sehenswuerdigkeit",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Donauturmplatz 1, 1220 Wien",
+    "beschreibung": "Mit 252 Metern das höchste Bauwerk Österreichs, die Aussichtsterrasse sitzt auf 150 Metern. Bei klarer Sicht reicht der Blick bis in die Berge.",
+    "website": "https://donauturm.at",
+    "bild": "bilder/donauturm.jpg",
+    "lat": 48.2404081,
+    "lng": 16.4100395,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "kunsthistorisches-museum",
+    "name": "Kunsthistorisches Museum",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-kunst"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Maria-Theresien-Platz, 1010 Wien",
+    "beschreibung": "Die Gemäldegalerie der Habsburger, mit dem größten Bruegel-Bestand der Welt. Für einen Durchgang sollte man drei Stunden einplanen.",
+    "website": "https://khm.at",
+    "bild": "bilder/kunsthistorisches-museum.jpg",
+    "lat": 48.2045105,
+    "lng": 16.3608955,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "naturhistorisches-museum",
+    "name": "Naturhistorisches Museum",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-natur"
+    ],
+    "labels": [],
+    "adresse": "Burgring 7, 1010 Wien",
+    "beschreibung": "Zwillingsbau des Kunsthistorischen Museums auf der anderen Platzseite. Die Venus von Willendorf steht hier, dazu ein Saal voller Meteoriten.",
+    "website": "https://nhm-wien.ac.at",
+    "bild": "bilder/naturhistorisches-museum.jpg",
+    "lat": 48.2052692,
+    "lng": 16.3597554,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "albertina",
+    "name": "Albertina",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-kunst"
+    ],
+    "labels": [],
+    "adresse": "Albertinaplatz 1, 1010 Wien",
+    "beschreibung": "Habsburgisches Palais über der Ringstraße mit Dürers Feldhasen und einer starken Sammlung der Moderne. Die Prunkräume sind im Ticket enthalten.",
+    "website": "https://albertina.at",
+    "bild": "bilder/albertina.jpg",
+    "lat": 48.2046365,
+    "lng": 16.3682605,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "schloss-belvedere",
+    "name": "Schloss Belvedere",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-kunst"
+    ],
+    "labels": [
+      "lgbtq",
+      "hunde"
+    ],
+    "adresse": "Prinz-Eugen-Straße 27, 1030 Wien",
+    "beschreibung": "Barockes Schlossensemble mit dem Garten dazwischen. Im Oberen Belvedere hängt Klimts Kuss.",
+    "website": "https://belvedere.at",
+    "bild": "bilder/schloss-belvedere.jpg",
+    "lat": 48.1912243,
+    "lng": 16.3798261,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "leopold-museum",
+    "name": "Leopold Museum",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-kunst"
+    ],
+    "labels": [],
+    "adresse": "Museumsplatz 1, 1070 Wien",
+    "beschreibung": "Im MuseumsQuartier, mit der weltweit größten Schiele-Sammlung. Klimt und Kokoschka hängen daneben.",
+    "website": "https://leopoldmuseum.org",
+    "bild": "bilder/leopold-museum.jpg",
+    "lat": 48.2025896,
+    "lng": 16.3590667,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "haus-der-musik",
+    "name": "Haus der Musik",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-musik"
+    ],
+    "labels": [
+      "lgbtq",
+      "hunde"
+    ],
+    "adresse": "Seilerstätte 30, 1010 Wien",
+    "beschreibung": "Klangmuseum in der Seilerstätte, in dem man selbst dirigieren und Töne bauen kann. Bis 22 Uhr geöffnet und damit auch nach dem Abendessen möglich.",
+    "website": "https://hausdermusik.com",
+    "bild": "bilder/haus-der-musik.jpg",
+    "lat": 48.2038496,
+    "lng": 16.3730813,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "wien-museum",
+    "name": "Wien Museum",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-geschichte"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Karlsplatz 8, 1040 Wien",
+    "beschreibung": "Stadtgeschichte am Karlsplatz, von den Römern bis in die Gegenwart. Die Dauerausstellung ist gratis.",
+    "website": "https://wienmuseum.at",
+    "bild": "bilder/wien-museum.jpg",
+    "lat": 48.1992128,
+    "lng": 16.3730689,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "kostenlos",
+    "gehen": "viel"
+  },
+  {
+    "id": "technisches-museum",
+    "name": "Technisches Museum Wien",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-technik"
+    ],
+    "labels": [],
+    "adresse": "Mariahilfer Straße 212, 1140 Wien",
+    "beschreibung": "Museum für Technik und Industrie in Penzing, vom Dampfmotor bis zur Raumfahrt. Viel zum Anfassen, stark mit Kindern.",
+    "website": "https://technischesmuseum.at",
+    "bild": "",
+    "lat": 48.1909208,
+    "lng": 16.3180346,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "mak",
+    "name": "MAK – Museum für angewandte Kunst",
+    "kategorie": "museum",
+    "weitere": [],
+    "tags": [
+      "thema-angewandt",
+      "thema-kunst"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Stubenring 5, 1010 Wien",
+    "beschreibung": "Museum für angewandte Kunst am Stubenring, mit Design, Möbeln und Mode aus mehreren Jahrhunderten. Der Bau selbst ist einen Blick wert.",
+    "website": "https://mak.at",
+    "bild": "",
+    "lat": 48.2074202,
+    "lng": 16.3815068,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "musikverein",
+    "name": "Musikverein",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-klassik",
+      "loc-gross"
+    ],
+    "labels": [
+      "hunde",
+      "reizarm"
+    ],
+    "adresse": "Musikvereinsplatz 1, 1010 Wien",
+    "beschreibung": "Der Goldene Saal, aus dem das Neujahrskonzert übertragen wird. Akustisch der beste Raum der Stadt.",
+    "website": "https://musikverein.at",
+    "bild": "bilder/musikverein.jpg",
+    "lat": 48.2004865,
+    "lng": 16.3727252,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "konzerthaus",
+    "name": "Wiener Konzerthaus",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-klassik",
+      "loc-gross"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Lothringerstraße 20, 1030 Wien",
+    "beschreibung": "Das zweite große Konzerthaus der Stadt, mit breiterem Programm als der Musikverein. Von Klassik bis Jazz ist alles möglich.",
+    "website": "https://konzerthaus.at",
+    "bild": "bilder/konzerthaus.jpg",
+    "lat": 48.2006491,
+    "lng": 16.3776125,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "porgy-and-bess",
+    "name": "Porgy & Bess",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-jazz",
+      "loc-klein"
+    ],
+    "labels": [
+      "hunde",
+      "reizarm"
+    ],
+    "adresse": "Riemergasse 11, 1010 Wien",
+    "beschreibung": "Jazzclub in der Riemergasse mit Konzerten an fast jedem Abend. Internationale Namen stehen hier ebenso auf der Bühne wie die Wiener Szene.",
+    "website": "https://porgy.at",
+    "bild": "",
+    "lat": 48.2068015,
+    "lng": 16.3765887,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "jazzland",
+    "name": "Jazzland",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-jazz",
+      "loc-klein"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Franz-Josefs-Kai 29, 1010 Wien",
+    "beschreibung": "Kellergewölbe unter der Ruprechtskirche, seit 1972 mit Programm aus New-Orleans-Jazz und Blues.",
+    "website": "https://jazzland.at",
+    "bild": "",
+    "lat": 48.2120903,
+    "lng": 16.3747488,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "kramladen",
+    "name": "Kramladen",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-poprock",
+      "loc-klein"
+    ],
+    "labels": [
+      "barrierefrei",
+      "lgbtq",
+      "geheimtipp"
+    ],
+    "adresse": "U-Bahn-Bogen 39–40, 1080 Wien",
+    "beschreibung": "Musikbar im Stadtbahnbogen am Gürtel, mit Konzerten von Indie bis Elektronik. Klein genug, dass man die Band von der Theke aus sieht.",
+    "website": "https://www.kramladenvienna.at",
+    "bild": "",
+    "lat": 48.2108759,
+    "lng": 16.3390894,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-aera",
+    "name": "Café Aera",
+    "kategorie": "musik",
+    "weitere": [
+      "restaurant"
+    ],
+    "tags": [
+      "genre-jazz",
+      "loc-klein"
+    ],
+    "labels": [],
+    "adresse": "Gonzagagasse 11, 1010 Wien",
+    "beschreibung": "Lokal in der Gonzagagasse, unten im Gewölbe spielt an fast jedem Abend eine Band. Oben gibt es dazu Wiener Küche.",
+    "website": "https://aera.at",
+    "bild": "",
+    "lat": 48.2148783,
+    "lng": 16.3706136,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "the-loft",
+    "name": "The Loft",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-poprock",
+      "loc-klein"
+    ],
+    "labels": [
+      "reizarm",
+      "vegan"
+    ],
+    "adresse": "Lerchenfelder Gürtel 37, 1160 Wien",
+    "beschreibung": "Kulturzentrum in einer alten Fabrik am Gürtel. Neben Konzerten laufen dort auch Filmabende und Poetry Slams.",
+    "website": "https://theloft.at",
+    "bild": "",
+    "lat": 48.2088496,
+    "lng": 16.3381002,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "arena-wien",
+    "name": "Arena Wien",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-poprock",
+      "genre-metal",
+      "loc-gross"
+    ],
+    "labels": [
+      "reizarm",
+      "vegan"
+    ],
+    "adresse": "Baumgasse 80, 1030 Wien",
+    "beschreibung": "Ehemaliger Schlachthof im dritten Bezirk, seit 1976 selbstverwaltet. Im Sommer spielen die Konzerte draußen im Hof.",
+    "website": "https://arena.wien",
+    "bild": "bilder/arena-wien.jpg",
+    "lat": 48.1875337,
+    "lng": 16.41276,
+    "indoor": false,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "szene-wien",
+    "name": "Szene Wien",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-poprock",
+      "genre-metal",
+      "loc-gross"
+    ],
+    "labels": [
+      "barrierefrei"
+    ],
+    "adresse": "Hauffgasse 26, 1110 Wien",
+    "beschreibung": "Konzertsaal in Simmering, seit den Achtzigern eine feste Größe für Rock und Punk.",
+    "website": "https://szene.wien",
+    "bild": "bilder/szene-wien.jpg",
+    "lat": 48.1755836,
+    "lng": 16.407949,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "das-muth",
+    "name": "Das MuTh",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-klassik",
+      "loc-klein"
+    ],
+    "labels": [
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Am Augartenspitz 1, 1020 Wien",
+    "beschreibung": "Konzertsaal der Wiener Sängerknaben am Augarten, 2012 eröffnet. Das Programm reicht weit über den Chor hinaus.",
+    "website": "https://muth.at",
+    "bild": "bilder/das-muth.jpg",
+    "lat": 48.2200452,
+    "lng": 16.3800366,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "zwe",
+    "name": "ZWE",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-jazz",
+      "loc-klein"
+    ],
+    "labels": [
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Floßgasse 4, 1020 Wien",
+    "beschreibung": "Jazzclub in der Floßgasse mit Programm an fast jedem Abend. Der Raum ist klein, die Besetzungen wechseln ständig.",
+    "website": "https://zwe.cc",
+    "bild": "",
+    "lat": 48.2163163,
+    "lng": 16.3749442,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "viper-room",
+    "name": "Viper Room",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-poprock",
+      "genre-metal",
+      "loc-klein"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Landstraßer Hauptstraße 38, 1030 Wien",
+    "beschreibung": "Rock- und Metal-Club in der Landstraße mit Konzerten und späten Partys. Klein, laut, schwarz gestrichen.",
+    "website": "https://viper-room.at",
+    "bild": "",
+    "lat": 48.2031718,
+    "lng": 16.3892579,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "wiener-staatsoper",
+    "name": "Wiener Staatsoper",
+    "kategorie": "event",
+    "weitere": [],
+    "tags": [
+      "event-oper",
+      "event-ballett"
+    ],
+    "labels": [
+      "lgbtq"
+    ],
+    "adresse": "Opernring 2, 1010 Wien",
+    "beschreibung": "Fast jeden Abend eine andere Produktion. Stehplätze gibt es ab wenigen Euro, die Schlange beginnt gut eine Stunde vor Vorstellungsbeginn.",
+    "website": "https://wiener-staatsoper.at",
+    "bild": "bilder/wiener-staatsoper.jpg",
+    "lat": 48.2032864,
+    "lng": 16.3691936,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "ronacher",
+    "name": "Ronacher",
+    "kategorie": "event",
+    "weitere": [],
+    "tags": [
+      "event-musical"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Seilerstätte 9, 1010 Wien",
+    "beschreibung": "Musicaltheater der Vereinigten Bühnen Wien im Bau von 1872. Gespielt wird in langen Serien, Karten sind meist Wochen im Voraus zu haben.",
+    "website": "https://musicalvienna.at",
+    "bild": "bilder/ronacher.jpg",
+    "lat": 48.2050185,
+    "lng": 16.3752982,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "hoch",
+    "gehen": "wenig"
+  },
+  {
+    "id": "volksoper",
+    "name": "Volksoper Wien",
+    "kategorie": "event",
+    "weitere": [],
+    "tags": [
+      "event-oper",
+      "event-musical"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Währinger Straße 78, 1090 Wien",
+    "beschreibung": "Haus für Operette und Spieloper im neunten Bezirk. Günstiger als die Staatsoper und meist auf Deutsch gesungen.",
+    "website": "https://volksoper.at",
+    "bild": "bilder/volksoper.jpg",
+    "lat": 48.2246675,
+    "lng": 16.3502354,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "theater-an-der-wien",
+    "name": "Theater an der Wien",
+    "kategorie": "event",
+    "weitere": [],
+    "tags": [
+      "event-oper",
+      "event-theater"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Linke Wienzeile 6, 1060 Wien",
+    "beschreibung": "Hier wurde Beethovens Fidelio uraufgeführt, heute ist es die Bühne für Barockoper und Zeitgenössisches. Nach der Sanierung wieder am Naschmarkt in Betrieb.",
+    "website": "https://theater-wien.at",
+    "bild": "bilder/theater-an-der-wien.jpg",
+    "lat": 48.1994967,
+    "lng": 16.3643893,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "kabarett-simpl",
+    "name": "Kabarett Simpl",
+    "kategorie": "event",
+    "weitere": [],
+    "tags": [
+      "event-kabarett"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Wollzeile 36, 1010 Wien",
+    "beschreibung": "Kleinkunstbühne in der Wollzeile, gegründet 1912. Wiener Kabarett, sprachlich fordernd für Zugereiste.",
+    "website": "https://simpl.at",
+    "bild": "",
+    "lat": 48.2076245,
+    "lng": 16.3784701,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "tschauner-buehne",
+    "name": "Tschauner Bühne",
+    "kategorie": "event",
+    "weitere": [],
+    "tags": [
+      "event-theater",
+      "event-kabarett"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Maroltingergasse 43, 1160 Wien",
+    "beschreibung": "Die letzte Stegreifbühne Europas, im Freien in Ottakring. Die Schauspieler bekommen nur die Handlung, den Text erfinden sie beim Spielen.",
+    "website": "https://tschauner.at",
+    "bild": "bilder/tschauner-buehne.jpg",
+    "lat": 48.2080486,
+    "lng": 16.3042976,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "escape-mission",
+    "name": "Escape Mission",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-logik"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Viaduktgasse 3, 1030 Wien",
+    "beschreibung": "Der älteste Escape Room der Stadt, seit 2013 im dritten Bezirk. Die Räume sind für zwei bis sieben Leute gebaut und barrierefrei zugänglich.",
+    "website": "https://escapemission.at",
+    "bild": "",
+    "lat": 48.2116679,
+    "lng": 16.3921439,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": false,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "game-over-escape",
+    "name": "GAME OVER Escape Rooms",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-logik"
+    ],
+    "labels": [
+      "reizarm",
+      "vegan"
+    ],
+    "adresse": "Mariahilfer Straße 103, 1060 Wien",
+    "beschreibung": "Escape Rooms an der Mariahilfer Straße mit aufwendig gebauten Kulissen. Bis spät am Abend buchbar.",
+    "website": "https://vienna.escapegameover.at",
+    "bild": "",
+    "lat": 48.196799,
+    "lng": 16.3454062,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": false,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "bogensportpark-kahlenberg",
+    "name": "3D Bogensportpark Kahlenberg",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-sport"
+    ],
+    "labels": [
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Josefsdorf 47, 1190 Wien",
+    "beschreibung": "Bogenparcours im Wienerwald mit Tierattrappen als Ziele, verteilt auf vier Runden. Die Ausrüstung wird vor Ort verliehen, Vorkenntnisse braucht es keine.",
+    "website": "https://bogenschiessen.erlebniswelt-kahlenberg.at",
+    "bild": "",
+    "lat": 48.2806863,
+    "lng": 16.3360543,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "arco-vienna",
+    "name": "Arco Vienna Club",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-sport"
+    ],
+    "labels": [
+      "barrierefrei",
+      "lgbtq",
+      "vegan",
+      "geheimtipp"
+    ],
+    "adresse": "Praterstraße 9, 1020 Wien",
+    "beschreibung": "Bogenschießhalle gegenüber dem Schwedenplatz mit vier Bahnen. Schnupperstunden sind auch ohne Mitgliedschaft möglich.",
+    "website": "https://arco-vienna.at",
+    "bild": "",
+    "lat": 48.2129756,
+    "lng": 16.3808719,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "battlekart-wien",
+    "name": "BattleKart Wien",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-sport"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Trabrennstraße 5, 1020 Wien",
+    "beschreibung": "Elektro-Karts auf einer Halle, in die Spielfelder projiziert werden. Gefahren wird wie in einem Videospiel, nur im echten Kart.",
+    "website": "https://battlekart.at",
+    "bild": "",
+    "lat": 48.2138455,
+    "lng": 16.4133234,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": false,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "wakeboardlift-wien",
+    "name": "Wakeboardlift Wien",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-sport"
+    ],
+    "labels": [],
+    "adresse": "Am Wehr 1, 1220 Wien",
+    "beschreibung": "Seilbahnanlage über der Neuen Donau, rund 800 Meter lang. Im Sommer täglich in Betrieb, Wasserski und Wakeboard gibt es vor Ort zu leihen.",
+    "website": "https://wakeboardlift.at",
+    "bild": "",
+    "lat": 48.2116365,
+    "lng": 16.4369509,
+    "indoor": false,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "blockfabrik",
+    "name": "Blockfabrik",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-sport"
+    ],
+    "labels": [
+      "lgbtq"
+    ],
+    "adresse": "Schlossgasse 10–12, 1050 Wien",
+    "beschreibung": "Boulderhalle in Margareten mit Routen über alle Schwierigkeitsgrade. Schuhe kann man leihen, allein hinzugehen funktioniert problemlos.",
+    "website": "https://blockfabrik.at",
+    "bild": "",
+    "lat": 48.190596,
+    "lng": 16.3602942,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "viel"
+  },
+  {
+    "id": "bootsvermietung-eppel",
+    "name": "Bootsvermietung Eppel",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Wagramer Straße 48a, 1220 Wien",
+    "beschreibung": "Elektroboote und Tretboote an der Alten Donau. Eine Stunde reicht für eine Runde, zwei sind angenehmer.",
+    "website": "https://eppel-boote.at",
+    "bild": "",
+    "lat": 48.2364787,
+    "lng": 16.4253119,
+    "indoor": false,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "wiener-riesenrad",
+    "name": "Wiener Riesenrad",
+    "kategorie": "aktivitaet",
+    "weitere": [
+      "sehenswuerdigkeit"
+    ],
+    "tags": [],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Riesenradplatz 1, 1020 Wien",
+    "beschreibung": "Steht seit 1897 im Prater und ist 65 Meter hoch. Eine Umdrehung dauert eine gute Viertelstunde.",
+    "website": "https://wienerriesenrad.com",
+    "bild": "bilder/wiener-riesenrad.jpg",
+    "lat": 48.2177501,
+    "lng": 16.3968637,
+    "indoor": false,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "maxx-lasertag",
+    "name": "MAXXLasertag Roßauer Lände",
+    "kategorie": "aktivitaet",
+    "weitere": [],
+    "tags": [
+      "akt-sport"
+    ],
+    "labels": [
+      "reizarm"
+    ],
+    "adresse": "Roßauer Lände 45, 1090 Wien",
+    "beschreibung": "Lasertag-Arena am Donaukanal, aufgebaut über zwei Ebenen. Ab etwa sechs Leuten macht es am meisten her.",
+    "website": "https://maxxarena.com",
+    "bild": "",
+    "lat": 48.2263268,
+    "lng": 16.3653573,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": false,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  }
+];

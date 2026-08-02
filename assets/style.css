@@ -1,0 +1,1322 @@
+/* Wien-Karte — Gestaltung */
+
+:root {
+  --papier: #f7f4ee;
+  --papier-tief: #efeae1;
+  --tinte: #1d1a16;
+  --tinte-leise: #6b635a;
+  --linie: #ddd5c8;
+  --weiss: #fffdf9;
+
+  /* Kategoriefarben, gespiegelt in KATEGORIEN in assets/app.js */
+  --fruehstueck: #c08a2e;
+  --restaurant: #b23a2a;
+  --sehenswuerdigkeit: #1b7fa8;
+  --museum: #7a3f86;
+  --musik: #3b4a8c;
+  --event: #a8336a;
+  --aktivitaet: #2f7355;
+  --warnung: #b23a2a;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --kopfhoehe: 92px;
+  --filterhoehe: 116px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--papier);
+  color: var(--tinte);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Toolbar ---------- */
+
+.topbar {
+  position: relative;
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--linie);
+  background: var(--papier-tief);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 20px;
+}
+
+.toolbar-suche {
+  flex: 0 0 auto;
+  width: 190px;
+  padding: 7px 13px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: var(--weiss);
+  font: inherit;
+  font-size: 13.5px;
+  color: inherit;
+}
+
+.toolbar-suche:focus {
+  outline: 2px solid var(--tinte);
+  outline-offset: 1px;
+}
+
+/* Kategorien scrollen waagrecht, statt umzubrechen. */
+.toolbar .toolbar-kat {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+}
+
+.toolbar-kat .chip { flex: 0 0 auto; }
+
+.toolbar-status {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--tinte-leise);
+  white-space: nowrap;
+}
+
+.icon-knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: var(--weiss);
+  font-size: 16px;
+  line-height: 1;
+  color: var(--tinte);
+  cursor: pointer;
+}
+
+.icon-knopf:hover { border-color: var(--tinte-leise); }
+
+/* ---------- Routenvorschlag ---------- */
+
+.route-knopf {
+  position: absolute;
+  top: 12px;
+  right: 172px;
+  /* über den Leaflet-Bedienelementen, die bei 1000 liegen */
+  z-index: 1100;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.92);
+  backdrop-filter: blur(3px);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--tinte);
+  cursor: pointer;
+  box-shadow: 0 1px 5px rgba(0,0,0,.14);
+}
+
+.route-knopf:hover { border-color: var(--tinte-leise); }
+.route-knopf.offen { border-color: var(--tinte); }
+
+.route-popup {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1120;
+  width: min(360px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(29,26,22,0.12);
+  border-radius: 12px;
+  background: rgba(255,253,249,0.96);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  box-shadow: 0 12px 36px rgba(0,0,0,.24);
+  overflow: hidden;
+}
+
+.route-popup[hidden] { display: none; }
+
+.route-koerper {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 14px 16px;
+}
+
+.route-titel {
+  font-size: 12px;
+  color: var(--tinte-leise);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 4px 0 7px;
+}
+
+.route-titel:not(:first-child) { margin-top: 14px; }
+
+#route-kategorien, #route-fenster, #route-umkreis-gruppe { gap: 6px; }
+#route-umkreis-gruppe { margin-top: 14px; }
+
+.route-punktwert {
+  display: inline-block;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: rgba(29,26,22,0.10);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.chip[aria-pressed="true"] .route-punktwert {
+  background: rgba(255,255,255,0.28);
+}
+
+.route-hinweis {
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--tinte-leise);
+}
+
+.route-summe {
+  font-size: 12.5px;
+  color: var(--tinte-leise);
+  margin-bottom: 10px;
+}
+
+.route-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.route-abschnitt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinte-leise);
+  padding: 10px 0 3px;
+  border-bottom: none;
+}
+
+.route-abschnitt:first-child { padding-top: 0; }
+
+.route-stopp {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--linie);
+}
+
+.route-stopp:last-child { border-bottom: none; }
+.route-stopp + .route-abschnitt { border-top: 1px solid var(--linie); margin-top: 2px; }
+
+.route-nr {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--weiss);
+  font-size: 12px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
+.route-stopp-text { display: flex; flex-direction: column; min-width: 0; }
+.route-stopp-text b { font-size: 14px; font-weight: 600; }
+
+.route-stopp-kat {
+  font-size: 11.5px;
+  color: var(--tinte-leise);
+}
+
+.route-knapp, .route-fehler {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--tinte-leise);
+}
+
+.route-fehler { color: var(--tinte); }
+
+/* Titel als Overlay in der oberen Kartenecke. */
+.titel-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.86);
+  backdrop-filter: blur(3px);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tinte);
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  pointer-events: none;
+}
+
+/* ---------- Filter ---------- */
+
+.merkmale {
+  padding: 0 20px 10px;
+}
+
+.filtergruppe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.filtergruppe.merkmale {
+  gap: 7px 14px;
+  align-items: center;
+}
+
+.filtergruppe.merkmale[hidden] { display: none; }
+
+.merkmal-kat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.merkmal-titel {
+  font-size: 12px;
+  color: var(--tinte-leise);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+
+.chip.merkmal { font-size: 13px; padding: 5px 12px; }
+
+/* Zahnrad und Popover für die universellen Schalter */
+.gear {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 9px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: var(--weiss);
+  font-size: 15px;
+  line-height: 1;
+  color: var(--tinte);
+  cursor: pointer;
+}
+
+.gear:hover { border-color: var(--tinte-leise); }
+.gear[aria-expanded="true"] { border-color: var(--tinte); }
+
+.gear-zahl {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--tinte);
+  color: var(--weiss);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.gear-zahl[hidden] { display: none; }
+
+.einstellungen {
+  position: absolute;
+  top: 46px;
+  right: 16px;
+  z-index: 1300;
+  width: min(320px, calc(100vw - 40px));
+  padding: 14px 16px;
+  border: 1px solid var(--linie);
+  border-radius: 8px;
+  background: var(--weiss);
+  box-shadow: 0 8px 28px rgba(0,0,0,.16);
+}
+
+.einstellungen[hidden] { display: none; }
+
+.einstellungen-titel {
+  font-size: 12px;
+  color: var(--tinte-leise);
+  margin-bottom: 10px;
+}
+
+.filtergruppe.schalter { gap: 7px; }
+
+.legende-titel { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--linie); }
+
+.schalt-zeichen { margin-right: 5px; font-size: 12px; }
+
+.legende-hinweis {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--tinte-leise);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 6px 11px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: var(--weiss);
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--tinte);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+
+.chip:hover { border-color: var(--tinte-leise); }
+
+.chip .punkt {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ton, var(--tinte));
+  flex: 0 0 auto;
+}
+
+.chip[aria-pressed="true"] .punkt { background: var(--weiss); }
+
+.chip[aria-pressed="true"] {
+  background: var(--ton, var(--tinte));
+  border-color: var(--ton, var(--tinte));
+  color: var(--weiss);
+}
+
+.chip.schalt {
+  padding-left: 14px;
+  font-size: 13px;
+}
+
+.chip.schalt[aria-pressed="true"] {
+  background: var(--tinte);
+  border-color: var(--tinte);
+  color: var(--weiss);
+}
+
+.textknopf {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--tinte-leise);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.textknopf:hover { color: var(--tinte); }
+
+/* ---------- Bühne ---------- */
+
+.buehne {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 410px 1fr;
+  min-height: 0;
+}
+
+.liste-spalte {
+  overflow-y: auto;
+  border-right: 1px solid var(--linie);
+  background: var(--weiss);
+}
+
+.karten-spalte { min-height: 0; position: relative; }
+
+#karte {
+  width: 100%;
+  height: 100%;
+  background: var(--papier-tief);
+}
+
+/* ---------- Liste ---------- */
+
+.liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Geschlossen eine schmale Zeile, offen mit Beschreibung und Aktionen.
+   Die Aktionen stapeln sich senkrecht unter dem Bild in der linken Leiste. */
+.eintrag {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 18px 9px 20px;
+  border-bottom: 1px solid var(--linie);
+  cursor: pointer;
+}
+
+.eintrag-text { min-width: 0; flex: 1 1 auto; }
+
+/* Kopfzeile: Name links, Aktionen rechts auf gleicher Höhe.
+   Lange Namen dürfen auf eine zweite Zeile umbrechen, statt abgeschnitten
+   zu werden — betrifft nur eine Handvoll Orte. */
+.eintrag-kopf {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.eintrag-kopf h3 { flex: 1 1 auto; min-width: 0; }
+
+.eintrag-kopf .eintrag-aktionen { margin-top: 1px; }
+
+/* Miniatur: Foto, sonst farbiges Feld mit dem Kategoriesymbol. */
+.miniatur {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.miniatur span { font-size: 16px; line-height: 1; }
+
+.miniatur img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eintrag::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--ton);
+}
+
+
+.eintrag:hover { background: var(--papier); }
+
+.eintrag.aktiv {
+  background: var(--papier-tief);
+}
+
+.eintrag h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.eintrag .adresse {
+  margin: 1px 0 0;
+  font-size: 12.5px;
+  color: var(--tinte-leise);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+/* Die Adresse bleibt einzeilig; der Name darf bei Bedarf umbrechen. */
+.eintrag .adresse {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eintrag h3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Beschreibung geklemmt auf die Höhe, die die Knopfleiste ohnehin vorgibt.
+   Der gewählte Eintrag zeigt sie ganz. */
+.eintrag p.text {
+  margin: 5px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #3d3831;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.eintrag.aktiv p.text {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* Aktionen waagrecht in der Kopfzeile, immer sichtbar.
+   Website und Route bleiben knappe Icons, damit der Name Platz behält. */
+.eintrag-aktionen {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.aktion-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: var(--weiss);
+  font-size: 12px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.aktion-icon:hover { border-color: var(--tinte-leise); background: var(--papier); }
+
+.leer {
+  margin: 0;
+  padding: 30px 22px;
+  color: var(--tinte-leise);
+  font-size: 14px;
+}
+
+.plan-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 1px solid var(--ton, var(--tinte));
+  border-radius: 999px;
+  background: var(--weiss);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ton, var(--tinte));
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+
+.plan-knopf:hover { background: var(--papier); }
+
+/* In der Liste sitzt der Knopf als Dreieck in der rechten oberen Ecke.
+   Die Beschriftung bleibt im DOM für Vorlesesoftware, sichtbar ist das
+   Zeichen aus ::after. */
+.eintrag-aktionen .plan-knopf {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: var(--ton, var(--tinte));
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  color: var(--weiss);
+  font-size: 0;
+}
+
+.eintrag-aktionen .plan-knopf::after {
+  content: "+";
+  position: absolute;
+  top: 2px;
+  right: 7px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Im Plan wechselt das Dreieck von der Kategoriefarbe auf Dunkel —
+   dieselbe Farbe wie der Knopf „Mein Tag“ auf der Karte. */
+.eintrag-aktionen .plan-knopf.drin { background: var(--tinte); }
+.eintrag-aktionen .plan-knopf.drin::after { content: "✓"; font-size: 14px; top: 4px; }
+.eintrag-aktionen .plan-knopf:hover { opacity: .85; }
+
+/* Platz für das Dreieck, damit es den Namen nicht überdeckt. */
+.eintrag-kopf { padding-right: 34px; }
+
+.plan-knopf.drin {
+  background: var(--ton, var(--tinte));
+  border-color: var(--ton, var(--tinte));
+  color: var(--weiss);
+}
+
+/* ---------- Tagesplan: schwebender Knopf und Overlay ---------- */
+
+.plan-fab {
+  position: absolute;
+  right: 16px;
+  bottom: 22px;
+  z-index: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--tinte);
+  color: var(--weiss);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(0,0,0,.28);
+}
+
+.plan-fab:hover { background: #322d26; }
+.plan-fab.offen { visibility: hidden; }
+
+.plan-fab-zahl {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--weiss);
+  color: var(--tinte);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+.plan-fab-zahl[hidden] { display: none; }
+
+.plan-overlay {
+  position: absolute;
+  right: 16px;
+  bottom: 22px;
+  z-index: 620;
+  width: min(330px, calc(100% - 32px));
+  max-height: calc(100% - 44px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(29,26,22,0.12);
+  border-radius: 12px;
+  background: rgba(255,253,249,0.90);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  box-shadow: 0 12px 36px rgba(0,0,0,.24);
+  overflow: hidden;
+}
+
+.plan-overlay[hidden] { display: none; }
+
+.plan-kopf {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--linie);
+}
+
+.plan-kopf h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.plan-schliessen {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--tinte-leise);
+  cursor: pointer;
+}
+
+.plan-schliessen:hover { color: var(--tinte); }
+
+.plan-koerper {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 12px 16px;
+}
+
+.plan-leer {
+  margin: 8px 6px;
+  font-size: 13px;
+  color: var(--tinte-leise);
+  line-height: 1.5;
+}
+
+.plan-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Rahmen und Innenabstand sind von Anfang an da, nur unsichtbar. Kämen
+   sie erst beim Überfahren dazu, würde die Überschrift wachsen, unter
+   dem Zeiger wegrutschen und zwischen beiden Zuständen flackern. */
+.plan-abschnitt {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinte-leise);
+  margin: 4px -7px 0;
+  padding: 4px 7px;
+  border: 1px dashed transparent;
+  border-radius: 5px;
+}
+
+.plan-abschnitt:first-child { margin-top: 0; }
+
+/* Ein Abschnitt ohne Eintrag bleibt stehen, tritt aber zurück. */
+.plan-abschnitt.leer { opacity: .45; }
+
+/* Beim Ziehen wird die Überschrift zum Ablegeziel. */
+.plan-abschnitt.ueber {
+  opacity: 1;
+  color: var(--tinte);
+  background: var(--weiss);
+  border-color: var(--tinte);
+}
+
+.plan-eintrag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px;
+  margin-bottom: 5px;
+  border: 1px solid var(--linie);
+  border-radius: 6px;
+  background: var(--weiss);
+  cursor: pointer;
+}
+
+/* Kein pointer-events: none hier — die Klasse wird schon beim dragstart
+   gesetzt, und WebKit bricht den Ziehvorgang dann sofort ab. */
+.plan-eintrag.zieht { opacity: .4; }
+.plan-eintrag.ueber { border-color: var(--tinte); border-style: dashed; }
+
+.plan-griff {
+  flex: 0 0 auto;
+  color: var(--linie);
+  cursor: grab;
+  font-size: 14px;
+  letter-spacing: -2px;
+}
+
+.plan-nr {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--weiss);
+  font-size: 12px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
+.plan-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plan-weg {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  font-size: 13px;
+  color: var(--tinte-leise);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.plan-weg:hover { color: var(--warnung); background: var(--papier); }
+
+.plan-fuss {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  align-items: flex-start;
+}
+
+.plan-fuss[hidden] { display: none; }
+
+.plan-fuss .knopf {
+  text-decoration: none;
+  text-align: center;
+  width: 100%;
+}
+
+/* ---------- Eigener Standort ---------- */
+
+.standort-steuerung a {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tinte-leise);
+}
+
+.standort-steuerung a.aktiv { color: #e03131; }
+.standort-steuerung a.laedt { color: var(--tinte-leise); opacity: .6; }
+
+.standort-punkt {
+  width: 16px;
+  height: 16px;
+  margin: 3px;
+  border-radius: 50%;
+  background: #e03131;
+  border: 3px solid var(--weiss);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25);
+}
+
+.standort-punkt::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid #e03131;
+  animation: standort-puls 2s ease-out infinite;
+}
+
+@keyframes standort-puls {
+  0%   { transform: scale(1);   opacity: .7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .standort-punkt::after { animation: none; }
+}
+
+/* ---------- Karte: Marker und Popup ---------- */
+
+.pin {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 3px;
+  transform: rotate(-45deg);
+  border: 2px solid var(--weiss);
+  box-shadow: 0 2px 5px rgba(0,0,0,.3);
+}
+
+.pin span {
+  transform: rotate(45deg);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.pin.gross {
+  width: 38px;
+  height: 38px;
+  z-index: 1000;
+}
+
+.pin.gross span { font-size: 17px; }
+
+/* Wrapper trägt die Nummer außerhalb des gedrehten Tropfens. */
+.pinwrap { position: relative; width: 100%; height: 100%; }
+
+/* Nummern-Marke und Hervorhebung geplanter Orte. */
+.pin-nr {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
+  border-radius: 9px;
+  background: var(--tinte);
+  color: var(--weiss);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+
+.pin.geplant, .bildpin.geplant {
+  box-shadow: 0 0 0 3px var(--tinte), 0 2px 5px rgba(0,0,0,.3);
+}
+
+/* Liegt etwas im Tagesplan, treten die übrigen Orte zurück —
+   beim Überfahren kommen sie kurz zurück. */
+.pin.gedimmt, .bildpin.gedimmt {
+  opacity: .38;
+  filter: grayscale(0.75);
+  transition: opacity .15s, filter .15s;
+}
+
+.leaflet-marker-icon:hover .pin.gedimmt,
+.leaflet-marker-icon:hover .bildpin.gedimmt {
+  opacity: 1;
+  filter: none;
+}
+
+/* Marker mit Foto: runder Bildpunkt mit Ring in der Kategoriefarbe. */
+.bildpin {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,.3);
+}
+
+.bildpin span { font-size: 15px; line-height: 1; }
+
+.bildpin img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bildpin.gross {
+  width: 44px;
+  height: 44px;
+  border-width: 4px;
+  z-index: 1000;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--weiss);
+  box-shadow: 0 6px 24px rgba(0,0,0,.18);
+}
+
+.leaflet-popup-content {
+  margin: 14px 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.45;
+  width: 250px !important;
+}
+
+.popup-bild {
+  display: block;
+  margin: -14px -16px 10px;
+  height: 118px;
+  overflow: hidden;
+  background: var(--papier-tief);
+}
+
+.popup-bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.popup-titel {
+  display: block;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.popup-adresse {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tinte-leise);
+  margin-bottom: 7px;
+}
+
+.popup-links {
+  margin-top: 9px;
+  display: flex;
+  gap: 13px;
+  font-size: 13px;
+}
+
+.popup-plan { display: block; margin-top: 10px; }
+
+/* ---------- Fuß ---------- */
+
+.fuss {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 26px;
+  border-top: 1px solid var(--linie);
+  background: var(--papier-tief);
+  font-size: 12px;
+  color: var(--tinte-leise);
+}
+
+/* ---------- Bearbeiten ---------- */
+
+body.bearbeiten .fuss { background: #2b2721; color: #e8e0d4; }
+body.bearbeiten .fuss .textknopf { color: #e8e0d4; }
+
+.bearbeiten-panel {
+  padding: 16px 20px;
+  border-bottom: 2px solid var(--tinte);
+  background: var(--papier-tief);
+}
+
+.bearbeiten-panel h2 {
+  margin: 0 0 3px;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.bearbeiten-panel .hinweis {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--tinte-leise);
+}
+
+.feld {
+  display: block;
+  margin-bottom: 9px;
+}
+
+.feld span {
+  display: block;
+  font-size: 12px;
+  color: var(--tinte-leise);
+  margin-bottom: 3px;
+  letter-spacing: 0.02em;
+}
+
+.feld input,
+.feld select,
+.feld textarea {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--linie);
+  border-radius: 4px;
+  background: var(--weiss);
+  font: inherit;
+  font-size: 13.5px;
+  color: inherit;
+}
+
+.feld textarea { min-height: 66px; resize: vertical; }
+
+.mehrfach {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  padding: 7px 9px;
+  border: 1px solid var(--linie);
+  border-radius: 4px;
+  background: var(--weiss);
+}
+
+.kaestchen {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.kaestchen input { margin: 0; }
+
+.feld-paar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.position {
+  margin: 6px 0 -4px;
+  font-size: 12.5px;
+  color: var(--tinte-leise);
+}
+
+.position .offen { color: var(--warnung); }
+
+.knopfreihe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.knopf {
+  padding: 8px 15px;
+  border: 1px solid var(--tinte);
+  border-radius: 4px;
+  background: var(--tinte);
+  color: var(--weiss);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.knopf.leise {
+  background: transparent;
+  color: var(--tinte);
+}
+
+.knopf:hover { opacity: .85; }
+
+.eintrag-werkzeug {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: none;
+  gap: 6px;
+}
+
+body.bearbeiten .eintrag-werkzeug { display: flex; }
+
+/* Im Bearbeiten-Modus stehen oben rechts Stift und Kreuz. */
+body.bearbeiten .eintrag-aktionen { display: none; }
+body.bearbeiten .eintrag-kopf { padding-right: 58px; }
+
+.eintrag-werkzeug button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--linie);
+  border-radius: 4px;
+  background: var(--weiss);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--tinte-leise);
+  cursor: pointer;
+}
+
+.eintrag-werkzeug button:hover {
+  border-color: var(--tinte);
+  color: var(--tinte);
+}
+
+.merker {
+  padding: 10px 20px;
+  background: #2b2721;
+  color: #f0e8db;
+  font-size: 12.5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.merker-knoepfe {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.merker button {
+  border: 1px solid #6d6558;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+body.setzt-position #karte { cursor: crosshair; }
+
+/* ---------- Schmale Fenster ---------- */
+
+@media (max-width: 900px) {
+  .toolbar { flex-wrap: wrap; padding: 9px 14px; gap: 9px; }
+  .toolbar-suche { flex: 1 1 140px; width: auto; }
+  .toolbar .toolbar-kat {
+    order: 3;
+    width: 100%;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    mask-image: none;
+  }
+  .merkmale { padding: 0 14px 10px; }
+  .einstellungen { right: 12px; }
+  .buehne {
+    grid-template-columns: 1fr;
+    grid-template-rows: 58vh auto;
+  }
+  .karten-spalte { grid-row: 1; }
+  .liste-spalte {
+    grid-row: 2;
+    overflow: visible;
+    border-right: none;
+    border-top: 1px solid var(--linie);
+  }
+  body { height: auto; min-height: 100%; }
+  .buehne { min-height: 0; }
+
+  /* Knopf und Overlay bleiben in der Kartenecke, nur etwas näher am Rand. */
+  .plan-fab { right: 12px; bottom: 16px; }
+  .plan-overlay { right: 12px; bottom: 16px; max-height: calc(100% - 32px); }
+
+  /* Der Kartenbereich ist hier zu niedrig für das Routen-Popup — es löst
+     sich deshalb vom Kartenausschnitt und nutzt die ganze Fensterhöhe. */
+  .route-knopf { right: auto; left: 12px; top: 10px; }
+  .route-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    width: min(380px, calc(100vw - 24px));
+    max-height: 84vh;
+  }
+}
