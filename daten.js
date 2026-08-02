@@ -1596,5 +1596,28 @@ const ORTE = [
     "gruppe": true,
     "preis": "guenstig",
     "gehen": "wenig"
+  },
+  {
+    "id": "new-bar",
+    "name": "New Bar",
+    "kategorie": "bar",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "bar-cocktails"
+    ],
+    "labels": [],
+    "adresse": "Zirkusgasse 38, 1020 Wien",
+    "beschreibung": "Bar in der Leopoldstadt, Sichtbeton und eigenes Lichtkonzept. Sperrt erst um sechs am Abend auf, am Wochenende bis vier Uhr früh. Nur Bargeld.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2169034,
+    "lng": 16.3853171,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
   }
 ];

@@ -1,6 +1,6 @@
 # Wien entdecken — interaktive Karte
 
-Statische Website mit 65 handverlesenen Orten in Wien. Läuft ohne Server-Software, ohne Build-Schritt und ohne Abhängigkeit von Claude.
+Statische Website mit 66 handverlesenen Orten in Wien. Läuft ohne Server-Software, ohne Build-Schritt und ohne Abhängigkeit von Claude.
 
 Die Auswahl ist bewusst kuratiert: keine austauschbaren Touristenadressen, sondern Orte, die etwas taugen. Wer etwas ergänzt, hält diesen Maßstab.
 
@@ -48,7 +48,7 @@ Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/
 
 Ohne Bild bleibt es beim farbigen Tropfen mit dem Symbol der Kategorie. Dasselbe passiert, wenn der Pfad ins Leere zeigt — die Seite fällt still auf das Symbol zurück, statt ein kaputtes Bild anzuzeigen. Details in [bilder/LIESMICH.md](bilder/LIESMICH.md).
 
-28 der 65 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen. Für Cafés, Clubs und die meisten Aktivitäten gibt es auf Commons nichts Brauchbares, dort hilft nur ein eigenes Foto.
+28 der 66 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen. Für Cafés, Clubs und die meisten Aktivitäten gibt es auf Commons nichts Brauchbares, dort hilft nur ein eigenes Foto.
 
 Die Karte läuft mit [Leaflet](https://leafletjs.com) und Kacheln von CARTO auf OpenStreetMap-Basis. Beides wird zur Laufzeit von einem CDN geladen, die Seite braucht daher eine Internetverbindung.
 
@@ -88,7 +88,7 @@ Jede Kategorie trägt einen Zeitwert in Punkten, jedes Zeitfenster ein Budget:
 | Restaurant · Bar · Sehenswürdigkeit · Aktivität | 2 |
 | Museum · Musik · Event | 3 |
 
-**Ganztag 8 Punkte · Morgens bis mittags 4 · Nur Abend 5.** Höchstens ein Frühstück, ein Café, zwei Museen, zwei Restaurants, eine Bar, ein Konzert. Cafés liegen tagsüber, Bars am Abend — eine Bar landet immer im Abschnitt „Abends", auch wenn sonst nichts dort steht. Ein Ganztag enthält mindestens ein Café und ein Restaurant; fehlt eine dieser Kategorien in der Auswahl, fragt die Seite vor dem Rechnen nach.
+**Ganztag 8 Punkte · Morgens bis mittags 4 · Nur Abend 5.** Höchstens ein Frühstück, ein Café, zwei Museen, zwei Restaurants, eine Bar, ein Konzert. Cafés liegen tagsüber, Bars am Abend — eine Bar landet immer im Abschnitt „Abends", auch wenn sonst nichts dort steht. Ein Ganztag enthält mindestens ein Frühstückscafé und ein Restaurant — gemeint ist die Kategorie `fruehstueck`, nicht die neue Kategorie `cafe`. Fehlt eine der beiden in der Auswahl, fragt die Seite vor dem Rechnen nach.
 
 Die Route bevorzugt Orte, die nah beieinanderliegen, wählt aber unter den nächstgelegenen zufällig und füllt zuerst noch fehlende Kategorien auf. „Neu würfeln" ergibt deshalb bei gleicher Eingabe einen anderen Tag. Sortiert wird nach Tagesabschnitt: Frühstück, dann Museum oder Sehenswürdigkeit, dann Essen, zuletzt Konzert oder Theater.
 
@@ -96,7 +96,7 @@ Das Ergebnis erscheint als nummerierte Liste im Popup. Erst mit „In den Tagesp
 
 > **Die Tageszeit ist geschätzt.** Die Orte führen keine Öffnungszeiten, deshalb leitet die Route sie aus der Kategorie ab — Frühstückscafés am Morgen, Musik und Events am Abend, Museen tagsüber. Aktivitäten zählen abends nur mit, wenn sie drinnen stattfinden. Ein Museum mit Montagsruhe erkennt die Route nicht.
 
-Der Umkreis braucht einen aktiven Standort und wirkt je nach Lage sehr unterschiedlich: Vom Stephansdom aus liegen 52 der 65 Orte in drei Kilometern, von Penzing aus sieben. Reicht es nicht für die Pflichtkategorien, sagt die Seite das und schlägt vor, den Umkreis wegzulassen.
+Der Umkreis braucht einen aktiven Standort und wirkt je nach Lage sehr unterschiedlich: Vom Stephansdom aus liegen 53 der 66 Orte in drei Kilometern, von Penzing aus sieben. Reicht es nicht für die Pflichtkategorien, sagt die Seite das und schlägt vor, den Umkreis wegzulassen.
 
 ## Eigener Standort
 
