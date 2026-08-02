@@ -78,7 +78,7 @@ Der Plan lebt im Browser, getrennt von den Orten, unter dem Speicher-Schlüssel 
 
 ## Route vorschlagen
 
-Der Knopf links neben dem Titel öffnet ein Popup, das aus drei Angaben einen fertigen Tag baut: worauf man Lust hat (Kategorien, mehrfach wählbar), wie viel Zeit man hat, und ob nur im Umkreis von drei Kilometern um den eigenen Standort gesucht werden soll.
+Der Knopf am unteren Kartenrand, links neben „Mein Tag", öffnet ein Popup, das aus drei Angaben einen fertigen Tag baut: worauf man Lust hat (Kategorien, mehrfach wählbar), wie viel Zeit man hat, und ob nur im Umkreis von drei Kilometern um den eigenen Standort gesucht werden soll.
 
 Jede Kategorie trägt einen Zeitwert in Punkten, jedes Zeitfenster ein Budget:
 
@@ -118,7 +118,11 @@ Beim nächsten Neuladen vergleicht die Seite den lokalen Stand mit `daten.js`. S
 
 ## Filter
 
-**Kategorien.** Sieben Knöpfe, aber nur einer zur Zeit — ein Klick auf eine andere Kategorie löst die vorige ab, ein Klick auf die aktive schaltet sie wieder ab. Ohne Auswahl sind alle Orte sichtbar.
+**Kategorien.** Neun Symbole, schwebend in der oberen rechten Kartenecke. Eingeklappt zeigt jedes nur sein Zeichen; beim Überfahren oder bei Tastaturfokus rollt der Name nach links auf, und die Nachbarn weichen zur Seite. Das gewählte Symbol bleibt aufgeklappt und in seiner Kategoriefarbe gefüllt, damit man ohne Nachsehen weiß, was gerade filtert.
+
+Es gilt nur eine Kategorie zur Zeit — ein Klick auf eine andere löst die vorige ab, ein Klick auf die aktive schaltet sie wieder ab. Ohne Auswahl sind alle Orte sichtbar.
+
+Beschriftete Knöpfe in der Kopfzeile waren das vorher, sie brauchten aber 1112 Pixel und begannen schon unter rund 1490 Pixel Fensterbreite seitlich zu scrollen — Kategorien verschwanden also aus dem Blick. Als Symbolleiste sind es rund 435 Pixel, und alle neun passen bis hinunter aufs Handy in eine Zeile.
 
 **Merkmale.** Sobald eine Kategorie gewählt ist, erscheint darunter eine Zeile mit Merkmalen, die zu dieser Kategorie passen — bei Restaurants die Küche, bei Musik das Genre und die Größe, bei Aktivitäten Indoor/Outdoor und den Typ.
 

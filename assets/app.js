@@ -1060,11 +1060,16 @@
       var k = KATEGORIEN[schluessel];
       var b = document.createElement("button");
       b.type = "button";
-      b.className = "chip";
+      b.className = "kat-chip";
       b.style.setProperty("--ton", k.farbe);
       b.setAttribute("aria-pressed", "false");
+      /* Der Name ist eingeklappt und rollt erst beim Überfahren auf —
+         ohne aria-label wäre der Knopf für Screenreader namenlos. */
+      b.setAttribute("aria-label", k.titel);
+      b.title = k.titel;
       b.dataset.kategorie = schluessel;
-      b.innerHTML = '<span class="punkt"></span>' + k.titel;
+      b.innerHTML = '<span class="name">' + k.titel + "</span>" +
+        '<span class="sym" aria-hidden="true">' + k.zeichen + "</span>";
       b.addEventListener("click", function () {
         /* Nur eine Kategorie zur Zeit: erneut klicken schaltet ab. */
         if (aktiveKategorien.has(schluessel)) { aktiveKategorien.clear(); }

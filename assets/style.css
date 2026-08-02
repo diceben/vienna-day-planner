@@ -77,20 +77,6 @@ body {
   outline-offset: 1px;
 }
 
-/* Kategorien scrollen waagrecht, statt umzubrechen. */
-.toolbar .toolbar-kat {
-  flex: 1 1 auto;
-  min-width: 0;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-}
-
-.toolbar-kat .chip { flex: 0 0 auto; }
-
 .toolbar-status {
   flex: 0 0 auto;
   display: flex;
@@ -120,16 +106,12 @@ body {
 
 /* ---------- Routenvorschlag ---------- */
 
+/* Sitzt in .karten-aktionen unten rechts, links neben „Mein Tag“. */
 .route-knopf {
-  position: absolute;
-  top: 12px;
-  right: 172px;
-  /* über den Leaflet-Bedienelementen, die bei 1000 liegen */
-  z-index: 1100;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 9px 15px;
   border: 1px solid var(--linie);
   border-radius: 999px;
   background: rgba(255, 253, 249, 0.92);
@@ -145,13 +127,14 @@ body {
 .route-knopf:hover { border-color: var(--tinte-leise); }
 .route-knopf.offen { border-color: var(--tinte); }
 
+/* Öffnet vom Knopf am unteren Rand nach oben. */
 .route-popup {
   position: absolute;
-  top: 12px;
+  bottom: 72px;
   right: 12px;
   z-index: 1120;
   width: min(360px, calc(100% - 24px));
-  max-height: calc(100% - 24px);
+  max-height: calc(100% - 96px);
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(29,26,22,0.12);
@@ -270,23 +253,81 @@ body {
 
 .route-fehler { color: var(--tinte); }
 
-/* Titel als Overlay in der oberen Kartenecke. */
-.titel-overlay {
+/* ---------- Kategorienleiste über der Karte ----------
+   Rechtsbündig, damit ein aufklappender Chip seine Nachbarn nach links
+   schiebt statt nach rechts aus dem Bild. */
+.kat-leiste {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 500;
-  padding: 4px 12px;
+  /* über den Leaflet-Bedienelementen, die bei 1000 liegen */
+  z-index: 1100;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+}
+
+.kat-chip {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--linie);
   border-radius: 999px;
-  background: rgba(255, 253, 249, 0.86);
+  background: rgba(255, 253, 249, 0.94);
   backdrop-filter: blur(3px);
-  font-family: var(--serif);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  box-shadow: 0 1px 5px rgba(0,0,0,.14);
+  font: inherit;
+  font-size: 13.5px;
   color: var(--tinte);
-  box-shadow: 0 1px 4px rgba(0,0,0,.12);
-  pointer-events: none;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s;
+}
+
+.kat-chip .sym {
+  flex: 0 0 auto;
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* Eingeklappt: Breite null. Beim Überfahren, bei Tastaturfokus und solange
+   der Filter läuft, rollt der Name nach links auf. */
+.kat-chip .name {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width .22s ease, opacity .16s ease, margin-right .22s ease;
+}
+
+.kat-chip:hover .name,
+.kat-chip:focus-visible .name,
+.kat-chip[aria-pressed="true"] .name {
+  max-width: 14rem;
+  opacity: 1;
+  margin-right: 6px;
+}
+
+.kat-chip:hover { border-color: var(--ton, var(--tinte-leise)); }
+
+.kat-chip[aria-pressed="true"] {
+  background: var(--ton, var(--tinte));
+  border-color: var(--ton, var(--tinte));
+  color: var(--weiss);
+}
+
+/* ---------- Aktionen am unteren Kartenrand ---------- */
+.karten-aktionen {
+  position: absolute;
+  right: 16px;
+  bottom: 22px;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ---------- Filter ---------- */
@@ -691,11 +732,8 @@ body {
 
 /* ---------- Tagesplan: schwebender Knopf und Overlay ---------- */
 
+/* Sitzt in .karten-aktionen unten rechts. */
 .plan-fab {
-  position: absolute;
-  right: 16px;
-  bottom: 22px;
-  z-index: 600;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -936,6 +974,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .standort-punkt::after { animation: none; }
+  /* Der Name springt dann auf, statt aufzurollen. */
+  .kat-chip .name { transition: none; }
 }
 
 /* ---------- Karte: Marker und Popup ---------- */
@@ -1281,14 +1321,10 @@ body.setzt-position #karte { cursor: crosshair; }
 @media (max-width: 900px) {
   .toolbar { flex-wrap: wrap; padding: 9px 14px; gap: 9px; }
   .toolbar-suche { flex: 1 1 140px; width: auto; }
-  .toolbar .toolbar-kat {
-    order: 3;
-    width: 100%;
-    flex-basis: 100%;
-    flex-wrap: wrap;
-    overflow-x: visible;
-    mask-image: none;
-  }
+  /* Neun Symbole zu je 30 px passen damit auch auf ein 360-px-Display. */
+  .kat-leiste { top: 10px; right: 10px; gap: 4px; }
+  .kat-chip { height: 30px; padding: 0 9px; }
+  .kat-chip .sym { font-size: 14px; }
   .merkmale { padding: 0 14px 10px; }
   .einstellungen { right: 12px; }
   .buehne {
@@ -1305,13 +1341,13 @@ body.setzt-position #karte { cursor: crosshair; }
   body { height: auto; min-height: 100%; }
   .buehne { min-height: 0; }
 
-  /* Knopf und Overlay bleiben in der Kartenecke, nur etwas näher am Rand. */
-  .plan-fab { right: 12px; bottom: 16px; }
+  /* Knöpfe und Overlay bleiben in der Kartenecke, nur etwas näher am Rand. */
+  .karten-aktionen { right: 12px; bottom: 16px; gap: 6px; }
+  .route-knopf { padding: 8px 12px; }
   .plan-overlay { right: 12px; bottom: 16px; max-height: calc(100% - 32px); }
 
   /* Der Kartenbereich ist hier zu niedrig für das Routen-Popup — es löst
      sich deshalb vom Kartenausschnitt und nutzt die ganze Fensterhöhe. */
-  .route-knopf { right: auto; left: 12px; top: 10px; }
   .route-popup {
     position: fixed;
     top: 50%;
