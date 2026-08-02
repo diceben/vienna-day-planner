@@ -151,17 +151,19 @@ Das Suchfeld greift auf Name, Adresse und Beschreibung zu.
 
 ## Zwei Zustände
 
-Am großen Schirm hat die Seite zwei Zustände, so wie man es von Kartendiensten kennt.
+Die Seite hat zwei Zustände, so wie man es von Kartendiensten kennt — an beiden Breiten, nur mit unterschiedlicher Bewegung.
 
 **Ohne Filter** füllt die Karte das Fenster. Oben links schwebt die Suchpille aus Lupe und Eingabefeld, rechts daneben die Kategorien, ganz rechts das Zahnrad. Sonst nichts. Man sieht die Orte, nicht die Maschinerie.
 
-**Sobald etwas filtert**, fährt links die Ergebnisspalte heraus, 410 Pixel breit. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte bleibt die Kategorienreihe, wie sie ist — die gewählte in ihrer Farbe gefüllt. Ein Klick auf eine andere wechselt direkt hinüber.
+**Sobald etwas filtert**, fährt am großen Schirm links die Ergebnisspalte heraus, 410 Pixel breit. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte bleibt die Kategorienreihe, wie sie ist — die gewählte in ihrer Farbe gefüllt. Ein Klick auf eine andere wechselt direkt hinüber.
 
 Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAktiv()`: eine gewählte Kategorie, ein Suchbegriff oder ein Schalter aus dem Zahnrad. Auch der Bearbeiten-Modus hält die Spalte offen — sein Panel steht darin und wäre sonst nicht zu erreichen. Das ✕ in der Suchpille räumt alles weg und führt zurück in den ersten Zustand; es ist der einzige Weg dorthin und trägt deshalb volle Tintenfarbe und eine Trennlinie, statt sich als graues Zeichen zu verstecken.
 
 Der Titel steht nur noch im Browsertab. Auf der Seite selbst wäre oben links kein Platz mehr für ihn, und Kartendienste haben dort auch keinen.
 
-Leaflets Zoom- und Standortknöpfe sitzen deshalb **unten links**: Oben liegt in beiden Zuständen die Chipreihe, und unten rechts stehen „Route vorschlagen“ und „Mein Tag“.
+**Am Handy** dasselbe Prinzip, andere Richtung: Ohne Filter füllt die Karte den Schirm, die Liste ist nicht da und es gibt nichts zu scrollen. Filtert etwas, schrumpft die Karte auf 58 Prozent der Fensterhöhe und die Liste schaut von unten herein — das Schrumpfen ist zugleich die sichtbare Antwort auf den Tipp. Der Seitenfuß mit dem Bearbeiten-Knopf bleibt in beiden Zuständen stehen; die Karte nimmt deshalb nicht 100vh, sondern den Rest der Bühne.
+
+Leaflets Zoom- und Standortknöpfe sitzen **unten links**: Oben liegt in beiden Zuständen die Chipreihe, und unten rechts stehen „Route vorschlagen“ und „Mein Tag“.
 
 ## Auf dem Handy
 
@@ -171,10 +173,8 @@ Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was ma
 - Darunter die **Kategorien als beschriftete Chips** in einer waagrecht scrollbaren Reihe, Symbol vorn, Name dahinter. Der Scrollbalken ist ausgeblendet, gescrollt wird trotzdem. Erster Chip ist die Trefferzahl.
 - **Leaflets Zoomknöpfe sind ausgeblendet** — auf dem Handy wird mit zwei Fingern gezoomt, und die Knöpfe wären nur im Weg. Der Standortknopf (◉) bleibt und steht wie am großen Schirm unten links.
 - Suchleiste und Chips **bleiben beim Scrollen stehen**. Sobald die Ortsliste unter ihnen hochwandert, legt sich ein papierfarbener Streifen dahinter, der nach unten weich ausläuft — sonst läse man zwischen den Pillen hindurch Textfetzen. Über der Karte, also ganz oben, bleibt alles durchsichtig.
-- **Ein Pin öffnet ein Ortsblatt**, das von unten hereinfährt: Bild, Name, Adresse, Beschreibung, dazu Website, Route und „+ Zum Tag". Solange es offen ist, **tritt die Liste ganz ab**: Die Karte füllt den Schirm, das Blatt liegt im unteren Drittel, und die Seite lässt sich nicht scrollen — es gibt nichts mehr, wohin. Die Karte rückt den Pin über die Blattoberkante. Erst das ✕ schließt das Blatt und holt die Liste zurück. Vorher sprang die Seite hinunter zum Listeneintrag, und die Karte war weg — damit verlor man genau den Zusammenhang, den man gesucht hatte. Auf dem Handy wird deshalb auch kein Leaflet-Popup mehr gebunden; das Blatt tritt an seine Stelle.
+- **Ein Pin öffnet ein Ortsblatt**, das von unten hereinfährt: Bild, Name, Adresse, Beschreibung, dazu Website, Route und „+ Zum Tag". Solange es offen ist, **tritt die Liste ganz ab**: Die Karte füllt den Schirm, das Blatt liegt im unteren Drittel, und die Seite lässt sich nicht scrollen — es gibt nichts mehr, wohin. Die Karte rückt den Pin über die Blattoberkante. Das ✕ schließt das Blatt und stellt den Stand davor wieder her — mit Filter also samt Liste, ohne Filter die nackte Karte. Vorher sprang die Seite hinunter zum Listeneintrag, und die Karte war weg — damit verlor man genau den Zusammenhang, den man gesucht hatte. Auf dem Handy wird deshalb auch kein Leaflet-Popup mehr gebunden; das Blatt tritt an seine Stelle.
 - Ein Tipp auf einen **Listeneintrag** bleibt dagegen in der Liste: Der Eintrag klappt auf, die Seite springt nicht, kein Blatt. Liste zum Stöbern, Karte zum Verorten.
-
-Der Unterschied zum großen Schirm: Hier gibt es die zwei Zustände nicht. Karte oben, Liste darunter, beide immer da — zum Ausweichen wäre kein Platz, und die Liste ist am Handy der Hauptweg durch die Orte.
 
 Früher stand hier ein Absatz darüber, dass es am Handy keine Merkmal-Vorschau beim Überfahren gibt: Ein Touchgerät schickt vor dem Klick ein erfundenes `mouseenter`, und wenn das den Inhalt verändert, verschluckt Safari den darauffolgenden Klick — man musste zweimal tippen. Die Vorschau gibt es nicht mehr, und die Merkmalchips selbst auch nicht. Beim Überfahren ändert sich nichts mehr, also kann der Fehler auch nicht wiederkommen.
 

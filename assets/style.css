@@ -1543,19 +1543,35 @@ body.setzt-position #karte { cursor: crosshair; }
      Der Standortknopf steht ohnehin schon unten links. */
   .leaflet-control-zoom { display: none; }
 
-  /* ----- Karte oben, Liste darunter — beide immer da ----- */
-  /* Die zwei Zustände des großen Schirms gibt es hier nicht: Zum Ausweichen
-     wäre kein Platz, und die Liste ist am Handy der Hauptweg durch die Orte. */
+  /* ----- Auch hier zwei Zustände ----- */
+  /* Ohne Filter füllt die Karte den Schirm, ganz ohne Liste — dasselbe Bild
+     wie am großen Schirm, nur dass die Liste nicht seitlich hereinfährt,
+     sondern unter der Karte auftaucht. Nicht 100vh, sondern der Rest der
+     Bühne: So bleibt der Seitenfuß mit dem Bearbeiten-Knopf stehen, und die
+     Seite braucht trotzdem keinen Scrollbalken. */
+  /* Die Spaltenregel muss beide Selektoren nennen: Am großen Schirm steht
+     `body.liste-offen .buehne` mit der 410-Pixel-Spalte, und die ist
+     spezifischer als ein schlichtes `.buehne`. Sonst legt sich die
+     Ergebnisspalte auch hier quer, die Seite wird 410 statt 390 Pixel breit
+     und der Browser zoomt heraus. */
   .buehne,
   body.liste-offen .buehne {
     grid-template-columns: 1fr;
-    grid-template-rows: 58vh auto;
     min-height: 0;
     transition: none;
   }
+  .buehne { grid-template-rows: 1fr; }
+  body:not(.liste-offen) .liste-spalte { display: none; }
+  body:not(.liste-offen) { overflow: hidden; }
+
+  /* Mit Filter: Karte oben, Liste darunter, die Seite scrollt. Dass die Karte
+     dabei von schirmfüllend auf 58vh schrumpft, ist die sichtbare Antwort auf
+     den Tipp — die Liste schaut von unten herein. */
+  body.liste-offen .buehne { grid-template-rows: 58vh auto; }
+  body.liste-offen { height: auto; min-height: 100%; }
+
   .karten-spalte { grid-row: 1; }
-  .liste-spalte,
-  body.liste-offen .liste-spalte {
+  .liste-spalte {
     grid-row: 2;
     display: block;
     overflow: visible;
@@ -1565,7 +1581,6 @@ body.setzt-position #karte { cursor: crosshair; }
   .liste { overflow: visible; }
   /* Die Trefferzahl steht hier als erster Chip in der Kategorienreihe. */
   .listen-kopf { display: none; }
-  body { height: auto; min-height: 100%; }
 
   /* ----- Ortsblatt: fährt beim Antippen eines Pins von unten herein -----
      Solange es offen ist, weicht die Ortsliste ganz — die Karte füllt den
