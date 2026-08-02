@@ -23,8 +23,9 @@
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  --kopfhoehe: 92px;
-  --filterhoehe: 116px;
+  /* Breite der Ergebnisspalte. Die Suchpille darüber ist 386 px breit und
+     sitzt 12 px vom Rand — daran hängt auch der Anfang der Chipreihe. */
+  --spalte: 410px;
 }
 
 * { box-sizing: border-box; }
@@ -44,122 +45,97 @@ body {
   flex-direction: column;
 }
 
-/* ---------- Toolbar ---------- */
-
-/* Transparent und ohne Unterkante: Die Leiste ist kein eigener Balken mehr,
-   sondern Titel links und schwebende Bedienelemente rechts. Was dazwischen
-   liegt, bleibt bewusst frei. */
+/* ---------- Suchpille ----------
+   Steht in beiden Zuständen an derselben Stelle: ohne Auswahl schwebt sie
+   über der Karte, mit Auswahl im Kopf der Ergebnisspalte, deren weiße Fläche
+   dann bis an den Fensterrand hinaufreicht. Deshalb fest am Fenster und nicht
+   im Fluss — sonst müsste sie beim Umschalten springen. */
 .topbar {
-  position: relative;
-  flex: 0 0 auto;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 386px;
+  z-index: 1200;
   background: transparent;
+  /* Die Leiste selbst fängt keine Klicks ab, nur ihre Kinder. */
+  pointer-events: none;
 }
 
-.toolbar {
+.toolbar { display: flex; }
+
+/* Lupe, Eingabefeld, ✕ und Zahnrad sitzen in einer gemeinsamen Pille — wie
+   das Profilbild in der Suchleiste von Kartendiensten. */
+.kopf-rechts {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  /* Rechts 12 px, damit das Zahnrad exakt auf der Kante der Symbolleiste
-     über der Karte sitzt (.kat-zone steht ebenfalls auf right: 12px). */
-  padding: 9px 12px 9px 20px;
+  gap: 6px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 6px 0 14px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.97);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(0,0,0,.16);
+  pointer-events: auto;
 }
 
-.marke {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--tinte);
-  white-space: nowrap;
+/* Der Fokusring gehört auf die Pille, sonst liegen zwei Rahmen übereinander. */
+.kopf-rechts:focus-within {
+  outline: 2px solid var(--tinte);
+  outline-offset: 1px;
 }
 
-.kopf-rechts {
+.suchfeld {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
 
-/* Pille aus Lupe und Eingabefeld — dieselbe schwebende Behandlung wie
-   .route-knopf und .kat-chip. */
-.suchfeld {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 13px;
-  height: 32px;
-  border: 1px solid var(--linie);
-  border-radius: 999px;
-  background: rgba(255, 253, 249, 0.94);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  box-shadow: 0 1px 5px rgba(0,0,0,.14);
-}
-
-/* Der Fokusring gehört auf die Pille, sonst liegen zwei Rahmen übereinander. */
-.suchfeld:focus-within {
-  outline: 2px solid var(--tinte);
-  outline-offset: 1px;
-}
-
 .such-lupe {
   flex: 0 0 auto;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1;
   opacity: 0.75;
 }
 
-/* Sitzt randlos in .suchfeld; Rahmen, Hintergrund und Fokusring trägt die Pille. */
+/* Randlos in der Pille; Rahmen, Hintergrund und Fokusring trägt die Pille. */
 .toolbar-suche {
   flex: 1 1 auto;
-  width: 176px;
   min-width: 0;
   padding: 0;
   border: none;
   background: none;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 15px;
   color: inherit;
 }
 
 .toolbar-suche:focus { outline: none; }
 
-.toolbar-status {
+/* Der einzige Weg zurück zur reinen Karte. Nur da, solange etwas filtert. */
+.such-x {
   flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--tinte-leise);
-  white-space: nowrap;
-}
-
-.icon-knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
-  border: 1px solid var(--linie);
+  border: none;
   border-radius: 999px;
-  background: var(--weiss);
-  font-size: 16px;
+  background: none;
+  font-size: 14px;
   line-height: 1;
-  color: var(--tinte);
+  color: var(--tinte-leise);
   cursor: pointer;
 }
 
-.icon-knopf:hover { border-color: var(--tinte-leise); }
-
-/* Auf der transparenten Kopfzeile brauchen die runden Knöpfe denselben
-   Schatten wie die übrigen schwebenden Bedienelemente, sonst wirken sie
-   flach aufgeklebt. */
-.topbar .icon-knopf,
-.topbar .gear {
-  box-shadow: 0 1px 5px rgba(0,0,0,.14);
-}
+.such-x:hover { background: var(--papier-tief); color: var(--tinte); }
+.such-x[hidden] { display: none; }
 
 /* ---------- Routenvorschlag ---------- */
 
@@ -310,51 +286,103 @@ body {
 
 .route-fehler { color: var(--tinte); }
 
-/* ---------- Kategorienleiste über der Karte ----------
-   Rechtsbündig, damit ein aufklappender Chip seine Nachbarn nach links
-   schiebt statt nach rechts aus dem Bild. */
-/* Spannt die volle Kartenbreite auf, obwohl die Leiste rechts sitzt: Die
-   Merkmalkarte hängt absolut an dieser Zone, und ihr bliebe sonst links vom
-   Anker kaum Platz — sie würde zu einer schmalen Spalte zusammenfallen. */
+/* ---------- Chipreihen über der Karte ----------
+   Beginnen rechts neben der Suchpille (12 + 386 + 12) und laufen bis zum
+   rechten Rand. Fest am Fenster, damit die Reihe an derselben Stelle steht,
+   ob die Ergebnisspalte nun offen ist oder nicht. */
 .kat-zone {
-  position: absolute;
+  position: fixed;
   top: 12px;
-  left: 12px;
+  left: var(--spalte);
   right: 12px;
   /* über den Leaflet-Bedienelementen, die bei 1000 liegen */
   z-index: 1100;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: stretch;
+  gap: 8px;
   /* Die Zone selbst fängt keine Klicks ab, nur ihre Kinder. */
   pointer-events: none;
 }
 
-.kat-leiste {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 6px;
+/* Trägt die beiden Blätterpfeile, die über den Enden der Reihe liegen. */
+.kat-scroller {
+  position: relative;
+  min-width: 0;
   pointer-events: auto;
 }
 
-/* Am großen Schirm steht die Trefferzahl in der Kopfzeile — der Chip in der
-   Symbolleiste ist nur die Handyfassung. */
-.zaehler-chip { display: none; }
+.kat-scroller[hidden] { display: none; }
 
+.kat-leiste,
+.merkmale {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Scrollbalken ausblenden, gescrollt wird trotzdem. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kat-leiste::-webkit-scrollbar,
+.merkmale::-webkit-scrollbar { display: none; }
+
+/* Am Handy wischt man, am großen Schirm gibt es dafür keine Geste. Die Pfeile
+   zeigen sich nur, solange in ihre Richtung noch etwas zu sehen ist. */
+.kat-blaettern {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--linie);
+  border-radius: 999px;
+  background: var(--weiss);
+  box-shadow: 0 1px 6px rgba(0,0,0,.18);
+  font-size: 16px;
+  line-height: 1;
+  color: var(--tinte);
+  cursor: pointer;
+}
+
+.kat-blaettern:hover { border-color: var(--tinte-leise); }
+.kat-blaettern.links { left: -6px; }
+.kat-blaettern.rechts { right: -6px; }
+.kat-blaettern[hidden] { display: none; }
+
+/* Ist eine Kategorie gewählt, treten die Merkmale an ihre Stelle — dieselbe
+   Zeile, derselbe Anfang. Zurück geht es über das ✕ in der Suchpille.
+   Die ganze Hülle weicht, nicht nur die Reihe darin: Sonst bliebe der
+   Zeilenabstand der Zone als Lücke stehen und die Merkmale rutschten 8 px
+   nach unten. */
+body.kategorie-offen #kategorie-scroller { display: none; }
+
+/* Symbol vorn, Name dahinter — die HTML-Reihenfolge ist umgekehrt, damit ein
+   Screenreader zuerst den Namen liest und nicht das Emoji. */
 .kat-chip {
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
-  height: 34px;
-  padding: 0 11px;
+  flex-direction: row-reverse;
+  height: 38px;
+  padding: 0 14px;
   border: 1px solid var(--linie);
   border-radius: 999px;
   background: rgba(255, 253, 249, 0.94);
   backdrop-filter: blur(3px);
   box-shadow: 0 1px 5px rgba(0,0,0,.14);
   font: inherit;
-  font-size: 13.5px;
+  font-size: 14px;
+  white-space: nowrap;
   color: var(--tinte);
   cursor: pointer;
   transition: background .16s, border-color .16s, color .16s;
@@ -362,36 +390,13 @@ body {
 
 .kat-chip .sym {
   flex: 0 0 auto;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1;
 }
 
-/* Eingeklappt: Breite null. Beim Überfahren, bei Tastaturfokus und solange
-   der Filter läuft, rollt der Name nach links auf. */
-.kat-chip .name {
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: max-width .22s ease, opacity .16s ease, margin-right .22s ease;
-}
+.kat-chip .name { margin-left: 8px; }
 
-.kat-chip:focus-visible .name,
-.kat-chip[aria-pressed="true"] .name {
-  max-width: 14rem;
-  opacity: 1;
-  margin-right: 6px;
-}
-
-/* Nur für echte Zeiger. Auf einem Touchscreen bliebe der Hover-Zustand nach
-   dem Tippen kleben, und das Aufklappen beim ersten Tipper kostet dort den
-   Klick — siehe kannSchweben in app.js. */
 @media (hover: hover) {
-  .kat-chip:hover .name {
-    max-width: 14rem;
-    opacity: 1;
-    margin-right: 6px;
-  }
   .kat-chip:hover { border-color: var(--ton, var(--tinte-leise)); }
 }
 
@@ -400,6 +405,11 @@ body {
   border-color: var(--ton, var(--tinte));
   color: var(--weiss);
 }
+
+/* Am großen Schirm steht die Trefferzahl im Kopf der Ergebnisspalte — der
+   Chip in der Reihe ist nur die Handyfassung. Muss nach .kat-chip stehen:
+   gleiche Spezifität, und der spätere gewinnt. */
+.zaehler-chip { display: none; }
 
 /* ---------- Aktionen am unteren Kartenrand ---------- */
 .karten-aktionen {
@@ -414,45 +424,35 @@ body {
 
 /* ---------- Filter ---------- */
 
-/* Schwebt unter der Kategorienleiste, rechtsbündig unter dem aufgeklappten
-   Symbol. Den Abstand zum rechten Rand setzt zeigeMerkmale() in app.js. */
-/* Untereinander am rechten Rand, direkt unter der Symbolleiste. Ohne Karte
-   darunter — jeder Chip trägt seinen eigenen Hintergrund und hebt sich über
-   einen Schatten von den Kartenkacheln ab. */
-.merkmale {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  pointer-events: auto;
-}
-
+/* Am großen Schirm treten die Merkmale an die Stelle der Kategorienreihe,
+   sobald eine Kategorie gewählt ist — dieselbe Zeile, derselbe Anfang. Ohne
+   Kasten darum: Jeder Chip trägt seinen eigenen Hintergrund und hebt sich
+   über einen Schatten von den Kartenkacheln ab. */
 .merkmale .merkmal-kat {
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 6px;
 }
 
+/* Dieselbe Höhe wie die Kategorien-Chips — die beiden Reihen stehen an
+   derselben Stelle und müssen deshalb gleich hoch sein, sonst springt die
+   Zeile beim Umschalten. */
 .merkmale .chip.merkmal {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 14px;
+  white-space: nowrap;
   box-shadow: 0 1px 5px rgba(0,0,0,.16);
-}
-
-/* Nur angesehen, noch nicht ausgewählt. */
-.merkmale.vorschau .chip.merkmal {
-  border-style: dashed;
 }
 
 .filtergruppe {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-}
-
-.filtergruppe.merkmale {
-  gap: 7px 14px;
-  align-items: center;
 }
 
 .filtergruppe.merkmale[hidden] { display: none; }
@@ -475,23 +475,25 @@ body {
 .chip.merkmal { font-size: 13px; padding: 5px 12px; }
 
 /* Zahnrad und Popover für die universellen Schalter */
+/* Sitzt am rechten Ende der Suchpille und trägt deshalb keine eigene Hülle. */
 .gear {
   position: relative;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 5px 9px;
-  border: 1px solid var(--linie);
+  padding: 6px;
+  border: none;
   border-radius: 999px;
-  background: var(--weiss);
-  font-size: 15px;
+  background: none;
+  font-size: 17px;
   line-height: 1;
   color: var(--tinte);
   cursor: pointer;
 }
 
-.gear:hover { border-color: var(--tinte-leise); }
-.gear[aria-expanded="true"] { border-color: var(--tinte); }
+.gear:hover { background: var(--papier-tief); }
+.gear[aria-expanded="true"] { background: var(--papier-tief); }
 
 .gear-zahl {
   min-width: 16px;
@@ -510,10 +512,11 @@ body {
 
 .einstellungen {
   position: absolute;
-  top: 46px;
-  /* Bündig mit dem Zahnrad darüber. */
-  right: 12px;
+  /* Hängt linksbündig unter der Suchpille, in der das Zahnrad sitzt. */
+  top: 56px;
+  left: 0;
   z-index: 1300;
+  pointer-events: auto;
   width: min(320px, calc(100vw - 40px));
   padding: 14px 16px;
   border: 1px solid var(--linie);
@@ -601,19 +604,44 @@ body {
 
 .textknopf:hover { color: var(--tinte); }
 
-/* ---------- Bühne ---------- */
+/* ---------- Bühne ----------
+   Zwei Zustände: Ohne Filter füllt die Karte das Fenster, die Ergebnisspalte
+   ist auf null gefahren. Filtert etwas, fährt sie auf 410 px heraus. Die
+   Suchpille steht fest darüber und macht die Bewegung nicht mit. */
 
 .buehne {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: 410px 1fr;
+  grid-template-columns: 0 1fr;
   min-height: 0;
+  transition: grid-template-columns .22s ease;
 }
 
+body.liste-offen .buehne { grid-template-columns: var(--spalte) 1fr; }
+
 .liste-spalte {
-  overflow-y: auto;
-  border-right: 1px solid var(--linie);
+  display: flex;
+  flex-direction: column;
+  /* Bei Breite null darf nichts hinausragen. */
+  overflow: hidden;
   background: var(--weiss);
+}
+
+body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
+
+/* Macht der Suchpille Platz, die darüber schwebt, und trägt die Trefferzahl —
+   die Zeile „Ergebnisse“ aus dem Vorbild. */
+.listen-kopf {
+  flex: 0 0 auto;
+  padding: 68px 20px 8px;
+  font-size: 13px;
+  color: var(--tinte-leise);
+  white-space: nowrap;
+}
+
+.liste {
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 .karten-spalte { min-height: 0; position: relative; }
@@ -1088,10 +1116,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .standort-punkt::after { animation: none; }
-  /* Der Name springt dann auf, statt aufzurollen. */
-  .kat-chip .name { transition: none; }
   .kat-zone::before { transition: none; }
   .ort-blatt { transition: none; }
+  /* Die Ergebnisspalte steht dann sofort da, statt hereinzufahren. */
+  .buehne { transition: none; }
 }
 
 /* ---------- Karte: Marker und Popup ---------- */
@@ -1435,74 +1463,29 @@ body.setzt-position #karte { cursor: crosshair; }
 /* ---------- Schmale Fenster ---------- */
 
 @media (max-width: 900px) {
-  /* ----- Kopfzeile schwebt über der Karte, wie bei Kartendiensten üblich ----- */
-  /* Fest am oberen Rand: Suche und Kategorien bleiben beim Scrollen stehen,
-     auch wenn die Ortsliste unter der Karte hochwandert. */
+  /* ----- Die Suchpille spannt über die volle Breite ----- */
+  /* Am Handy gibt es keine Ergebnisspalte, an der sie sich ausrichten könnte —
+     sie schwebt über der ganzen Fensterbreite. Alles Übrige an ihr steht
+     schon in der Grundfassung. */
   .topbar {
-    position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1200;
-    pointer-events: none;
+    width: auto;
   }
-  .toolbar { padding: 9px 10px; gap: 0; }
-  .marke { display: none; }
-
-  /* Die rechte Gruppe wird selbst zur Pille: Lupe, Eingabefeld und Zahnrad
-     sitzen darin, wie das Profilbild in der Suchleiste von Google Maps. */
-  .kopf-rechts {
-    flex: 1 1 auto;
-    height: 44px;
-    padding: 0 6px 0 14px;
-    gap: 8px;
-    border: 1px solid var(--linie);
-    border-radius: 999px;
-    background: rgba(255, 253, 249, 0.97);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 2px 10px rgba(0,0,0,.16);
-    pointer-events: auto;
-  }
-  .kopf-rechts:focus-within {
-    outline: 2px solid var(--tinte);
-    outline-offset: 1px;
-  }
-  /* Die inneren Elemente verlieren ihre eigene Hülle — die trägt jetzt die
-     umgebende Pille. */
-  .suchfeld {
-    flex: 1 1 auto;
-    min-width: 0;
-    height: auto;
-    padding: 0;
-    border: none;
-    background: none;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-  .suchfeld:focus-within { outline: none; }
-  .such-lupe { font-size: 15px; }
-  .toolbar-suche { width: auto; font-size: 15px; }
-  .topbar .gear {
-    border: none;
-    background: none;
-    box-shadow: none;
-    font-size: 17px;
-    padding: 6px;
-  }
-  /* Trefferzahl und Zurücksetzen sitzen hier in der Kategorienreihe. */
-  .toolbar-status { display: none; }
-  .einstellungen { right: 10px; top: 60px; }
+  .toolbar { padding: 9px 10px; }
+  .einstellungen { left: 10px; top: 60px; }
 
   /* ----- Kategorien: waagrecht scrollbare Reihe mit Namen ----- */
   .kat-zone {
-    position: fixed;
     top: 68px;
     left: 0;
     right: 0;
     z-index: 1150;
-    align-items: stretch;
+    gap: 6px;
   }
+  /* Gewischt wird mit dem Finger; Pfeile wären hier nur im Weg. */
+  .kat-blaettern { display: none; }
 
   /* Über der Karte bleibt der Kopfbereich durchsichtig. Erst wenn die
      Ortsliste darunter hochwandert, legt sich ein papierfarbener Streifen
@@ -1531,34 +1514,16 @@ body.setzt-position #karte { cursor: crosshair; }
   }
 
   body.gescrollt .kat-zone::before { opacity: 1; }
-  .kat-leiste {
-    justify-content: flex-start;
-    gap: 6px;
-    padding: 2px 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    /* Scrollbalken ausblenden, gescrollt wird trotzdem. */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .kat-leiste::-webkit-scrollbar { display: none; }
 
-  /* Hier tragen die Chips ihren Namen dauerhaft — die Reihe scrollt ja.
-     Und das Symbol steht vorn: Es klappt nichts mehr auf, also gibt es keinen
-     Grund für die umgekehrte Reihenfolge des großen Schirms. */
+  /* Am Fensterrand statt an der Spaltenkante. */
+  .kat-leiste,
+  .merkmale { padding: 2px 10px; }
+
+  /* Fingerbreite Chips. */
   .kat-chip {
     height: 40px;
     padding: 0 15px;
     font-size: 14.5px;
-    flex-direction: row-reverse;
-  }
-  .kat-chip .name {
-    max-width: none;
-    opacity: 1;
-    margin-right: 0;
-    margin-left: 8px;
-    transition: none;
   }
   .kat-chip .sym { font-size: 17px; }
 
@@ -1571,52 +1536,44 @@ body.setzt-position #karte { cursor: crosshair; }
     white-space: nowrap;
   }
 
-  /* ----- Merkmale: zweite scrollbare Reihe darunter ----- */
-  .merkmale {
-    position: static;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 6px;
-    margin-top: 6px;
-    padding: 2px 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .merkmale::-webkit-scrollbar { display: none; }
-  .merkmale .merkmal-kat {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 6px;
-  }
+  /* Beide Reihen stehen hier untereinander: Die Merkmale kommen zu den
+     Kategorien dazu, statt sie zu ersetzen. Der Platz dafür ist da, und
+     ein ✕ am Handy zu treffen, um die Kategorie zu wechseln, wäre mühsam. */
+  body.kategorie-offen #kategorie-scroller { display: block; }
+
   .merkmale .chip.merkmal {
-    white-space: nowrap;
     font-size: 14px;
     padding: 8px 14px;
   }
 
   /* ----- Leaflets Bedienelemente aus dem Weg ----- */
-  /* Auf dem Handy wird gezoomt, nicht geklickt — die Knöpfe stünden nur
-     unter der Suchleiste im Weg. Der Standortknopf rutscht nach unten links. */
+  /* Auf dem Handy wird mit zwei Fingern gezoomt; die Knöpfe wären nur im Weg.
+     Der Standortknopf steht ohnehin schon unten links. */
   .leaflet-control-zoom { display: none; }
-  .leaflet-top.leaflet-left { top: auto; bottom: 16px; }
-  .buehne {
+
+  /* ----- Karte oben, Liste darunter — beide immer da ----- */
+  /* Die zwei Zustände des großen Schirms gibt es hier nicht: Zum Ausweichen
+     wäre kein Platz, und die Liste ist am Handy der Hauptweg durch die Orte. */
+  .buehne,
+  body.liste-offen .buehne {
     grid-template-columns: 1fr;
     grid-template-rows: 58vh auto;
+    min-height: 0;
+    transition: none;
   }
   .karten-spalte { grid-row: 1; }
-  .liste-spalte {
+  .liste-spalte,
+  body.liste-offen .liste-spalte {
     grid-row: 2;
+    display: block;
     overflow: visible;
     border-right: none;
     border-top: 1px solid var(--linie);
   }
+  .liste { overflow: visible; }
+  /* Die Trefferzahl steht hier als erster Chip in der Kategorienreihe. */
+  .listen-kopf { display: none; }
   body { height: auto; min-height: 100%; }
-  .buehne { min-height: 0; }
 
   /* ----- Ortsblatt: fährt beim Antippen eines Pins von unten herein -----
      Solange es offen ist, weicht die Ortsliste ganz — die Karte füllt den

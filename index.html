@@ -13,16 +13,12 @@
 
 <div class="topbar" role="search">
   <div class="toolbar">
-    <p class="marke">vienna day planner</p>
     <div class="kopf-rechts">
-      <div class="toolbar-status">
-        <span id="trefferzahl" class="trefferzahl"></span>
-        <button type="button" id="zuruecksetzen" class="icon-knopf" title="Filter zurücksetzen" aria-label="Filter zurücksetzen">⟲</button>
-      </div>
       <div class="suchfeld">
         <span class="such-lupe" aria-hidden="true">🔍</span>
         <input type="search" id="suche" class="toolbar-suche" placeholder="Suchen…" aria-label="Orte durchsuchen" autocomplete="off">
       </div>
+      <button type="button" id="zuruecksetzen" class="such-x" title="Auswahl aufheben" aria-label="Auswahl aufheben" hidden>✕</button>
       <button type="button" id="einstellungen-knopf" class="gear" aria-expanded="false" aria-haspopup="true" aria-label="Weitere Filter">
         <span aria-hidden="true">⚙</span><span id="gear-zahl" class="gear-zahl" hidden></span>
       </button>
@@ -39,14 +35,25 @@
 
 <main class="buehne">
   <section class="liste-spalte" aria-label="Ortsliste">
+    <div class="listen-kopf">
+      <span id="trefferzahl" class="trefferzahl"></span>
+    </div>
     <div id="bearbeiten-panel" class="bearbeiten-panel" hidden></div>
     <ul id="liste" class="liste"></ul>
     <p id="leer" class="leer" hidden>Keine Orte passen zu dieser Auswahl. Nimm einen Filter weg.</p>
   </section>
   <section class="karten-spalte">
     <div class="kat-zone" id="kat-zone">
-      <div class="kat-leiste" id="kategorien" role="group" aria-label="Kategorien"></div>
-      <div class="filtergruppe merkmale" id="merkmale" role="group" aria-label="Merkmale" hidden></div>
+      <div class="kat-scroller" id="kategorie-scroller">
+        <div class="kat-leiste" id="kategorien" role="group" aria-label="Kategorien"></div>
+        <button type="button" class="kat-blaettern links" aria-label="Weiter nach links" hidden>‹</button>
+        <button type="button" class="kat-blaettern rechts" aria-label="Weiter nach rechts" hidden>›</button>
+      </div>
+      <div class="kat-scroller" id="merkmal-scroller" hidden>
+        <div class="filtergruppe merkmale" id="merkmale" role="group" aria-label="Merkmale"></div>
+        <button type="button" class="kat-blaettern links" aria-label="Weiter nach links" hidden>‹</button>
+        <button type="button" class="kat-blaettern rechts" aria-label="Weiter nach rechts" hidden>›</button>
+      </div>
     </div>
 
     <div class="route-popup" id="route-popup" role="dialog" aria-label="Route vorschlagen" hidden>

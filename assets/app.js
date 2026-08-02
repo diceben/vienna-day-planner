@@ -600,7 +600,7 @@
   }
 
   var StandortSteuerung = L.Control.extend({
-    options: { position: "topleft" },
+    options: { position: "bottomleft" },
     onAdd: function () {
       var c = L.DomUtil.create("div", "leaflet-bar standort-steuerung");
       var a = L.DomUtil.create("a", "", c);
@@ -843,8 +843,13 @@
      Karte
      ------------------------------------------------------------------ */
 
-  var karte = L.map("karte", { zoomControl: true, scrollWheelZoom: true })
+  /* Zoom unten links statt oben links: Oben liegt in beiden Zuständen die
+     Chipreihe. Rechts unten ist auch belegt — dort stehen „Route vorschlagen“
+     und „Mein Tag“. */
+  var karte = L.map("karte", { zoomControl: false, scrollWheelZoom: true })
     .setView([48.2082, 16.3730], 13);
+
+  L.control.zoom({ position: "bottomleft" }).addTo(karte);
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     maxZoom: 19,
@@ -1033,23 +1038,20 @@
     });
   }
 
-  /* Welche Kategorie gerade nur überfahren wird — null, sobald der Zeiger die
-     Zone verlässt. Dann zeigt die Leiste wieder die gewählte Kategorie. */
-  var vorschauKategorie = null;
-
-  /* Hat das Gerät einen Zeiger, der schweben kann? Auf Touchscreens nicht. */
-  var kannSchweben = window.matchMedia("(hover: hover)").matches;
-
   function zeichneMerkmale() {
     var box = document.getElementById("merkmale");
+    var huelle = document.getElementById("merkmal-scroller");
     box.innerHTML = "";
-    var vorschau = vorschauKategorie && !aktiveKategorien.has(vorschauKategorie);
-    var kats = vorschauKategorie
-      ? (MERKMALE[vorschauKategorie] ? [vorschauKategorie] : [])
-      : Object.keys(MERKMALE).filter(function (k) { return aktiveKategorien.has(k); });
-    box.classList.toggle("vorschau", !!vorschau);
-    if (!kats.length) { box.hidden = true; return; }
+    var kats = Object.keys(MERKMALE).filter(function (k) {
+      return aktiveKategorien.has(k);
+    });
+    if (!kats.length) {
+      box.hidden = true;
+      huelle.hidden = true;
+      return;
+    }
     box.hidden = false;
+    huelle.hidden = false;
     var mehrere = kats.length > 1;
 
     kats.forEach(function (kat) {
@@ -1070,13 +1072,6 @@
           b.setAttribute("aria-pressed", aktiveFacetten.has(chip.key) ? "true" : "false");
           b.textContent = chip.label;
           b.addEventListener("click", function () {
-            /* Aus der Vorschau heraus geklickt: erst die Kategorie
-               einschalten, sonst greift das Merkmal ins Leere. */
-            if (!aktiveKategorien.has(kat)) {
-              aktiveKategorien.clear();
-              aktiveKategorien.add(kat);
-              vorschauKategorie = null;
-            }
             if (aktiveFacetten.has(chip.key)) { aktiveFacetten.delete(chip.key); }
             else { aktiveFacetten.add(chip.key); }
             aktualisiere();
@@ -1088,33 +1083,56 @@
     });
   }
 
-  /* Verlässt der Zeiger die Zone, fällt die Vorschau zurück auf die gewählte
-     Kategorie. Die kurze Verzögerung überbrückt den Spalt zwischen Leiste und
-     Merkmalkarte — ohne sie klappt alles zu, sobald man hinunterfährt. */
-  var vorschauZaehler = null;
-  var vorschauVerdrahtet = false;
+  /* ------------------------------------------------------------------
+     Waagrecht scrollbare Chipreihen
+     ------------------------------------------------------------------
+     Am Handy wischt man, am großen Schirm gibt es dafür keine Geste — dort
+     blättern zwei Pfeile, und sie zeigen sich nur, solange es in ihre
+     Richtung noch etwas zu sehen gibt. */
 
-  function verdrahteVorschau() {
-    if (vorschauVerdrahtet || !kannSchweben) { return; }
-    var zone = document.getElementById("kat-zone");
-    if (!zone) { return; }
-    vorschauVerdrahtet = true;
+  var ruhigerModus = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    function halten() { clearTimeout(vorschauZaehler); }
-    function loslassen() {
-      clearTimeout(vorschauZaehler);
-      vorschauZaehler = setTimeout(function () {
-        if (vorschauKategorie === null) { return; }
-        vorschauKategorie = null;
-        zeichneMerkmale();
-      }, 160);
+  function verdrahteScroller(huelle) {
+    var reihe = huelle.querySelector(".kat-leiste, .merkmale");
+    var links = huelle.querySelector(".kat-blaettern.links");
+    var rechts = huelle.querySelector(".kat-blaettern.rechts");
+    if (!reihe || !links || !rechts) { return; }
+
+    function pruefe() {
+      /* Ein Rest von einem Pixel entsteht durch gebrochene Breiten und wäre
+         sonst ein Pfeil, der ins Leere blättert. */
+      var mehrRechts = reihe.scrollLeft + reihe.clientWidth < reihe.scrollWidth - 1;
+      links.hidden = reihe.scrollLeft <= 0;
+      rechts.hidden = !mehrRechts;
     }
 
-    zone.addEventListener("mouseenter", halten, true);
-    zone.addEventListener("mouseover", halten);
-    zone.addEventListener("mouseleave", loslassen);
-    zone.addEventListener("focusout", function (e) {
-      if (!zone.contains(e.relatedTarget)) { loslassen(); }
+    function blaettere(richtung) {
+      reihe.scrollBy({
+        left: richtung * reihe.clientWidth * 0.8,
+        behavior: ruhigerModus.matches ? "auto" : "smooth"
+      });
+    }
+
+    links.addEventListener("click", function () { blaettere(-1); });
+    rechts.addEventListener("click", function () { blaettere(1); });
+    reihe.addEventListener("scroll", pruefe, { passive: true });
+    window.addEventListener("resize", pruefe);
+
+    /* Der Fokusring wandert über die Tastatur sonst aus dem Bild. */
+    reihe.addEventListener("focusin", function (e) {
+      if (e.target.scrollIntoView) {
+        e.target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+    });
+
+    huelle.pruefeScroller = pruefe;
+    pruefe();
+  }
+
+  /* Nach jedem Neuzeichnen einer Reihe stimmen die Pfeile wieder. */
+  function pruefeScroller() {
+    document.querySelectorAll(".kat-scroller").forEach(function (h) {
+      if (h.pruefeScroller) { h.pruefeScroller(); }
     });
   }
 
@@ -1135,9 +1153,6 @@
       b.className = "kat-chip";
       b.style.setProperty("--ton", k.farbe);
       b.setAttribute("aria-pressed", "false");
-      /* Der Name ist eingeklappt und rollt erst beim Überfahren auf —
-         ohne aria-label wäre der Knopf für Screenreader namenlos. */
-      b.setAttribute("aria-label", k.titel);
       b.title = k.titel;
       b.dataset.kategorie = schluessel;
       b.innerHTML = '<span class="name">' + k.titel + "</span>" +
@@ -1146,29 +1161,11 @@
         /* Nur eine Kategorie zur Zeit: erneut klicken schaltet ab. */
         if (aktiveKategorien.has(schluessel)) { aktiveKategorien.clear(); }
         else { aktiveKategorien.clear(); aktiveKategorien.add(schluessel); }
-        vorschauKategorie = null;
         aktualisiere();
       });
 
-      /* Überfahren und Tastaturfokus zeigen die Merkmale schon vorab — aber
-         nur auf Geräten mit echtem Zeiger. Auf einem Touchscreen schickt der
-         erste Tipper ein erfundenes mouseenter voraus; ändert sich dadurch der
-         Inhalt, verschluckt Safari den darauffolgenden Klick, und man müsste
-         zweimal tippen, um eine Kategorie zu wählen. */
-      if (kannSchweben) {
-        function vorschauAn() {
-          if (vorschauKategorie === schluessel) { return; }
-          vorschauKategorie = schluessel;
-          zeichneMerkmale();
-        }
-        b.addEventListener("mouseenter", vorschauAn);
-        b.addEventListener("focus", vorschauAn);
-      }
-
       behaelter.appendChild(b);
     });
-
-    verdrahteVorschau();
 
     var labelbox = document.getElementById("label-schalter");
     labelbox.innerHTML = "";
@@ -1437,10 +1434,56 @@
     var text = liste.length === orte.length
       ? orte.length + " Orte"
       : liste.length + " von " + orte.length + " Orten";
-    /* Zweimal vorhanden: in der Kopfzeile (Desktop) und als erster Chip in der
-       Kategorienreihe (Handy). Sichtbar ist immer nur eines der beiden. */
+    /* Zweimal vorhanden: im Kopf der Ergebnisspalte (Desktop) und als erster
+       Chip in der Kategorienreihe (Handy). Sichtbar ist immer nur eines. */
     document.querySelectorAll(".trefferzahl").forEach(function (el) {
       el.textContent = text;
+    });
+
+    zeigeZustand();
+    pruefeScroller();
+  }
+
+  /* Filtert gerade irgendetwas? Daran hängt am großen Schirm die ganze
+     Ansicht: ohne Filter nur die Karte, mit Filter die Ergebnisspalte
+     daneben. Der Bearbeiten-Modus zählt mit — sein Panel steht in der
+     Spalte und wäre sonst nicht zu erreichen. */
+  function filterAktiv() {
+    return aktiveKategorien.size > 0 ||
+      aktiveFacetten.size > 0 ||
+      aktiveSchalter.size > 0 ||
+      aktiveLabels.size > 0 ||
+      suchtext.trim() !== "";
+  }
+
+  function zeigeZustand() {
+    var offen = filterAktiv() || document.body.classList.contains("bearbeiten");
+    var warOffen = document.body.classList.contains("liste-offen");
+    document.body.classList.toggle("liste-offen", offen);
+    /* Nur bei genau einer Kategorie treten am Desktop die Merkmale an die
+       Stelle der Kategorienreihe. */
+    document.body.classList.toggle("kategorie-offen", aktiveKategorien.size === 1);
+    var x = document.getElementById("zuruecksetzen");
+    if (x) { x.hidden = !filterAktiv(); }
+    /* Die Spalte fährt herein, die Karte wird schmäler — Leaflet muss das
+       erfahren, sonst rechnet es mit der alten Breite weiter. */
+    if (offen !== warOffen) { warteAufSpalte(); }
+  }
+
+  /* Nach dem Übergang einmal nachmessen. Der Zähler ist die Rückfalllinie:
+     Läuft der Übergang nicht (reduzierte Bewegung, verstecktes Fenster),
+     kommt kein transitionend. */
+  var spaltenZaehler = null;
+  function warteAufSpalte() {
+    var buehne = document.querySelector(".buehne");
+    clearTimeout(spaltenZaehler);
+    spaltenZaehler = setTimeout(function () { karte.invalidateSize(); }, 260);
+    if (!buehne) { return; }
+    buehne.addEventListener("transitionend", function einmal(e) {
+      if (e.propertyName !== "grid-template-columns") { return; }
+      buehne.removeEventListener("transitionend", einmal);
+      clearTimeout(spaltenZaehler);
+      karte.invalidateSize();
     });
   }
 
@@ -2152,6 +2195,7 @@
 
   zeichneFilter();
   zeichneRouteEingabe();
+  document.querySelectorAll(".kat-scroller").forEach(verdrahteScroller);
   baueMarker();
   aktualisiere();
   zeichnePlan();
