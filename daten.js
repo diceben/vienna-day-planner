@@ -1599,7 +1599,7 @@ const ORTE = [
   },
   {
     "id": "new-bar",
-    "name": "New Bar",
+    "name": "neue bar",
     "kategorie": "bar",
     "weitere": [],
     "tags": [
