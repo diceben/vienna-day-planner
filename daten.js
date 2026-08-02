@@ -1619,5 +1619,53 @@ const ORTE = [
     "gruppe": true,
     "preis": "mittel",
     "gehen": "wenig"
+  },
+  {
+    "id": "dachboden",
+    "name": "Dachboden",
+    "kategorie": "bar",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "bar-cocktails"
+    ],
+    "labels": [],
+    "adresse": "Lerchenfelder Straße 1-3, 1070 Wien",
+    "beschreibung": "Dachbar im obersten Stock des 25hours Hotels beim MuseumsQuartier. Von der Terrasse geht der Blick über den Park bis zum Parlament.",
+    "website": "https://dachbodenwien.at",
+    "bild": "",
+    "lat": 48.2064774,
+    "lng": 16.3546214,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "hoch",
+    "gehen": "wenig"
+  },
+  {
+    "id": "b72",
+    "name": "B72",
+    "kategorie": "musik",
+    "weitere": [],
+    "tags": [
+      "genre-poprock",
+      "loc-klein"
+    ],
+    "labels": [
+      "barrierefrei"
+    ],
+    "adresse": "Hernalser Gürtel 72–73, 1080 Wien",
+    "beschreibung": "Club in den Stadtbahnbögen am Gürtel, seit 1998. Zwei Ebenen, Konzerte und DJ-Linien, täglich ab acht Uhr abends.",
+    "website": "https://www.b72.at",
+    "bild": "",
+    "lat": 48.2146141,
+    "lng": 16.3406381,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
   }
 ];

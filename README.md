@@ -1,6 +1,6 @@
 # Wien entdecken — interaktive Karte
 
-Statische Website mit 66 handverlesenen Orten in Wien. Läuft ohne Server-Software, ohne Build-Schritt und ohne Abhängigkeit von Claude.
+Statische Website mit 68 handverlesenen Orten in Wien. Läuft ohne Server-Software, ohne Build-Schritt und ohne Abhängigkeit von Claude.
 
 Die Auswahl ist bewusst kuratiert: keine austauschbaren Touristenadressen, sondern Orte, die etwas taugen. Wer etwas ergänzt, hält diesen Maßstab.
 
@@ -48,7 +48,7 @@ Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/
 
 Ohne Bild bleibt es beim farbigen Tropfen mit dem Symbol der Kategorie. Dasselbe passiert, wenn der Pfad ins Leere zeigt — die Seite fällt still auf das Symbol zurück, statt ein kaputtes Bild anzuzeigen. Details in [bilder/LIESMICH.md](bilder/LIESMICH.md).
 
-28 der 66 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen. Für Cafés, Clubs und die meisten Aktivitäten gibt es auf Commons nichts Brauchbares, dort hilft nur ein eigenes Foto.
+28 der 68 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen. Für Cafés, Clubs und die meisten Aktivitäten gibt es auf Commons nichts Brauchbares, dort hilft nur ein eigenes Foto.
 
 Die Karte läuft mit [Leaflet](https://leafletjs.com) und Kacheln von CARTO auf OpenStreetMap-Basis. Beides wird zur Laufzeit von einem CDN geladen, die Seite braucht daher eine Internetverbindung.
 
@@ -96,7 +96,7 @@ Das Ergebnis erscheint als nummerierte Liste im Popup. Erst mit „In den Tagesp
 
 > **Die Tageszeit ist geschätzt.** Die Orte führen keine Öffnungszeiten, deshalb leitet die Route sie aus der Kategorie ab — Frühstückscafés am Morgen, Musik und Events am Abend, Museen tagsüber. Aktivitäten zählen abends nur mit, wenn sie drinnen stattfinden. Ein Museum mit Montagsruhe erkennt die Route nicht.
 
-Der Umkreis braucht einen aktiven Standort und wirkt je nach Lage sehr unterschiedlich: Vom Stephansdom aus liegen 53 der 66 Orte in drei Kilometern, von Penzing aus sieben. Reicht es nicht für die Pflichtkategorien, sagt die Seite das und schlägt vor, den Umkreis wegzulassen.
+Der Umkreis braucht einen aktiven Standort und wirkt je nach Lage sehr unterschiedlich: Vom Stephansdom aus liegen 55 der 68 Orte in drei Kilometern, von Penzing aus sieben. Reicht es nicht für die Pflichtkategorien, sagt die Seite das und schlägt vor, den Umkreis wegzulassen.
 
 ## Eigener Standort
 
