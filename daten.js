@@ -1667,5 +1667,31 @@ const ORTE = [
     "gruppe": true,
     "preis": "guenstig",
     "gehen": "wenig"
+  },
+  {
+    "id": "loop",
+    "name": "LOOP",
+    "kategorie": "musik",
+    "weitere": [
+      "bar"
+    ],
+    "tags": [
+      "genre-poprock",
+      "loc-klein",
+      "bar-cocktails"
+    ],
+    "labels": [],
+    "adresse": "U-Bahn-Bogen 26–27, 1080 Wien",
+    "beschreibung": "Bar, Club und Lounge in den Gürtelbögen. DJ-Linien zwischen Funk, Rock und Hip-Hop, dazu drei- bis viermal im Monat Livemusik.",
+    "website": "https://loop.co.at",
+    "bild": "",
+    "lat": 48.2094489,
+    "lng": 16.338885,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
   }
 ];
