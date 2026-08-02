@@ -36,7 +36,7 @@ bilder/           Miniaturbilder der Orte, siehe bilder/LIESMICH.md
 
 ## Ortsübersicht
 
-Die Liste ist 410 Pixel breit und zeigt pro Ort rund 108 Pixel: das Bild links, daneben der Name mit den Aktionen auf gleicher Höhe, darunter die Adresse und eine auf zwei Zeilen geklemmte Beschreibung. Damit sind etwa sieben Orte gleichzeitig sichtbar.
+Die Liste ist 410 Pixel breit und zeigt pro Ort im Mittel 128 Pixel: das Bild links, daneben der Name mit den Aktionen auf gleicher Höhe, darunter die Adresse, die Merkmale als kleine Marken und eine auf zwei Zeilen geklemmte Beschreibung. Damit sind rund fünf Orte gleichzeitig sichtbar. Die Marken kosten etwa 20 Pixel je Eintrag und damit zwei sichtbare Orte — dafür weiß man beim Durchsehen, was ein Ort ist. Jeder der 69 Orte trägt mindestens eine, höchstens vier, es bleibt also immer bei einer Zeile.
 
 Die Aktionen sind zwei knappe Icons für Website und Route, dazu der Knopf „+ Zum Tag“ — bewusst mit Text, weil er die eigentliche Handlung ist. Liegt der Ort im Plan, steht dort „✓ Im Tag“ in der Kategoriefarbe.
 
@@ -122,17 +122,15 @@ Beim nächsten Neuladen vergleicht die Seite den lokalen Stand mit `daten.js`. S
 
 Es gilt nur eine Kategorie zur Zeit — ein Klick auf eine andere löst die vorige ab, ein Klick auf die aktive schaltet sie wieder ab. Ohne Auswahl sind alle Orte sichtbar.
 
-**Merkmale.** Ist eine Kategorie gewählt, treten am großen Schirm ihre Merkmale **an die Stelle der Kategorienreihe** — dieselbe Zeile, derselbe Anfang, dieselbe Höhe: bei Restaurants die Küche, bei Musik das Genre und die Größe, bei Aktivitäten Indoor/Outdoor und den Typ. Kein Kasten darum: Jeder Chip trägt seinen eigenen Hintergrund und hebt sich über einen Schatten von den Kartenkacheln ab.
+Damit man die Wahl auch dort sieht, wo die Reihe gerade weggescrollt ist, **steht der Name der Kategorie im Suchfeld** — nach einem Klick auf „Restaurants“ liest man dort „Restaurants“. Ein Suchbegriff ist er nicht: `suchtext` bleibt leer, und `spiegleSuchfeld()` in `assets/app.js` schreibt den Namen nur zur Anzeige hinein. Wer im Feld zu tippen beginnt, sucht etwas Neues; die Kategorie tritt dann ab, sonst stünde ein Filter in Kraft, den das Feld nicht mehr benennt.
 
-Damit die Reihe nicht verrät, wonach gefiltert wird, **steht der Name der Kategorie im Suchfeld** — nach einem Klick auf „Restaurants“ liest man dort „Restaurants“. Ein Suchbegriff ist er nicht: `suchtext` bleibt leer, und `spiegleSuchfeld()` in `assets/app.js` schreibt den Namen nur zur Anzeige hinein. Wer im Feld zu tippen beginnt, sucht etwas Neues; die Kategorie tritt dann ab, sonst stünde ein Filter in Kraft, den das Feld nicht mehr benennt.
+**Merkmale.** Sie sind da, um gelesen zu werden, nicht um angeklickt zu werden. Jeder Listeneintrag trägt sie als kleine Marken zwischen Adresse und Beschreibung: bei Restaurants die Küche, bei Musik Genre und Größe, bei Aktivitäten Indoor/Outdoor und den Typ. Man sieht beim Durchsehen, was ein Ort ist, ohne ihn anzutippen. Im Ortsblatt am Handy stehen sie an derselben Stelle.
 
-Zurück zu den Kategorien geht es über das ✕ in der Suchpille. Um von „Restaurants“ zu „Bars“ zu wechseln, braucht es also zwei Klicks. Das ist bewusst so — es ist der Weg, den Kartendienste gehen, und er hält die Zeile frei für das, was gerade zur Auswahl gehört.
+Gehört ein Ort mehreren Kategorien an, stehen die Merkmale aller seiner Kategorien da — das Cafe Merkur ist auch ein Restaurant und trägt trotzdem „Klassisch“ und „bis Mittag“ aus dem Frühstück. Die Marken beschreiben den Ort, nicht den laufenden Filter. Doppelte fallen weg: „Draußensitzen“ gibt es bei Frühstück, Café und Bar, es erscheint aber nur einmal.
 
-Am Handy ist es anders: Dort kommen die Merkmale als **zweite Reihe darunter** dazu, statt die Kategorien zu ersetzen. Der Platz ist da, und ein ✕ zu treffen, nur um die Kategorie zu wechseln, wäre mühsam.
+Filtern lässt sich damit nicht. Das war einmal anders — die Merkmale standen als anklickbare Chips über der Karte —, aber es hat den Kopfbereich vollgestellt für einen Filter, den man selten braucht. Wer nur die italienischen Lokale sucht, tippt „italienisch“ ins Suchfeld; die Suche greift auf Name, Adresse und Beschreibung zu.
 
-Die Logik: innerhalb einer Dimension gilt oder (Italienisch + Griechisch zeigt beide), über Dimensionen hinweg und (Italienisch + Fancy zeigt nur das teure italienische Lokal). Ein Merkmal wertet nur Orte seiner eigenen Kategorie.
-
-Die Merkmale je Kategorie stehen in `assets/app.js` unter `MERKMALE`. Die meisten hängen an einem Eintrag im Feld `tags` (z. B. `kueche-italienisch`, `genre-jazz`, `thema-kunst`) und lassen sich im Bearbeiten-Formular anhaken. Ein paar werden aus anderen Feldern abgeleitet und tragen keinen Tag: Kostenlos/Mit Eintritt aus `preis`, Indoor/Outdoor aus `indoor`, Gruppe/Duo aus `allein`.
+Welche Merkmale es je Kategorie gibt, steht in `assets/app.js` unter `MERKMALE`. Die meisten hängen an einem Eintrag im Feld `tags` (z. B. `kueche-italienisch`, `genre-jazz`, `thema-kunst`) und lassen sich im Bearbeiten-Formular anhaken. Ein paar werden aus anderen Feldern abgeleitet und tragen keinen Tag: Kostenlos/Mit Eintritt aus `preis`, Indoor/Outdoor aus `indoor`, Gruppe/Duo aus `allein`. Jedes trägt eine `test`-Funktion, und `merkmaleVon(ort)` fragt sie der Reihe nach ab.
 
 **Zahnrad.** Am großen Schirm steht es ganz rechts oben, am anderen Ende der Chipreihe; am Handy sitzt es im rechten Ende der Suchpille. Es öffnet zwei Gruppen von Schaltern, die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
 
@@ -157,9 +155,9 @@ Am großen Schirm hat die Seite zwei Zustände, so wie man es von Kartendiensten
 
 **Ohne Filter** füllt die Karte das Fenster. Oben links schwebt die Suchpille aus Lupe und Eingabefeld, rechts daneben die Kategorien, ganz rechts das Zahnrad. Sonst nichts. Man sieht die Orte, nicht die Maschinerie.
 
-**Sobald etwas filtert**, fährt links die Ergebnisspalte heraus, 410 Pixel breit. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte sind aus den Kategorien die Merkmale geworden.
+**Sobald etwas filtert**, fährt links die Ergebnisspalte heraus, 410 Pixel breit. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte bleibt die Kategorienreihe, wie sie ist — die gewählte in ihrer Farbe gefüllt. Ein Klick auf eine andere wechselt direkt hinüber.
 
-Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAktiv()`: eine gewählte Kategorie, ein Suchbegriff, ein Merkmal oder ein Schalter aus dem Zahnrad. Auch der Bearbeiten-Modus hält die Spalte offen — sein Panel steht darin und wäre sonst nicht zu erreichen. Das ✕ in der Suchpille räumt alles weg und führt zurück in den ersten Zustand; es ist der einzige Weg dorthin und trägt deshalb volle Tintenfarbe und eine Trennlinie, statt sich als graues Zeichen zu verstecken.
+Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAktiv()`: eine gewählte Kategorie, ein Suchbegriff oder ein Schalter aus dem Zahnrad. Auch der Bearbeiten-Modus hält die Spalte offen — sein Panel steht darin und wäre sonst nicht zu erreichen. Das ✕ in der Suchpille räumt alles weg und führt zurück in den ersten Zustand; es ist der einzige Weg dorthin und trägt deshalb volle Tintenfarbe und eine Trennlinie, statt sich als graues Zeichen zu verstecken.
 
 Der Titel steht nur noch im Browsertab. Auf der Seite selbst wäre oben links kein Platz mehr für ihn, und Kartendienste haben dort auch keinen.
 
@@ -171,7 +169,6 @@ Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was ma
 
 - Die **Suchleiste** schwebt über der Karte, hier über die volle Breite statt nur über der Spalte, mit der Lupe links und dem Zahnrad rechts darin. Am großen Schirm steht das Zahnrad stattdessen frei am rechten Rand — auf 390 Pixeln wäre daneben kein Platz, und die Chipreihe braucht die volle Breite zum Wischen.
 - Darunter die **Kategorien als beschriftete Chips** in einer waagrecht scrollbaren Reihe, Symbol vorn, Name dahinter. Der Scrollbalken ist ausgeblendet, gescrollt wird trotzdem. Erster Chip ist die Trefferzahl.
-- Ist eine Kategorie gewählt, erscheint darunter eine **zweite scrollbare Reihe** mit ihren Merkmalen. Sie kommt dazu, statt die Kategorien zu ersetzen — anders als am großen Schirm.
 - **Leaflets Zoomknöpfe sind ausgeblendet** — auf dem Handy wird mit zwei Fingern gezoomt, und die Knöpfe wären nur im Weg. Der Standortknopf (◉) bleibt und steht wie am großen Schirm unten links.
 - Suchleiste und Chips **bleiben beim Scrollen stehen**. Sobald die Ortsliste unter ihnen hochwandert, legt sich ein papierfarbener Streifen dahinter, der nach unten weich ausläuft — sonst läse man zwischen den Pillen hindurch Textfetzen. Über der Karte, also ganz oben, bleibt alles durchsichtig.
 - **Ein Pin öffnet ein Ortsblatt**, das von unten hereinfährt: Bild, Name, Adresse, Beschreibung, dazu Website, Route und „+ Zum Tag". Solange es offen ist, **tritt die Liste ganz ab**: Die Karte füllt den Schirm, das Blatt liegt im unteren Drittel, und die Seite lässt sich nicht scrollen — es gibt nichts mehr, wohin. Die Karte rückt den Pin über die Blattoberkante. Erst das ✕ schließt das Blatt und holt die Liste zurück. Vorher sprang die Seite hinunter zum Listeneintrag, und die Karte war weg — damit verlor man genau den Zusammenhang, den man gesucht hatte. Auf dem Handy wird deshalb auch kein Leaflet-Popup mehr gebunden; das Blatt tritt an seine Stelle.
@@ -179,7 +176,7 @@ Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was ma
 
 Der Unterschied zum großen Schirm: Hier gibt es die zwei Zustände nicht. Karte oben, Liste darunter, beide immer da — zum Ausweichen wäre kein Platz, und die Liste ist am Handy der Hauptweg durch die Orte.
 
-Früher stand hier ein Absatz darüber, dass es am Handy keine Merkmal-Vorschau beim Überfahren gibt: Ein Touchgerät schickt vor dem Klick ein erfundenes `mouseenter`, und wenn das den Inhalt verändert, verschluckt Safari den darauffolgenden Klick — man musste zweimal tippen. Die Vorschau ist inzwischen ganz weg, an beiden Breiten. Beim Überfahren ändert sich nichts mehr, also kann der Fehler auch nicht wiederkommen.
+Früher stand hier ein Absatz darüber, dass es am Handy keine Merkmal-Vorschau beim Überfahren gibt: Ein Touchgerät schickt vor dem Klick ein erfundenes `mouseenter`, und wenn das den Inhalt verändert, verschluckt Safari den darauffolgenden Klick — man musste zweimal tippen. Die Vorschau gibt es nicht mehr, und die Merkmalchips selbst auch nicht. Beim Überfahren ändert sich nichts mehr, also kann der Fehler auch nicht wiederkommen.
 
 ## Auf GitHub Pages veröffentlichen
 

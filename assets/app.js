@@ -234,11 +234,13 @@
     ]
   };
 
-  /* Jedem Chip einen eindeutigen Schlüssel und eine einheitliche test-Funktion geben. */
+  /* Jedem Chip eine einheitliche test-Funktion geben: Die einen hängen an
+     einem Eintrag in `tags`, die anderen leiten sich aus Feldern wie `preis`
+     oder `indoor` ab. Danach lässt sich für jeden Ort gleich fragen, welche
+     Merkmale auf ihn zutreffen. */
   Object.keys(MERKMALE).forEach(function (kat) {
     MERKMALE[kat].forEach(function (dim) {
-      dim.chips.forEach(function (chip, i) {
-        chip.key = kat + ":" + dim.id + ":" + i;
+      dim.chips.forEach(function (chip) {
         if (!chip.test) { chip.test = hatTag(chip.tag); }
       });
     });
@@ -258,7 +260,6 @@
   var aktiveKategorien = new Set();
   var aktiveSchalter = new Set();
   var aktiveLabels = new Set();
-  var aktiveFacetten = new Set();
   var suchtext = "";
   var markerNach = {};
   var gewaehlt = null;
@@ -995,7 +996,6 @@
         var trifft = kategorienVon(ort).some(function (k) { return aktiveKategorien.has(k); });
         if (!trifft) { return false; }
       }
-      if (!passtFacetten(ort)) { return false; }
       var alleSchalter = SCHALTER.every(function (s) {
         return !aktiveSchalter.has(s.id) || s.pruef(ort);
       });
@@ -1014,73 +1014,31 @@
     });
   }
 
-  /* Innerhalb einer Dimension oder, über Dimensionen und, je Kategorie getrennt.
-     Ein Ort besteht, wenn eine seiner aktiven Kategorien alle deren aktive
-     Dimensionen erfüllt. */
-  function passtFacetten(ort) {
-    if (!aktiveFacetten.size) { return true; }
-    var cats = kategorienVon(ort).filter(function (c) { return aktiveKategorien.has(c); });
-    if (!cats.length) { return true; }
-    return cats.some(function (c) {
-      return (MERKMALE[c] || []).every(function (dim) {
-        var aktivInDim = dim.chips.filter(function (ch) { return aktiveFacetten.has(ch.key); });
-        if (!aktivInDim.length) { return true; }
-        return aktivInDim.some(function (ch) { return ch.test(ort); });
-      });
-    });
-  }
-
-  /* Facetten wegwerfen, deren Kategorie nicht mehr gewählt ist. */
-  function bereinigeFacetten() {
-    Array.from(aktiveFacetten).forEach(function (key) {
-      var kat = key.split(":")[0];
-      if (!aktiveKategorien.has(kat)) { aktiveFacetten.delete(key); }
-    });
-  }
-
-  function zeichneMerkmale() {
-    var box = document.getElementById("merkmale");
-    var huelle = document.getElementById("merkmal-scroller");
-    box.innerHTML = "";
-    var kats = Object.keys(MERKMALE).filter(function (k) {
-      return aktiveKategorien.has(k);
-    });
-    if (!kats.length) {
-      box.hidden = true;
-      huelle.hidden = true;
-      return;
-    }
-    box.hidden = false;
-    huelle.hidden = false;
-    var mehrere = kats.length > 1;
-
-    kats.forEach(function (kat) {
-      var gruppe = document.createElement("div");
-      gruppe.className = "merkmal-kat";
-      if (mehrere) {
-        var titel = document.createElement("span");
-        titel.className = "merkmal-titel";
-        titel.textContent = KATEGORIEN[kat].titel;
-        gruppe.appendChild(titel);
-      }
-      MERKMALE[kat].forEach(function (dim) {
+  /* Welche Merkmale auf einen Ort zutreffen. Sie sind hier nicht mehr zum
+     Anklicken da, sondern zum Lesen: Sie stehen als kleine Marken im
+     Listeneintrag und sagen, was der Ort ist — italienisch, Jazz, draußen.
+     Ein Ort kann mehreren Kategorien angehören; „Draußensitzen“ steht bei
+     Frühstück, Café und Bar, soll aber nur einmal erscheinen. */
+  function merkmaleVon(ort) {
+    var labels = [];
+    kategorienVon(ort).forEach(function (kat) {
+      (MERKMALE[kat] || []).forEach(function (dim) {
         dim.chips.forEach(function (chip) {
-          var b = document.createElement("button");
-          b.type = "button";
-          b.className = "chip merkmal";
-          b.style.setProperty("--ton", KATEGORIEN[kat].farbe);
-          b.setAttribute("aria-pressed", aktiveFacetten.has(chip.key) ? "true" : "false");
-          b.textContent = chip.label;
-          b.addEventListener("click", function () {
-            if (aktiveFacetten.has(chip.key)) { aktiveFacetten.delete(chip.key); }
-            else { aktiveFacetten.add(chip.key); }
-            aktualisiere();
-          });
-          gruppe.appendChild(b);
+          if (chip.test(ort) && labels.indexOf(chip.label) === -1) {
+            labels.push(chip.label);
+          }
         });
       });
-      box.appendChild(gruppe);
     });
+    return labels;
+  }
+
+  function merkmalMarken(ort) {
+    var labels = merkmaleVon(ort);
+    if (!labels.length) { return ""; }
+    return '<p class="merkmal-marken">' + labels.map(function (l) {
+      return '<span class="merkmal-marke">' + entschaerfe(l) + "</span>";
+    }).join("") + "</p>";
   }
 
   /* ------------------------------------------------------------------
@@ -1093,7 +1051,7 @@
   var ruhigerModus = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   function verdrahteScroller(huelle) {
-    var reihe = huelle.querySelector(".kat-leiste, .merkmale");
+    var reihe = huelle.querySelector(".kat-leiste");
     var links = huelle.querySelector(".kat-blaettern.links");
     var rechts = huelle.querySelector(".kat-blaettern.rechts");
     if (!reihe || !links || !rechts) { return; }
@@ -1250,6 +1208,7 @@
         '<div class="eintrag-kopf"><h3>' + entschaerfe(ort.name) + "</h3>" +
         '<div class="eintrag-aktionen">' + aktionen + "</div></div>" +
         '<p class="adresse">' + entschaerfe(ort.adresse) + "</p>" +
+        merkmalMarken(ort) +
         '<p class="text">' + entschaerfe(ort.beschreibung) + "</p></div>" +
         '<div class="eintrag-werkzeug">' +
         '<button type="button" data-tun="bearbeiten" title="Bearbeiten">✎</button>' +
@@ -1300,6 +1259,7 @@
       '<div class="blatt-kopf">' + miniatur(ort, "blatt-bild") +
       '<div><h3>' + entschaerfe(ort.name) + "</h3>" +
       '<p class="adresse">' + entschaerfe(ort.adresse) + "</p></div></div>" +
+      merkmalMarken(ort) +
       '<p class="blatt-text">' + entschaerfe(ort.beschreibung) + "</p>" +
       '<div class="blatt-aktionen">' + aktionen + "</div>";
 
@@ -1416,8 +1376,6 @@
      ------------------------------------------------------------------ */
 
   function aktualisiere() {
-    bereinigeFacetten();
-    zeichneMerkmale();
     var liste = sichtbare();
     spiegleFilterZustand();
     aktualisiereGearZahl();
@@ -1450,7 +1408,6 @@
      Spalte und wäre sonst nicht zu erreichen. */
   function filterAktiv() {
     return aktiveKategorien.size > 0 ||
-      aktiveFacetten.size > 0 ||
       aktiveSchalter.size > 0 ||
       aktiveLabels.size > 0 ||
       suchtext.trim() !== "";
@@ -1474,9 +1431,6 @@
     var offen = filterAktiv() || document.body.classList.contains("bearbeiten");
     var warOffen = document.body.classList.contains("liste-offen");
     document.body.classList.toggle("liste-offen", offen);
-    /* Nur bei genau einer Kategorie treten am Desktop die Merkmale an die
-       Stelle der Kategorienreihe. */
-    document.body.classList.toggle("kategorie-offen", aktiveKategorien.size === 1);
     spiegleSuchfeld();
     var x = document.getElementById("zuruecksetzen");
     if (x) { x.hidden = !filterAktiv(); }
@@ -2118,7 +2072,6 @@
        Kategorie tritt ab. Sonst stünde ein Filter in Kraft, den das Feld
        nicht mehr benennt. */
     aktiveKategorien.clear();
-    aktiveFacetten.clear();
     aktualisiere();
   });
 
@@ -2126,7 +2079,6 @@
     aktiveKategorien.clear();
     aktiveSchalter.clear();
     aktiveLabels.clear();
-    aktiveFacetten.clear();
     suchtext = "";
     document.getElementById("suche").value = "";
     aktualisiere();

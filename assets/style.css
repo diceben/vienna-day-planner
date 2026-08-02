@@ -325,8 +325,7 @@ body {
 
 .kat-scroller[hidden] { display: none; }
 
-.kat-leiste,
-.merkmale {
+.kat-leiste {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -340,8 +339,7 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-.kat-leiste::-webkit-scrollbar,
-.merkmale::-webkit-scrollbar { display: none; }
+.kat-leiste::-webkit-scrollbar { display: none; }
 
 /* Am Handy wischt man, am großen Schirm gibt es dafür keine Geste. Die Pfeile
    zeigen sich nur, solange in ihre Richtung noch etwas zu sehen ist. */
@@ -369,13 +367,6 @@ body {
 .kat-blaettern.links { left: -6px; }
 .kat-blaettern.rechts { right: -6px; }
 .kat-blaettern[hidden] { display: none; }
-
-/* Ist eine Kategorie gewählt, treten die Merkmale an ihre Stelle — dieselbe
-   Zeile, derselbe Anfang. Zurück geht es über das ✕ in der Suchpille.
-   Die ganze Hülle weicht, nicht nur die Reihe darin: Sonst bliebe der
-   Zeilenabstand der Zone als Lücke stehen und die Merkmale rutschten 8 px
-   nach unten. */
-body.kategorie-offen #kategorie-scroller { display: none; }
 
 /* Symbol vorn, Name dahinter — die HTML-Reihenfolge ist umgekehrt, damit ein
    Screenreader zuerst den Namen liest und nicht das Emoji. */
@@ -435,55 +426,32 @@ body.kategorie-offen #kategorie-scroller { display: none; }
 
 /* ---------- Filter ---------- */
 
-/* Am großen Schirm treten die Merkmale an die Stelle der Kategorienreihe,
-   sobald eine Kategorie gewählt ist — dieselbe Zeile, derselbe Anfang. Ohne
-   Kasten darum: Jeder Chip trägt seinen eigenen Hintergrund und hebt sich
-   über einen Schatten von den Kartenkacheln ab. */
-.merkmale .merkmal-kat {
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Dieselbe Höhe wie die Kategorien-Chips — die beiden Reihen stehen an
-   derselben Stelle und müssen deshalb gleich hoch sein, sonst springt die
-   Zeile beim Umschalten. */
-.merkmale .chip.merkmal {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  height: 38px;
-  padding: 0 14px;
-  font-size: 14px;
-  white-space: nowrap;
-  box-shadow: 0 1px 5px rgba(0,0,0,.16);
-}
-
 .filtergruppe {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
 }
 
-.filtergruppe.merkmale[hidden] { display: none; }
-
-.merkmal-kat {
+/* ---------- Merkmale als Marken im Eintrag ----------
+   Nicht zum Anklicken: Sie sagen, was ein Ort ist — italienisch, Jazz,
+   draußen. Deshalb tragen sie auch keine Kategoriefarbe, sonst sähen sie aus
+   wie Knöpfe und ständen in Konkurrenz zum farbigen Rand des Eintrags. */
+.merkmal-marken {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 7px;
+  gap: 4px;
+  margin: 5px 0 0;
 }
 
-.merkmal-titel {
-  font-size: 12px;
+.merkmal-marke {
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--papier-tief);
+  font-size: 11.5px;
+  line-height: 1.5;
   color: var(--tinte-leise);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  margin-right: 2px;
+  white-space: nowrap;
 }
-
-.chip.merkmal { font-size: 13px; padding: 5px 12px; }
 
 /* Zahnrad und Popover für die universellen Schalter */
 /* Steht am großen Schirm ganz rechts oben, am anderen Ende der Chipreihe —
@@ -1551,8 +1519,7 @@ body.setzt-position #karte { cursor: crosshair; }
   body.gescrollt .kat-zone::before { opacity: 1; }
 
   /* Am Fensterrand statt an der Spaltenkante. */
-  .kat-leiste,
-  .merkmale { padding: 2px 10px; }
+  .kat-leiste { padding: 2px 10px; }
 
   /* Fingerbreite Chips. */
   .kat-chip {
@@ -1569,16 +1536,6 @@ body.setzt-position #karte { cursor: crosshair; }
     cursor: default;
     color: var(--tinte-leise);
     white-space: nowrap;
-  }
-
-  /* Beide Reihen stehen hier untereinander: Die Merkmale kommen zu den
-     Kategorien dazu, statt sie zu ersetzen. Der Platz dafür ist da, und
-     ein ✕ am Handy zu treffen, um die Kategorie zu wechseln, wäre mühsam. */
-  body.kategorie-offen #kategorie-scroller { display: block; }
-
-  .merkmale .chip.merkmal {
-    font-size: 14px;
-    padding: 8px 14px;
   }
 
   /* ----- Leaflets Bedienelemente aus dem Weg ----- */
