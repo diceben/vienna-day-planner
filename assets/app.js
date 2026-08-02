@@ -1016,10 +1016,39 @@
     });
   }
 
+  /* Welche Kategorie gerade nur überfahren wird — null, sobald der Zeiger die
+     Zone verlässt. Dann zeigt die Leiste wieder die gewählte Kategorie. */
+  var vorschauKategorie = null;
+
+  /* Schiebt die Merkmalleiste unter das zugehörige Symbol. Gemessen wird die
+     rechte Kante: Die Leiste ist rechtsbündig, ein Chip wächst beim Aufklappen
+     nach links — die rechte Kante bleibt also stehen. */
+  function setzeMerkmalPosition(kat) {
+    var zone = document.getElementById("kat-zone");
+    var chip = document.querySelector('[data-kategorie="' + kat + '"]');
+    var box = document.getElementById("merkmale");
+    if (!zone || !chip || !box) { return; }
+    var zoneRect = zone.getBoundingClientRect();
+    var abstand = Math.max(0, Math.round(
+      zoneRect.right - chip.getBoundingClientRect().right));
+
+    /* Bei den linken Symbolen würde die Karte sonst über den Kartenrand
+       hinausragen — dann rückt sie so weit nach rechts, wie sie muss. */
+    box.style.setProperty("--merkmal-rechts", abstand + "px");
+    var hoechstens = Math.max(0, Math.round(zoneRect.width - box.getBoundingClientRect().width));
+    if (abstand > hoechstens) {
+      box.style.setProperty("--merkmal-rechts", hoechstens + "px");
+    }
+  }
+
   function zeichneMerkmale() {
     var box = document.getElementById("merkmale");
     box.innerHTML = "";
-    var kats = Object.keys(MERKMALE).filter(function (k) { return aktiveKategorien.has(k); });
+    var vorschau = vorschauKategorie && !aktiveKategorien.has(vorschauKategorie);
+    var kats = vorschauKategorie
+      ? (MERKMALE[vorschauKategorie] ? [vorschauKategorie] : [])
+      : Object.keys(MERKMALE).filter(function (k) { return aktiveKategorien.has(k); });
+    box.classList.toggle("vorschau", !!vorschau);
     if (!kats.length) { box.hidden = true; return; }
     box.hidden = false;
     var mehrere = kats.length > 1;
@@ -1042,6 +1071,13 @@
           b.setAttribute("aria-pressed", aktiveFacetten.has(chip.key) ? "true" : "false");
           b.textContent = chip.label;
           b.addEventListener("click", function () {
+            /* Aus der Vorschau heraus geklickt: erst die Kategorie
+               einschalten, sonst greift das Merkmal ins Leere. */
+            if (!aktiveKategorien.has(kat)) {
+              aktiveKategorien.clear();
+              aktiveKategorien.add(kat);
+              vorschauKategorie = null;
+            }
             if (aktiveFacetten.has(chip.key)) { aktiveFacetten.delete(chip.key); }
             else { aktiveFacetten.add(chip.key); }
             aktualisiere();
@@ -1050,6 +1086,50 @@
         });
       });
       box.appendChild(gruppe);
+    });
+
+    /* Erst jetzt ausrichten — vorher hätte die Karte noch keine Breite, und
+       die Begrenzung zum linken Kartenrand ließe sich nicht rechnen. */
+    setzeMerkmalPosition(kats[0]);
+  }
+
+  /* Verlässt der Zeiger die Zone, fällt die Vorschau zurück auf die gewählte
+     Kategorie. Die kurze Verzögerung überbrückt den Spalt zwischen Leiste und
+     Merkmalkarte — ohne sie klappt alles zu, sobald man hinunterfährt. */
+  var vorschauZaehler = null;
+  var vorschauVerdrahtet = false;
+
+  function verdrahteVorschau() {
+    if (vorschauVerdrahtet) { return; }
+    var zone = document.getElementById("kat-zone");
+    if (!zone) { return; }
+    vorschauVerdrahtet = true;
+
+    function halten() { clearTimeout(vorschauZaehler); }
+    function loslassen() {
+      clearTimeout(vorschauZaehler);
+      vorschauZaehler = setTimeout(function () {
+        if (vorschauKategorie === null) { return; }
+        vorschauKategorie = null;
+        zeichneMerkmale();
+      }, 160);
+    }
+
+    zone.addEventListener("mouseenter", halten, true);
+    zone.addEventListener("mouseover", halten);
+    zone.addEventListener("mouseleave", loslassen);
+
+    /* Beim Wechsel von einem Symbol zum nächsten klappt das vorige noch zu.
+       Solange das läuft, steht das Ziel weiter links, als es am Ende steht —
+       deshalb nach dem Ende der Animation nachmessen. */
+    zone.addEventListener("transitionend", function (e) {
+      if (e.propertyName !== "max-width") { return; }
+      var kat = vorschauKategorie ||
+        Object.keys(MERKMALE).filter(function (k) { return aktiveKategorien.has(k); })[0];
+      if (kat) { setzeMerkmalPosition(kat); }
+    });
+    zone.addEventListener("focusout", function (e) {
+      if (!zone.contains(e.relatedTarget)) { loslassen(); }
     });
   }
 
@@ -1074,10 +1154,23 @@
         /* Nur eine Kategorie zur Zeit: erneut klicken schaltet ab. */
         if (aktiveKategorien.has(schluessel)) { aktiveKategorien.clear(); }
         else { aktiveKategorien.clear(); aktiveKategorien.add(schluessel); }
+        vorschauKategorie = null;
         aktualisiere();
       });
+
+      /* Überfahren und Tastaturfokus zeigen die Merkmale schon vorab. */
+      function vorschauAn() {
+        if (vorschauKategorie === schluessel) { return; }
+        vorschauKategorie = schluessel;
+        zeichneMerkmale();
+      }
+      b.addEventListener("mouseenter", vorschauAn);
+      b.addEventListener("focus", vorschauAn);
+
       behaelter.appendChild(b);
     });
+
+    verdrahteVorschau();
 
     var labelbox = document.getElementById("label-schalter");
     labelbox.innerHTML = "";

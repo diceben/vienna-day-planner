@@ -124,7 +124,11 @@ Es gilt nur eine Kategorie zur Zeit — ein Klick auf eine andere löst die vori
 
 Beschriftete Knöpfe in der Kopfzeile waren das vorher, sie brauchten aber 1112 Pixel und begannen schon unter rund 1490 Pixel Fensterbreite seitlich zu scrollen — Kategorien verschwanden also aus dem Blick. Als Symbolleiste sind es rund 435 Pixel, und alle neun passen bis hinunter aufs Handy in eine Zeile.
 
-**Merkmale.** Sobald eine Kategorie gewählt ist, erscheint darunter eine Zeile mit Merkmalen, die zu dieser Kategorie passen — bei Restaurants die Küche, bei Musik das Genre und die Größe, bei Aktivitäten Indoor/Outdoor und den Typ.
+**Merkmale.** Unter dem Symbol erscheint eine schwebende Karte mit den Merkmalen dieser Kategorie — bei Restaurants die Küche, bei Musik das Genre und die Größe, bei Aktivitäten Indoor/Outdoor und den Typ. Sie klappt **schon beim Überfahren** auf, nicht erst nach dem Klick: Man kann die Kategorien also durchsehen, ohne den laufenden Filter zu verlieren. Solange nur angesehen wird, ist die Karte gestrichelt umrandet.
+
+Klickt man in dieser Vorschau ein Merkmal an, springt die zugehörige Kategorie mit an — sonst würde das Merkmal ins Leere greifen. Verlässt der Zeiger den Bereich, kehrt die Karte zur gewählten Kategorie zurück oder verschwindet.
+
+Auf schmalen Schirmen bleiben die Namen der Symbole zugeklappt: Neun Symbole und ein Name passen dort nicht nebeneinander, der Name bliebe am linken Kartenrand hängen. Was gefiltert ist, sagen dort die Färbung des Symbols, die Merkmalkarte und die Trefferzahl.
 
 Die Logik: innerhalb einer Dimension gilt oder (Italienisch + Griechisch zeigt beide), über Dimensionen hinweg und (Italienisch + Fancy zeigt nur das teure italienische Lokal). Ein Merkmal wertet nur Orte seiner eigenen Kategorie.
 

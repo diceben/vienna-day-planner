@@ -256,17 +256,29 @@ body {
 /* ---------- Kategorienleiste über der Karte ----------
    Rechtsbündig, damit ein aufklappender Chip seine Nachbarn nach links
    schiebt statt nach rechts aus dem Bild. */
-.kat-leiste {
+/* Spannt die volle Kartenbreite auf, obwohl die Leiste rechts sitzt: Die
+   Merkmalkarte hängt absolut an dieser Zone, und ihr bliebe sonst links vom
+   Anker kaum Platz — sie würde zu einer schmalen Spalte zusammenfallen. */
+.kat-zone {
   position: absolute;
   top: 12px;
+  left: 12px;
   right: 12px;
   /* über den Leaflet-Bedienelementen, die bei 1000 liegen */
   z-index: 1100;
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* Die Zone selbst fängt keine Klicks ab, nur ihre Kinder. */
+  pointer-events: none;
+}
+
+.kat-leiste {
+  display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 6px;
-  max-width: calc(100% - 24px);
+  pointer-events: auto;
 }
 
 .kat-chip {
@@ -332,8 +344,30 @@ body {
 
 /* ---------- Filter ---------- */
 
+/* Schwebt unter der Kategorienleiste, rechtsbündig unter dem aufgeklappten
+   Symbol. Den Abstand zum rechten Rand setzt zeigeMerkmale() in app.js. */
 .merkmale {
-  padding: 0 20px 10px;
+  /* Absolut statt im Fluss: Als Flex-Kind würde die Breite der Karte auf die
+     Zonenbreite zurückwirken und die Ausrichtung um einige Pixel verziehen. */
+  position: absolute;
+  top: calc(100% + 6px);
+  right: var(--merkmal-rechts, 0px);
+  padding: 8px 12px;
+  max-width: min(70vw, 460px);
+  justify-content: flex-end;
+  border: 1px solid var(--linie);
+  border-radius: 12px;
+  background: rgba(255, 253, 249, 0.96);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  pointer-events: auto;
+  transition: right .22s ease;
+}
+
+/* Nur angesehen, noch nicht ausgewählt: etwas zurückgenommen. */
+.merkmale.vorschau {
+  border-style: dashed;
 }
 
 .filtergruppe {
@@ -1322,9 +1356,22 @@ body.setzt-position #karte { cursor: crosshair; }
   .toolbar { flex-wrap: wrap; padding: 9px 14px; gap: 9px; }
   .toolbar-suche { flex: 1 1 140px; width: auto; }
   /* Neun Symbole zu je 30 px passen damit auch auf ein 360-px-Display. */
-  .kat-leiste { top: 10px; right: 10px; gap: 4px; }
-  .kat-chip { height: 30px; padding: 0 9px; }
-  .kat-chip .sym { font-size: 14px; }
+  /* Abstand zu Leaflets Zoomknöpfen oben links. */
+  .kat-zone { top: 10px; left: 56px; right: 10px; }
+  .kat-leiste { gap: 4px; }
+  .kat-chip { height: 30px; padding: 0 7px; }
+  .kat-chip .sym { font-size: 13px; }
+
+  /* Neun Symbole plus ein Name passen hier nicht nebeneinander — der Name
+     bliebe am linken Kartenrand hängen. Was gefiltert ist, sagen stattdessen
+     die Färbung, die Merkmalkarte darunter und die Trefferzahl. */
+  .kat-chip:hover .name,
+  .kat-chip:focus-visible .name,
+  .kat-chip[aria-pressed="true"] .name {
+    max-width: 0;
+    opacity: 0;
+    margin-right: 0;
+  }
   .merkmale { padding: 0 14px 10px; }
   .einstellungen { right: 12px; }
   .buehne {
