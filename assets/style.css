@@ -75,9 +75,11 @@ body {
   padding: 0 6px 0 14px;
   border: 1px solid var(--linie);
   border-radius: 999px;
+  /* Kein backdrop-filter hier, obwohl die übrigen schwebenden Flächen einen
+     haben: Er würde die Pille zum Bezugsrahmen für position: fixed machen,
+     und das Zahnrad darin käme nie an den rechten Fensterrand. Bei 97 %
+     Deckkraft ist von einem Weichzeichner ohnehin nichts zu sehen. */
   background: rgba(255, 253, 249, 0.97);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2px 10px rgba(0,0,0,.16);
   pointer-events: auto;
 }
@@ -117,24 +119,32 @@ body {
 
 .toolbar-suche:focus { outline: none; }
 
-/* Der einzige Weg zurück zur reinen Karte. Nur da, solange etwas filtert. */
+/* Das Feld ist ein input[type=search]; manche Browser setzen dort ein eigenes
+   Kreuz hinein. Zwei nebeneinander wären eines zu viel. */
+.toolbar-suche::-webkit-search-cancel-button,
+.toolbar-suche::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+
+/* Der einzige Weg zurück zur reinen Karte — und deshalb kein zaghaftes
+   Zeichen: volle Tintenfarbe, großzügige Fläche, eine Trennlinie davor. */
 .such-x {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
   border: none;
-  border-radius: 999px;
+  border-left: 1px solid var(--linie);
+  border-radius: 0 999px 999px 0;
   background: none;
-  font-size: 14px;
+  font-size: 19px;
   line-height: 1;
-  color: var(--tinte-leise);
+  color: var(--tinte);
   cursor: pointer;
 }
 
-.such-x:hover { background: var(--papier-tief); color: var(--tinte); }
+.such-x:hover { background: var(--papier-tief); }
 .such-x[hidden] { display: none; }
 
 /* ---------- Routenvorschlag ---------- */
@@ -294,7 +304,8 @@ body {
   position: fixed;
   top: 12px;
   left: var(--spalte);
-  right: 12px;
+  /* Rechts bleibt das Zahnrad stehen — die Reihe endet davor. */
+  right: 66px;
   /* über den Leaflet-Bedienelementen, die bei 1000 liegen */
   z-index: 1100;
   display: flex;
@@ -475,25 +486,33 @@ body.kategorie-offen #kategorie-scroller { display: none; }
 .chip.merkmal { font-size: 13px; padding: 5px 12px; }
 
 /* Zahnrad und Popover für die universellen Schalter */
-/* Sitzt am rechten Ende der Suchpille und trägt deshalb keine eigene Hülle. */
+/* Steht am großen Schirm ganz rechts oben, am anderen Ende der Chipreihe —
+   dieselbe schwebende Behandlung wie die Chips. Es bleibt dabei ein Kind der
+   Suchpille: Am Handy sitzt es dort drin, und ein fester Platz am Fenster
+   spart den Umbau des Baums für zwei Breiten. */
 .gear {
-  position: relative;
-  flex: 0 0 auto;
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 1200;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 6px;
-  border: none;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--linie);
   border-radius: 999px;
-  background: none;
+  background: rgba(255, 253, 249, 0.94);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 1px 5px rgba(0,0,0,.14);
   font-size: 17px;
   line-height: 1;
   color: var(--tinte);
   cursor: pointer;
 }
 
-.gear:hover { background: var(--papier-tief); }
-.gear[aria-expanded="true"] { background: var(--papier-tief); }
+.gear:hover { border-color: var(--tinte-leise); }
+.gear[aria-expanded="true"] { border-color: var(--tinte); }
 
 .gear-zahl {
   min-width: 16px;
@@ -511,10 +530,11 @@ body.kategorie-offen #kategorie-scroller { display: none; }
 .gear-zahl[hidden] { display: none; }
 
 .einstellungen {
-  position: absolute;
-  /* Hängt linksbündig unter der Suchpille, in der das Zahnrad sitzt. */
+  /* Hängt unter dem Zahnrad, also rechtsbündig am Fenster — und fest daran,
+     weil das Zahnrad selbst fest am Fenster steht. */
+  position: fixed;
   top: 56px;
-  left: 0;
+  right: 12px;
   z-index: 1300;
   pointer-events: auto;
   width: min(320px, calc(100vw - 40px));
@@ -1474,7 +1494,22 @@ body.setzt-position #karte { cursor: crosshair; }
     width: auto;
   }
   .toolbar { padding: 9px 10px; }
-  .einstellungen { left: 10px; top: 60px; }
+
+  /* Hier sitzt das Zahnrad wieder in der Suchpille: Die Chipreihe braucht die
+     volle Breite zum Wischen, und ein zweites schwebendes Ding daneben wäre
+     auf 390 Pixeln zu viel. Es verliert dafür seine eigene Hülle. */
+  .gear {
+    position: static;
+    flex: 0 0 auto;
+    height: auto;
+    padding: 6px;
+    border: none;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .gear:hover, .gear[aria-expanded="true"] { background: var(--papier-tief); }
+  .einstellungen { left: 10px; right: auto; top: 60px; }
 
   /* ----- Kategorien: waagrecht scrollbare Reihe mit Namen ----- */
   .kat-zone {

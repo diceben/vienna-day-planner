@@ -1456,6 +1456,20 @@
       suchtext.trim() !== "";
   }
 
+  /* Was im Suchfeld steht: der getippte Text, sonst der Name der gewählten
+     Kategorie. Die Kategorienreihe weicht am großen Schirm den Merkmalen —
+     ohne diesen Namen wüsste man dort nicht mehr, wonach gerade gefiltert
+     wird. Ein Suchbegriff ist er nicht; siehe den input-Handler. */
+  function spiegleSuchfeld() {
+    var feld = document.getElementById("suche");
+    if (!feld) { return; }
+    var kat = Array.from(aktiveKategorien)[0];
+    var soll = suchtext !== "" || !kat ? suchtext : KATEGORIEN[kat].titel;
+    /* Nur bei echter Abweichung schreiben — eine Zuweisung setzt sonst in
+       manchen Browsern den Cursor ans Ende, mitten im Tippen. */
+    if (feld.value !== soll) { feld.value = soll; }
+  }
+
   function zeigeZustand() {
     var offen = filterAktiv() || document.body.classList.contains("bearbeiten");
     var warOffen = document.body.classList.contains("liste-offen");
@@ -1463,6 +1477,7 @@
     /* Nur bei genau einer Kategorie treten am Desktop die Merkmale an die
        Stelle der Kategorienreihe. */
     document.body.classList.toggle("kategorie-offen", aktiveKategorien.size === 1);
+    spiegleSuchfeld();
     var x = document.getElementById("zuruecksetzen");
     if (x) { x.hidden = !filterAktiv(); }
     /* Die Spalte fährt herein, die Karte wird schmäler — Leaflet muss das
@@ -2098,6 +2113,12 @@
 
   document.getElementById("suche").addEventListener("input", function (e) {
     suchtext = e.target.value;
+    /* Im Feld stand womöglich der Name der gewählten Kategorie. Das war eine
+       Anzeige, kein Suchbegriff — wer hier tippt, sucht etwas Neues, und die
+       Kategorie tritt ab. Sonst stünde ein Filter in Kraft, den das Feld
+       nicht mehr benennt. */
+    aktiveKategorien.clear();
+    aktiveFacetten.clear();
     aktualisiere();
   });
 

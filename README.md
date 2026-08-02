@@ -124,6 +124,8 @@ Es gilt nur eine Kategorie zur Zeit — ein Klick auf eine andere löst die vori
 
 **Merkmale.** Ist eine Kategorie gewählt, treten am großen Schirm ihre Merkmale **an die Stelle der Kategorienreihe** — dieselbe Zeile, derselbe Anfang, dieselbe Höhe: bei Restaurants die Küche, bei Musik das Genre und die Größe, bei Aktivitäten Indoor/Outdoor und den Typ. Kein Kasten darum: Jeder Chip trägt seinen eigenen Hintergrund und hebt sich über einen Schatten von den Kartenkacheln ab.
 
+Damit die Reihe nicht verrät, wonach gefiltert wird, **steht der Name der Kategorie im Suchfeld** — nach einem Klick auf „Restaurants“ liest man dort „Restaurants“. Ein Suchbegriff ist er nicht: `suchtext` bleibt leer, und `spiegleSuchfeld()` in `assets/app.js` schreibt den Namen nur zur Anzeige hinein. Wer im Feld zu tippen beginnt, sucht etwas Neues; die Kategorie tritt dann ab, sonst stünde ein Filter in Kraft, den das Feld nicht mehr benennt.
+
 Zurück zu den Kategorien geht es über das ✕ in der Suchpille. Um von „Restaurants“ zu „Bars“ zu wechseln, braucht es also zwei Klicks. Das ist bewusst so — es ist der Weg, den Kartendienste gehen, und er hält die Zeile frei für das, was gerade zur Auswahl gehört.
 
 Am Handy ist es anders: Dort kommen die Merkmale als **zweite Reihe darunter** dazu, statt die Kategorien zu ersetzen. Der Platz ist da, und ein ✕ zu treffen, nur um die Kategorie zu wechseln, wäre mühsam.
@@ -132,7 +134,7 @@ Die Logik: innerhalb einer Dimension gilt oder (Italienisch + Griechisch zeigt b
 
 Die Merkmale je Kategorie stehen in `assets/app.js` unter `MERKMALE`. Die meisten hängen an einem Eintrag im Feld `tags` (z. B. `kueche-italienisch`, `genre-jazz`, `thema-kunst`) und lassen sich im Bearbeiten-Formular anhaken. Ein paar werden aus anderen Feldern abgeleitet und tragen keinen Tag: Kostenlos/Mit Eintritt aus `preis`, Indoor/Outdoor aus `indoor`, Gruppe/Duo aus `allein`.
 
-**Zahnrad.** Am rechten Ende der Suchpille öffnet ein Rädchen zwei Gruppen von Schaltern, die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
+**Zahnrad.** Am großen Schirm steht es ganz rechts oben, am anderen Ende der Chipreihe; am Handy sitzt es im rechten Ende der Suchpille. Es öffnet zwei Gruppen von Schaltern, die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
 
 Oben die sechs universellen Schalter (Tabelle unten), darunter die Eigenschaften aus dem Feld `labels`: Barrierefrei, LGBTQ+-freundlich, Hunde willkommen, Reizarm & ruhig, Vegan & vegetarisch, Geheimtipp. Mehrere Eigenschaften werden mit und verknüpft — wer barrierefrei und vegan wählt, sieht nur Orte, auf die beides zutrifft.
 
@@ -153,11 +155,11 @@ Das Suchfeld greift auf Name, Adresse und Beschreibung zu.
 
 Am großen Schirm hat die Seite zwei Zustände, so wie man es von Kartendiensten kennt.
 
-**Ohne Filter** füllt die Karte das Fenster. Oben links schwebt die Suchpille — Lupe, Eingabefeld, Zahnrad —, rechts daneben die Kategorien. Sonst nichts. Man sieht die Orte, nicht die Maschinerie.
+**Ohne Filter** füllt die Karte das Fenster. Oben links schwebt die Suchpille aus Lupe und Eingabefeld, rechts daneben die Kategorien, ganz rechts das Zahnrad. Sonst nichts. Man sieht die Orte, nicht die Maschinerie.
 
 **Sobald etwas filtert**, fährt links die Ergebnisspalte heraus, 410 Pixel breit. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte sind aus den Kategorien die Merkmale geworden.
 
-Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAktiv()`: eine gewählte Kategorie, ein Suchbegriff, ein Merkmal oder ein Schalter aus dem Zahnrad. Auch der Bearbeiten-Modus hält die Spalte offen — sein Panel steht darin und wäre sonst nicht zu erreichen. Das ✕ in der Suchpille räumt alles weg und führt zurück in den ersten Zustand.
+Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAktiv()`: eine gewählte Kategorie, ein Suchbegriff, ein Merkmal oder ein Schalter aus dem Zahnrad. Auch der Bearbeiten-Modus hält die Spalte offen — sein Panel steht darin und wäre sonst nicht zu erreichen. Das ✕ in der Suchpille räumt alles weg und führt zurück in den ersten Zustand; es ist der einzige Weg dorthin und trägt deshalb volle Tintenfarbe und eine Trennlinie, statt sich als graues Zeichen zu verstecken.
 
 Der Titel steht nur noch im Browsertab. Auf der Seite selbst wäre oben links kein Platz mehr für ihn, und Kartendienste haben dort auch keinen.
 
@@ -167,7 +169,7 @@ Leaflets Zoom- und Standortknöpfe sitzen deshalb **unten links**: Oben liegt in
 
 Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was man von Kartendiensten kennt:
 
-- Die **Suchleiste** schwebt über der Karte, hier über die volle Breite statt nur über der Spalte, mit der Lupe links und dem Zahnrad rechts darin.
+- Die **Suchleiste** schwebt über der Karte, hier über die volle Breite statt nur über der Spalte, mit der Lupe links und dem Zahnrad rechts darin. Am großen Schirm steht das Zahnrad stattdessen frei am rechten Rand — auf 390 Pixeln wäre daneben kein Platz, und die Chipreihe braucht die volle Breite zum Wischen.
 - Darunter die **Kategorien als beschriftete Chips** in einer waagrecht scrollbaren Reihe, Symbol vorn, Name dahinter. Der Scrollbalken ist ausgeblendet, gescrollt wird trotzdem. Erster Chip ist die Trefferzahl.
 - Ist eine Kategorie gewählt, erscheint darunter eine **zweite scrollbare Reihe** mit ihren Merkmalen. Sie kommt dazu, statt die Kategorien zu ersetzen — anders als am großen Schirm.
 - **Leaflets Zoomknöpfe sind ausgeblendet** — auf dem Handy wird mit zwei Fingern gezoomt, und die Knöpfe wären nur im Weg. Der Standortknopf (◉) bleibt und steht wie am großen Schirm unten links.
