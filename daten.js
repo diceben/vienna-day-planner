@@ -1,30 +1,21 @@
 /* ---------------------------------------------------------------
    Wien-Karte — Datenbestand
    ---------------------------------------------------------------
-   Diese Datei enthält alle Orte. Sie lässt sich von Hand bearbeiten
-   oder über den Bearbeiten-Modus der Seite (Adresse mit #bearbeiten
-   aufrufen) und dort per Export neu erzeugen.
-
-   ⚠️  ACHTUNG — das Feld `labels` enthält derzeit ERFUNDENE Testdaten.
-   Sie dienen nur dazu, den Filter zu prüfen. Ob ein Ort
-   wirklich barrierefrei ist, Hunde erlaubt oder nur Bargeld nimmt, wurde
-   NICHT recherchiert. Vor einer Veröffentlichung müssen diese Werte
-   geprüft und ersetzt werden — eine falsche Angabe bei „barrierefrei“
-   schickt jemanden im Rollstuhl vor eine Treppe.
+   Exportiert aus dem Bearbeiten-Modus der Seite.
+   Diese Datei ersetzt daten.js im Projektordner.
 
    Felder je Ort:
      id           eindeutige Kennung, wird beim Anlegen vergeben
      name         Anzeigename
      kategorie    fruehstueck | restaurant | sehenswuerdigkeit | museum
-                  | musik | event | aktivitaet — bestimmt die Farbe
+                  | musik | event | aktivitaet — bestimmt Farbe und Symbol
      weitere      Liste weiterer Kategorien, meist leer
      tags         Merkmale für die kategoriespezifischen Filter
-     labels       Eigenschaften, schaltbar im Zahnrad-Popover. Mögliche
-                  Werte stehen in assets/app.js unter LABELS.
+     labels       Eigenschaften als Farbbänder, sh. LABELS in app.js
+     bild         Miniaturbild: Pfad wie bilder/riesenrad.jpg oder URL
      adresse      Straße, PLZ und Wien
      beschreibung ein bis zwei Sätze
      website      vollständige URL oder leerer String
-     bild         Miniaturbild: Pfad wie bilder/riesenrad.jpg oder URL
      lat, lng     Koordinaten in Dezimalgrad, setzt das Formular selbst
      indoor       true, wenn der Ort bei Regen funktioniert
      andrang      ruhig | belebt
@@ -35,59 +26,6 @@
    --------------------------------------------------------------- */
 
 const ORTE = [
-  {
-    "id": "cafe-landtmann",
-    "name": "Café Landtmann",
-    "kategorie": "fruehstueck",
-    "weitere": [],
-    "tags": [
-      "draussen",
-      "fr-klassisch",
-      "fr-nachmittag"
-    ],
-    "labels": [
-      "lgbtq",
-      "hunde"
-    ],
-    "adresse": "Universitätsring 4, 1010 Wien",
-    "beschreibung": "Kaffeehaus von 1873 gegenüber dem Burgtheater. Freud und Mahler saßen hier, heute die Leute aus dem Parlament nebenan.",
-    "website": "https://landtmann.at",
-    "bild": "bilder/cafe-landtmann.jpg",
-    "lat": 48.2115624,
-    "lng": 16.3614497,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
-    "id": "kurkonditorei-oberlaa",
-    "name": "Kurkonditorei Oberlaa",
-    "kategorie": "fruehstueck",
-    "weitere": [],
-    "tags": [
-      "draussen",
-      "fr-klassisch",
-      "fr-nachmittag"
-    ],
-    "labels": [
-      "hunde"
-    ],
-    "adresse": "Neuer Markt 16, 1010 Wien",
-    "beschreibung": "Konditorei am Neuen Markt, wenige Schritte vom Stephansdom entfernt. Die Mehlspeisen sind der Grund herzukommen.",
-    "website": "https://oberlaa-wien.at",
-    "bild": "",
-    "lat": 48.2067216,
-    "lng": 16.3707002,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
   {
     "id": "cafe-merkur",
     "name": "Cafe Merkur",
@@ -160,29 +98,6 @@ const ORTE = [
     "lng": 16.3467208,
     "indoor": true,
     "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "vollpension",
-    "name": "Vollpension",
-    "kategorie": "fruehstueck",
-    "weitere": [],
-    "tags": [
-      "fr-klassisch",
-      "fr-nachmittag"
-    ],
-    "labels": [],
-    "adresse": "Schleifmühlgasse 16, 1040 Wien",
-    "beschreibung": "Generationencafé, in dem Pensionistinnen und Pensionisten die Mehlspeisen backen und ausgeben. Am Wochenende ohne Reservierung schwierig.",
-    "website": "https://vollpension.wien",
-    "bild": "",
-    "lat": 48.1976603,
-    "lng": 16.365035,
-    "indoor": true,
-    "andrang": "belebt",
     "allein": true,
     "gruppe": true,
     "preis": "guenstig",
@@ -262,226 +177,6 @@ const ORTE = [
     "gehen": "wenig"
   },
   {
-    "id": "pane-e-cafe",
-    "name": "Pane e Cafe",
-    "kategorie": "fruehstueck",
-    "weitere": [],
-    "tags": [
-      "fr-klassisch",
-      "fr-mittag"
-    ],
-    "labels": [
-      "barrierefrei",
-      "lgbtq"
-    ],
-    "adresse": "Elisabethstraße 26, 1010 Wien",
-    "beschreibung": "Kleines Café zwischen Oper und Karlsplatz mit italienischem Einschlag. Sperrt um acht Uhr auf.",
-    "website": "",
-    "bild": "",
-    "lat": 48.2031696,
-    "lng": 16.3633172,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "beisl-sigmundsgasse",
-    "name": "Beisl in der Sigmundsgasse",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-traditionell"
-    ],
-    "labels": [
-      "vegan",
-      "geheimtipp"
-    ],
-    "adresse": "Sigmundsgasse 12, 1070 Wien",
-    "beschreibung": "Kleines Wirtshaus am Spittelberg mit Wiener Hausmannskost zu Preisen, die im siebten Bezirk selten geworden sind. Mittags oft voll, eine Reservierung hilft.",
-    "website": "",
-    "bild": "",
-    "lat": 48.2035345,
-    "lng": 16.3535453,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "griechenbeisl",
-    "name": "Griechenbeisl",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-traditionell"
-    ],
-    "labels": [
-      "reizarm"
-    ],
-    "adresse": "Fleischmarkt 11, 1010 Wien",
-    "beschreibung": "Gasthaus am Fleischmarkt, dessen Gasträume bis ins 15. Jahrhundert zurückgehen. Deutlich touristisch, die Küche hält das Niveau trotzdem.",
-    "website": "https://griechenbeisl.at",
-    "bild": "bilder/griechenbeisl.jpg",
-    "lat": 48.2107463,
-    "lng": 16.3772648,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
-    "id": "gasthaus-reinthaler",
-    "name": "Gasthaus Reinthaler",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-traditionell"
-    ],
-    "labels": [
-      "geheimtipp"
-    ],
-    "adresse": "Gluckgasse 5, 1010 Wien",
-    "beschreibung": "Beisl hinter der Kärntner Straße, wo Schnitzel und Gulasch noch zweistellig kosten. Wirtshausbetrieb ohne jede Inszenierung.",
-    "website": "https://gasthausreinthaler.at",
-    "bild": "",
-    "lat": 48.2055017,
-    "lng": 16.3690442,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "wiener-wiazhaus",
-    "name": "Wiener Wiazhaus",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-traditionell"
-    ],
-    "labels": [
-      "geheimtipp"
-    ],
-    "adresse": "Karlsgasse 22, 1040 Wien",
-    "beschreibung": "Wirtshaus nahe dem Karlsplatz mit Retro-Einrichtung und regionaler Karte. Öffnet erst am Abend.",
-    "website": "",
-    "bild": "",
-    "lat": 48.1967941,
-    "lng": 16.3692091,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
-    "id": "scharfer-rene",
-    "name": "Würstelstand Zum scharfen René",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-fastfood"
-    ],
-    "labels": [],
-    "adresse": "Schwarzenbergplatz 15, 1040 Wien",
-    "beschreibung": "Würstelstand am Schwarzenbergplatz, bekannt für seine scharfen Saucen. Eine Käsekrainer im Stehen gehört zu Wien wie die Melange.",
-    "website": "https://zumscharfenrene.at",
-    "bild": "",
-    "lat": 48.200345,
-    "lng": 16.3745899,
-    "indoor": false,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "weingut-wailand",
-    "name": "Weingut Wailand",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-traditionell"
-    ],
-    "labels": [
-      "reizarm",
-      "vegan"
-    ],
-    "adresse": "Kahlenberger Straße 220, 1190 Wien",
-    "beschreibung": "Buschenschank mitten im Weingarten am Nussberg, mit Blick über die Stadt. Geöffnet von März bis November und nur bei gutem Wetter.",
-    "website": "https://www.wailandwein.at",
-    "bild": "",
-    "lat": 48.2589174,
-    "lng": 16.3658899,
-    "indoor": false,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "viel"
-  },
-  {
-    "id": "naschmarkt",
-    "name": "Naschmarkt",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-fastfood"
-    ],
-    "labels": [
-      "barrierefrei",
-      "lgbtq"
-    ],
-    "adresse": "Linke Wienzeile, 1060 Wien",
-    "beschreibung": "Marktzeile zwischen Karlsplatz und Kettenbrückengasse mit Ständen für Obst, Gewürze und Meze. Samstags kommt am westlichen Ende der Flohmarkt dazu.",
-    "website": "",
-    "bild": "bilder/naschmarkt.jpg",
-    "lat": 48.1981802,
-    "lng": 16.3626217,
-    "indoor": false,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "viel"
-  },
-  {
-    "id": "kolonitz-beisl",
-    "name": "Kolonitz Beisl",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-traditionell"
-    ],
-    "labels": [
-      "barrierefrei",
-      "lgbtq"
-    ],
-    "adresse": "Bechardgasse 2, 1030 Wien",
-    "beschreibung": "Beisl im dritten Bezirk, zehn Gehminuten vom Hundertwasserhaus. Große Portionen zu kleinen Preisen, die Gäste kommen aus der Nachbarschaft.",
-    "website": "",
-    "bild": "",
-    "lat": 48.2096691,
-    "lng": 16.3900381,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
     "id": "restaurant-cavaliere",
     "name": "Restaurant Cavaliere",
     "kategorie": "restaurant",
@@ -500,129 +195,6 @@ const ORTE = [
     "lng": 16.3757049,
     "indoor": true,
     "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "papaya",
-    "name": "Papaya",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-asiatisch"
-    ],
-    "labels": [
-      "barrierefrei",
-      "vegan",
-      "geheimtipp"
-    ],
-    "adresse": "Neustiftgasse 40, 1070 Wien",
-    "beschreibung": "Kleines Lokal in der Neustiftgasse mit thailändischer und südostasiatischer Küche. Öffnet erst zu Mittag.",
-    "website": "",
-    "bild": "",
-    "lat": 48.2054605,
-    "lng": 16.3499978,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "thanos-taverna",
-    "name": "Thanos Taverna",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-griechisch"
-    ],
-    "labels": [
-      "barrierefrei",
-      "lgbtq",
-      "vegan",
-      "geheimtipp"
-    ],
-    "adresse": "Otto-Bauer-Gasse 11, 1060 Wien",
-    "beschreibung": "Familiäre griechische Taverne in Mariahilf, mit Gyros und Mezedes. Eng, laut, gut.",
-    "website": "",
-    "bild": "",
-    "lat": 48.1956984,
-    "lng": 16.3487473,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
-    "id": "sri-nataraja",
-    "name": "Sri Nataraja",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-indisch"
-    ],
-    "labels": [
-      "hunde"
-    ],
-    "adresse": "Neustiftgasse 50, 1070 Wien",
-    "beschreibung": "Indisches Lokal in der Neustiftgasse, die Currys reichen von mild bis ernsthaft scharf. Viel für Vegetarier.",
-    "website": "",
-    "bild": "",
-    "lat": 48.2058184,
-    "lng": 16.3485888,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
-  },
-  {
-    "id": "arizona-burger",
-    "name": "Arizona Burger & Bar",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-steakburger"
-    ],
-    "labels": [],
-    "adresse": "Landstraßer Hauptstraße 103, 1030 Wien",
-    "beschreibung": "Burgerlokal in der Landstraße mit amerikanischer Schlagseite. Große Portionen, am Wochenende langer Andrang.",
-    "website": "",
-    "bild": "",
-    "lat": 48.1981193,
-    "lng": 16.3951716,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
-    "id": "pita-box",
-    "name": "Pita BOX",
-    "kategorie": "restaurant",
-    "weitere": [],
-    "tags": [
-      "kueche-fastfood"
-    ],
-    "labels": [
-      "barrierefrei"
-    ],
-    "adresse": "Taborstraße 38, 1020 Wien",
-    "beschreibung": "Streetfood in der Taborstraße, Döner und Falafel zum Mitnehmen. Auch die vegane Variante taugt.",
-    "website": "",
-    "bild": "",
-    "lat": 48.2186664,
-    "lng": 16.3810679,
-    "indoor": true,
-    "andrang": "ruhig",
     "allein": true,
     "gruppe": true,
     "preis": "guenstig",
@@ -1276,32 +848,6 @@ const ORTE = [
     "gehen": "wenig"
   },
   {
-    "id": "das-muth",
-    "name": "Das MuTh",
-    "kategorie": "musik",
-    "weitere": [],
-    "tags": [
-      "genre-klassik",
-      "loc-klein"
-    ],
-    "labels": [
-      "vegan",
-      "geheimtipp"
-    ],
-    "adresse": "Am Augartenspitz 1, 1020 Wien",
-    "beschreibung": "Konzertsaal der Wiener Sängerknaben am Augarten, 2012 eröffnet. Das Programm reicht weit über den Chor hinaus.",
-    "website": "https://muth.at",
-    "bild": "bilder/das-muth.jpg",
-    "lat": 48.2200452,
-    "lng": 16.3800366,
-    "indoor": true,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
     "id": "zwe",
     "name": "ZWE",
     "kategorie": "musik",
@@ -1603,30 +1149,6 @@ const ORTE = [
     "gehen": "wenig"
   },
   {
-    "id": "battlekart-wien",
-    "name": "BattleKart Wien",
-    "kategorie": "aktivitaet",
-    "weitere": [],
-    "tags": [
-      "akt-sport"
-    ],
-    "labels": [
-      "reizarm"
-    ],
-    "adresse": "Trabrennstraße 5, 1020 Wien",
-    "beschreibung": "Elektro-Karts auf einer Halle, in die Spielfelder projiziert werden. Gefahren wird wie in einem Videospiel, nur im echten Kart.",
-    "website": "https://battlekart.at",
-    "bild": "",
-    "lat": 48.2138455,
-    "lng": 16.4133234,
-    "indoor": true,
-    "andrang": "belebt",
-    "allein": false,
-    "gruppe": true,
-    "preis": "mittel",
-    "gehen": "wenig"
-  },
-  {
     "id": "wakeboardlift-wien",
     "name": "Wakeboardlift Wien",
     "kategorie": "aktivitaet",
@@ -1671,28 +1193,6 @@ const ORTE = [
     "gruppe": true,
     "preis": "guenstig",
     "gehen": "viel"
-  },
-  {
-    "id": "bootsvermietung-eppel",
-    "name": "Bootsvermietung Eppel",
-    "kategorie": "aktivitaet",
-    "weitere": [],
-    "tags": [],
-    "labels": [
-      "reizarm"
-    ],
-    "adresse": "Wagramer Straße 48a, 1220 Wien",
-    "beschreibung": "Elektroboote und Tretboote an der Alten Donau. Eine Stunde reicht für eine Runde, zwei sind angenehmer.",
-    "website": "https://eppel-boote.at",
-    "bild": "",
-    "lat": 48.2364787,
-    "lng": 16.4253119,
-    "indoor": false,
-    "andrang": "ruhig",
-    "allein": true,
-    "gruppe": true,
-    "preis": "guenstig",
-    "gehen": "wenig"
   },
   {
     "id": "wiener-riesenrad",
