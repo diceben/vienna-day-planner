@@ -130,7 +130,7 @@ Sie klappen **schon beim Überfahren** auf, nicht erst nach dem Klick — man ka
 
 Klickt man in dieser Vorschau ein Merkmal an, springt die zugehörige Kategorie mit an — sonst würde das Merkmal ins Leere greifen. Verlässt der Zeiger den Bereich, kehren die Chips zur gewählten Kategorie zurück oder verschwinden.
 
-Auf schmalen Schirmen bleiben die Namen der Symbole zugeklappt: Neun Symbole und ein Name passen dort nicht nebeneinander, der Name bliebe am linken Kartenrand hängen. Was gefiltert ist, sagen dort die Färbung des Symbols, die Merkmalkarte und die Trefferzahl.
+Auf dem Handy sieht das anders aus, siehe unten.
 
 Die Logik: innerhalb einer Dimension gilt oder (Italienisch + Griechisch zeigt beide), über Dimensionen hinweg und (Italienisch + Fancy zeigt nur das teure italienische Lokal). Ein Merkmal wertet nur Orte seiner eigenen Kategorie.
 
@@ -158,6 +158,17 @@ Das Suchfeld greift auf Name, Adresse und Beschreibung zu.
 Die Leiste ganz oben hat keinen eigenen Hintergrund und keine Unterkante — sie ist kein Balken, sondern ein Titel links und schwebende Bedienelemente rechts: Trefferzahl, Zurücksetzen, die Suchpille mit Lupe und das Zahnrad. Deren rechte Kante liegt auf derselben Linie wie die Kategoriensymbole über der Karte; beide sitzen 12 Pixel vom Rand (auf schmalen Fenstern 10).
 
 Die Mitte bleibt bewusst leer. Der Platz ist für später vorgesehen.
+
+## Auf dem Handy
+
+Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was man von Kartendiensten kennt:
+
+- Die **Suchleiste** schwebt über der Karte, über die volle Breite, mit der Lupe links und dem Zahnrad rechts darin. Der Titel entfällt.
+- Darunter die **Kategorien als beschriftete Chips** in einer waagrecht scrollbaren Reihe, Symbol vorn, Name dahinter. Der Scrollbalken ist ausgeblendet, gescrollt wird trotzdem. Erster Chip ist die Trefferzahl.
+- Ist eine Kategorie gewählt, erscheint darunter eine **zweite scrollbare Reihe** mit ihren Merkmalen.
+- **Leaflets Zoomknöpfe sind ausgeblendet** — auf dem Handy wird mit zwei Fingern gezoomt, und die Knöpfe stünden genau unter der Suchleiste im Weg. Der Standortknopf (◉) rutscht nach unten links.
+
+Am großen Schirm bleibt es beim Gegenteil: Dort sind die Kategorien reine Symbole, die beim Überfahren aufrollen, und die Merkmale stehen untereinander am rechten Rand.
 
 ## Auf GitHub Pages veröffentlichen
 

@@ -1101,6 +1101,13 @@
   function zeichneFilter() {
     var behaelter = document.getElementById("kategorien");
     behaelter.innerHTML = "";
+
+    /* Erster Chip der Reihe: die Trefferzahl. Nur auf schmalen Fenstern
+       sichtbar — am Desktop steht sie in der Kopfzeile. */
+    var zaehler = document.createElement("span");
+    zaehler.className = "kat-chip zaehler-chip trefferzahl";
+    behaelter.appendChild(zaehler);
+
     Object.keys(KATEGORIEN).forEach(function (schluessel) {
       var k = KATEGORIEN[schluessel];
       var b = document.createElement("button");
@@ -1309,10 +1316,14 @@
       else if (karte.hasLayer(m)) { karte.removeLayer(m); }
     });
 
-    var zahl = document.getElementById("trefferzahl");
-    zahl.textContent = liste.length === orte.length
+    var text = liste.length === orte.length
       ? orte.length + " Orte"
       : liste.length + " von " + orte.length + " Orten";
+    /* Zweimal vorhanden: in der Kopfzeile (Desktop) und als erster Chip in der
+       Kategorienreihe (Handy). Sichtbar ist immer nur eines der beiden. */
+    document.querySelectorAll(".trefferzahl").forEach(function (el) {
+      el.textContent = text;
+    });
   }
 
   /* ------------------------------------------------------------------
@@ -1772,7 +1783,9 @@
 
     /* Ohne bekannten Standort gäbe es keinen Bezugspunkt für die 3 km. */
     if (routeUmkreis && !standortMarker) {
-      window.alert("Für den Umkreis fehlt dein Standort. Schalt ihn links oben auf der Karte über ◉ ein, dann noch einmal berechnen.");
+      /* Ohne Ortsangabe: Der Knopf sitzt am Desktop oben links, auf dem Handy
+         unten links. */
+      window.alert("Für den Umkreis fehlt dein Standort. Schalt ihn auf der Karte über ◉ ein, dann noch einmal berechnen.");
       return;
     }
 

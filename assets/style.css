@@ -338,6 +338,10 @@ body {
   pointer-events: auto;
 }
 
+/* Am großen Schirm steht die Trefferzahl in der Kopfzeile — der Chip in der
+   Symbolleiste ist nur die Handyfassung. */
+.zaehler-chip { display: none; }
+
 .kat-chip {
   display: inline-flex;
   align-items: center;
@@ -1415,32 +1419,134 @@ body.setzt-position #karte { cursor: crosshair; }
 /* ---------- Schmale Fenster ---------- */
 
 @media (max-width: 900px) {
-  /* Rechts 10 px wie .kat-zone auf schmalen Fenstern. */
-  .toolbar { flex-wrap: nowrap; padding: 9px 10px 9px 14px; gap: 9px; }
-  .marke { font-size: 16px; }
-  /* Die Suchpille gibt als Erste nach, damit Titel, Zähler und Zahnrad
-     nebeneinander bleiben. */
-  .kopf-rechts { flex: 1 1 auto; justify-content: flex-end; }
-  .suchfeld { flex: 1 1 140px; min-width: 96px; }
-  .toolbar-suche { width: auto; }
-  /* Neun Symbole zu je 30 px passen damit auch auf ein 360-px-Display. */
-  /* Abstand zu Leaflets Zoomknöpfen oben links. */
-  .kat-zone { top: 10px; left: 56px; right: 10px; }
-  .kat-leiste { gap: 4px; }
-  .kat-chip { height: 30px; padding: 0 7px; }
-  .kat-chip .sym { font-size: 13px; }
-
-  /* Neun Symbole plus ein Name passen hier nicht nebeneinander — der Name
-     bliebe am linken Kartenrand hängen. Was gefiltert ist, sagen stattdessen
-     die Färbung, die Merkmalkarte darunter und die Trefferzahl. */
-  .kat-chip:hover .name,
-  .kat-chip:focus-visible .name,
-  .kat-chip[aria-pressed="true"] .name {
-    max-width: 0;
-    opacity: 0;
-    margin-right: 0;
+  /* ----- Kopfzeile schwebt über der Karte, wie bei Kartendiensten üblich ----- */
+  .topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1200;
+    pointer-events: none;
   }
-  .einstellungen { right: 10px; }
+  .toolbar { padding: 9px 10px; gap: 0; }
+  .marke { display: none; }
+
+  /* Die rechte Gruppe wird selbst zur Pille: Lupe, Eingabefeld und Zahnrad
+     sitzen darin, wie das Profilbild in der Suchleiste von Google Maps. */
+  .kopf-rechts {
+    flex: 1 1 auto;
+    height: 44px;
+    padding: 0 6px 0 14px;
+    gap: 8px;
+    border: 1px solid var(--linie);
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.97);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 2px 10px rgba(0,0,0,.16);
+    pointer-events: auto;
+  }
+  .kopf-rechts:focus-within {
+    outline: 2px solid var(--tinte);
+    outline-offset: 1px;
+  }
+  /* Die inneren Elemente verlieren ihre eigene Hülle — die trägt jetzt die
+     umgebende Pille. */
+  .suchfeld {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .suchfeld:focus-within { outline: none; }
+  .such-lupe { font-size: 15px; }
+  .toolbar-suche { width: auto; font-size: 15px; }
+  .topbar .gear {
+    border: none;
+    background: none;
+    box-shadow: none;
+    font-size: 17px;
+    padding: 6px;
+  }
+  /* Trefferzahl und Zurücksetzen sitzen hier in der Kategorienreihe. */
+  .toolbar-status { display: none; }
+  .einstellungen { right: 10px; top: 60px; }
+
+  /* ----- Kategorien: waagrecht scrollbare Reihe mit Namen ----- */
+  .kat-zone {
+    top: 62px;
+    left: 0;
+    right: 0;
+    align-items: stretch;
+  }
+  .kat-leiste {
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 2px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Scrollbalken ausblenden, gescrollt wird trotzdem. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kat-leiste::-webkit-scrollbar { display: none; }
+
+  /* Hier tragen die Chips ihren Namen dauerhaft — die Reihe scrollt ja.
+     Und das Symbol steht vorn: Es klappt nichts mehr auf, also gibt es keinen
+     Grund für die umgekehrte Reihenfolge des großen Schirms. */
+  .kat-chip { height: 34px; padding: 0 12px; flex-direction: row-reverse; }
+  .kat-chip .name {
+    max-width: none;
+    opacity: 1;
+    margin-right: 0;
+    margin-left: 7px;
+    transition: none;
+  }
+  .kat-chip .sym { font-size: 15px; }
+
+  .zaehler-chip {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    cursor: default;
+    color: var(--tinte-leise);
+    white-space: nowrap;
+  }
+
+  /* ----- Merkmale: zweite scrollbare Reihe darunter ----- */
+  .merkmale {
+    position: static;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 2px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .merkmale::-webkit-scrollbar { display: none; }
+  .merkmale .merkmal-kat {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .merkmale .chip.merkmal { white-space: nowrap; }
+
+  /* ----- Leaflets Bedienelemente aus dem Weg ----- */
+  /* Auf dem Handy wird gezoomt, nicht geklickt — die Knöpfe stünden nur
+     unter der Suchleiste im Weg. Der Standortknopf rutscht nach unten links. */
+  .leaflet-control-zoom { display: none; }
+  .leaflet-top.leaflet-left { top: auto; bottom: 16px; }
   .buehne {
     grid-template-columns: 1fr;
     grid-template-rows: 58vh auto;
