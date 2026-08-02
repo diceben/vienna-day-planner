@@ -53,7 +53,7 @@ Die Karte läuft mit [Leaflet](https://leafletjs.com) und Kacheln von CARTO auf 
 `index.html` doppelklicken reicht. Wenn der Browser dabei zickt, tut es ein lokaler Server:
 
 ```bash
-cd "Wien Karte" && python3 -m http.server 8765
+cd vienna-day-planner && python3 -m http.server 8765
 ```
 
 Danach im Browser `http://127.0.0.1:8765` öffnen.
@@ -141,10 +141,10 @@ Das Suchfeld greift auf Name, Adresse und Beschreibung zu.
 
 ## Auf GitHub Pages veröffentlichen
 
-1. Auf GitHub ein Repository anlegen, etwa `wien-karte`.
-2. Den Inhalt dieses Ordners hineinlegen — `index.html` muss im Wurzelverzeichnis liegen, nicht in einem Unterordner.
-3. Im Repository unter *Settings → Pages* als Quelle „Deploy from a branch“ wählen, Branch `main` und Ordner `/ (root)`.
-4. Nach ein bis zwei Minuten ist die Seite unter `https://<benutzername>.github.io/wien-karte/` erreichbar.
+Das Repository liegt auf [github.com/diceben/vienna-day-planner](https://github.com/diceben/vienna-day-planner), `index.html` im Wurzelverzeichnis — genau dort, wo Pages sie erwartet.
+
+1. Im Repository unter *Settings → Pages* als Quelle „Deploy from a branch“ wählen, Branch `main` und Ordner `/ (root)`.
+2. Nach ein bis zwei Minuten ist die Seite unter <https://diceben.github.io/vienna-day-planner/> erreichbar.
 
 Ein späteres Update besteht aus einem einzigen Schritt: die exportierte `daten.js` committen und pushen.
 
