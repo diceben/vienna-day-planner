@@ -1618,14 +1618,32 @@ body.setzt-position #karte { cursor: crosshair; }
   body { height: auto; min-height: 100%; }
   .buehne { min-height: 0; }
 
-  /* ----- Ortsblatt: fährt beim Antippen eines Pins von unten herein ----- */
+  /* ----- Ortsblatt: fährt beim Antippen eines Pins von unten herein -----
+     Solange es offen ist, weicht die Ortsliste ganz — die Karte füllt den
+     Schirm, das Blatt nimmt das untere Drittel. Erst das ✕ holt die Liste
+     zurück. */
+  body.ort-offen .liste-spalte { display: none; }
+  /* Der Seitenfuß stünde sonst als 53-px-Streifen unter der bildschirm-
+     füllenden Karte und machte die Seite wieder scrollbar. Die Nennung von
+     OpenStreetMap und CARTO steht ohnehin auf der Karte selbst. */
+  body.ort-offen .fuss { display: none; }
+  body.ort-offen .buehne { grid-template-rows: 100vh; }
+  @supports (height: 100dvh) {
+    body.ort-offen .buehne { grid-template-rows: 100dvh; }
+  }
+  /* Nichts zu scrollen, solange nur Karte und Blatt da sind. */
+  body.ort-offen { overflow: hidden; }
+
   .ort-blatt {
     display: block;
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 1250;
+    max-height: 42vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
     border-radius: 16px 16px 0 0;
     background: var(--weiss);

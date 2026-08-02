@@ -1307,6 +1307,11 @@
       '<div class="blatt-aktionen">' + aktionen + "</div>";
 
     blatt.hidden = false;
+    /* Die Liste weicht dem Blatt, die Karte füllt den Schirm. Erst danach
+       weiß Leaflet von seiner neuen Größe. */
+    document.body.classList.add("ort-offen");
+    window.scrollTo(0, 0);
+    karte.invalidateSize();
     /* Erst im nächsten Bild einblenden, sonst gibt es keinen Übergang. */
     window.requestAnimationFrame(function () { blatt.classList.add("offen"); });
   }
@@ -1314,8 +1319,12 @@
   function schliesseOrtBlatt() {
     var blatt = document.getElementById("ort-blatt");
     if (!blatt) { return; }
+    var war = !blatt.hidden;
     blatt.classList.remove("offen");
     blatt.hidden = true;
+    document.body.classList.remove("ort-offen");
+    /* Die Liste ist zurück, die Karte wieder kleiner. */
+    if (war) { karte.invalidateSize(); }
   }
 
   /* Der Pin soll über dem Blatt sichtbar bleiben, nicht darunter liegen. */
