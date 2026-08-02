@@ -12,7 +12,9 @@
 
   var KATEGORIEN = {
     fruehstueck:       { titel: "Frühstückscafés",        farbe: "#c08a2e", zeichen: "🥐" },
+    cafe:              { titel: "Cafés",                  farbe: "#8a6a3c", zeichen: "☕" },
     restaurant:        { titel: "Restaurants",            farbe: "#b23a2a", zeichen: "🍽️" },
+    bar:               { titel: "Bars",                   farbe: "#6b3f6e", zeichen: "🍸" },
     sehenswuerdigkeit: { titel: "Sehenswürdigkeiten",     farbe: "#1b7fa8", zeichen: "🏰" },
     museum:            { titel: "Museen & Ausstellungen", farbe: "#7a3f86", zeichen: "🏛️" },
     musik:             { titel: "Musik",                  farbe: "#3b4a8c", zeichen: "🎵" },
@@ -39,7 +41,9 @@
   var ROUTE = {
     punkte: {
       fruehstueck: 1,
+      cafe: 1,
       restaurant: 2,
+      bar: 2,
       sehenswuerdigkeit: 2,
       aktivitaet: 2,
       museum: 3,
@@ -53,7 +57,9 @@
       museum: ["tagsueber"],
       sehenswuerdigkeit: ["tagsueber"],
       aktivitaet: ["tagsueber"],
+      cafe: ["tagsueber"],
       restaurant: ["tagsueber", "abends"],
+      bar: ["abends"],
       musik: ["abends"],
       event: ["abends"]
     },
@@ -64,9 +70,11 @@
       sehenswuerdigkeit: 2,
       museum: 2,
       aktivitaet: 3,
+      cafe: 3,
       restaurant: 4,
       musik: 5,
-      event: 5
+      event: 5,
+      bar: 6
     },
 
     /* Der Tag wird in vier Abschnitte gegliedert. */
@@ -87,8 +95,10 @@
        geht an einem Abend in ein Konzert, nicht in zwei. */
     hoechstens: {
       fruehstueck: 1,
+      cafe: 1,
       museum: 2,
       restaurant: 2,
+      bar: 1,
       musik: 1,
       event: 1
     },
@@ -140,6 +150,20 @@
       { id: "sitzen", chips: [ { label: "Draußensitzen", tag: "draussen" } ] },
       { id: "stil", chips: [ { label: "Klassisch", tag: "fr-klassisch" }, { label: "Fancy", tag: "fr-fancy" } ] },
       { id: "ende", chips: [ { label: "bis Mittag", tag: "fr-mittag" }, { label: "bis Nachmittag", tag: "fr-nachmittag" } ] }
+    ],
+    cafe: [
+      { id: "sitzen", chips: [ { label: "Draußensitzen", tag: "draussen" } ] },
+      { id: "stil", chips: [ { label: "Kaffeehaus", tag: "cafe-kaffeehaus" }, { label: "Spezialitätenkaffee", tag: "cafe-spezialitaet" } ] },
+      { id: "suess", chips: [ { label: "Kuchen & Patisserie", tag: "cafe-kuchen" } ] }
+    ],
+    bar: [
+      { id: "sitzen", chips: [ { label: "Draußensitzen", tag: "draussen" } ] },
+      { id: "trinken", chips: [
+        { label: "Cocktails", tag: "bar-cocktails" },
+        { label: "Wein", tag: "bar-wein" },
+        { label: "Bier", tag: "bar-bier" }
+      ] },
+      { id: "kueche", chips: [ { label: "Auch Essen", tag: "bar-essen" } ] }
     ],
     restaurant: [
       { id: "kueche", chips: [
@@ -782,7 +806,7 @@
       if (fensterId === "abend") { c.abschnitt = "abend"; return; }
 
       if (k === "fruehstueck") { c.abschnitt = "vormittag"; return; }
-      if (k === "musik" || k === "event") { c.abschnitt = "abend"; return; }
+      if (k === "musik" || k === "event" || k === "bar") { c.abschnitt = "abend"; return; }
 
       if (k === "restaurant") {
         restaurants += 1;

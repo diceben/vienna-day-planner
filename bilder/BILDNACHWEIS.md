@@ -9,6 +9,7 @@ Wer ein Bild durch ein eigenes ersetzt, streicht die betreffende Zeile hier.
 | Albertina | `bilder/albertina.jpg` | C.Stadler/Bwag | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Wien_-_Albertina_(b).JPG) |
 | Ankeruhr | `bilder/ankeruhr.jpg` | Thomas Ledl | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Ankeruhr,_Hoher_Markt,_Vienna.jpg) |
 | Arena Wien | `bilder/arena-wien.jpg` | Michael Katai | CC BY-SA 2.5 | [Commons](https://commons.wikimedia.org/wiki/File:Arena_wien_01.jpg) |
+| Café Diglas | `bilder/cafe-diglas.jpg` | Dr Murali Mohan Gurram | CC BY-SA 3.0 AT | [Commons](https://commons.wikimedia.org/wiki/File:CAFE_DIGLAS-VIENNA-Dr._Murali_Mohan_Gurram_(2).jpg) |
 | Café Hummel | `bilder/cafe-hummel.jpg` | Gugerell | CC0 | [Commons](https://commons.wikimedia.org/wiki/File:Wien_08_Cafe_Hummel_a.jpg) |
 | Café Landtmann | `bilder/cafe-landtmann.jpg` | Gryffindor | CC BY 2.5 | [Commons](https://commons.wikimedia.org/wiki/File:Palais_Lieben-Auspitz_Vienna_Sept._2006_001.jpg) |
 | Das MuTh | `bilder/das-muth.jpg` | Gugerell | CC0 | [Commons](https://commons.wikimedia.org/wiki/File:Wien_02_MuTh_a.jpg) |
@@ -17,6 +18,7 @@ Wer ein Bild durch ein eigenes ersetzt, streicht die betreffende Zeile hier.
 | Haus der Musik | `bilder/haus-der-musik.jpg` | Clemens PFEIFFER, A-1190 Wien | Attribution | [Commons](https://commons.wikimedia.org/wiki/File:Haus-Der-Musik-Wien.jpg) |
 | Hundertwasserhaus | `bilder/hundertwasserhaus.jpg` | Dietmar Rabich | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Wien,_Hundertwasserhaus_--_2018_--_3173.jpg) |
 | Karlskirche | `bilder/karlskirche.jpg` | Thomas Ledl | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Karlskirche_Abendsonne_1.jpg) |
+| Kleines Café | `bilder/kleines-cafe.jpg` | Michal Louč (Nadkachna) | CC BY-SA 3.0 | [Commons](https://commons.wikimedia.org/wiki/File:Kleines_Caf%C3%A9.jpg) |
 | Kunsthistorisches Museum | `bilder/kunsthistorisches-museum.jpg` | AnonymousGuyFawkes | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Kunsthistorisches_Museum_-_Wien.jpg) |
 | Leopold Museum | `bilder/leopold-museum.jpg` | Gugerell | CC0 | [Commons](https://commons.wikimedia.org/wiki/File:Wien_07_Leopold_Museum_a.jpg) |
 | Musikverein | `bilder/musikverein.jpg` | C.Stadler/Bwag | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Wien_-_Haus_des_Wiener_Musikvereins_(1).JPG) |
@@ -37,4 +39,4 @@ Wer ein Bild durch ein eigenes ersetzt, streicht die betreffende Zeile hier.
 | Wiener Staatsoper | `bilder/wiener-staatsoper.jpg` | Wiener Staatsoper GmbH | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Wiener_Staatsoper_Front.jpg) |
 | Wiener Zentralfriedhof | `bilder/zentralfriedhof.jpg` | C.Stadler/Bwag | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Simmering_(Wien)_-_Luegerkirche_(1).JPG) |
 
-Stand: Juli 2026. Die Bilder wurden von Commons heruntergeladen, auf 420 Pixel verkleinert und liegen hier als Kopie.
+Stand: August 2026. Die Bilder wurden von Commons heruntergeladen und liegen hier als Kopie — die älteren auf 420 Pixel verkleinert, Café Diglas und Kleines Café auf 500 Pixel (Commons liefert Thumbnails nur noch in festen Größen).

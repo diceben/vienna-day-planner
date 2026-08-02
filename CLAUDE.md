@@ -21,6 +21,20 @@ CDN. Ansehen: `python3 -m http.server 8765`, dann http://127.0.0.1:8765 —
 nicht per Doppelklick, sonst funktioniert die Standortabfrage nicht (`file://`
 ist kein sicherer Kontext).
 
+## Der Kuratierungsmaßstab — wichtiger als alles andere hier
+
+Ben hat im August 2026 zwanzig Orte bewusst gelöscht, darunter Café Landtmann,
+Griechenbeisl, Naschmarkt und Vollpension. Begründung: **„Die Leute wollen keine
+0815-Karte, sondern wirklich coole oder schöne Orte."** Landtmann etwa flog raus,
+weil überteuert und beliebig.
+
+Daraus folgt für jede Ergänzung: Ein Ort kommt nicht auf die Karte, weil er
+bekannt ist oder gut bewertet, sondern weil er etwas taugt. Bekanntheit ist eher
+ein Gegenargument. Im Zweifel Ben fragen, nicht hilfsbereit auffüllen.
+
+Die früher dokumentierte Regel „Google-Bewertung ab 4,4 Sternen" beschreibt nur,
+wie der erste Bestand entstanden ist. Sie ist kein Aufnahmekriterium.
+
 ## Orte ergänzen
 
 Zwei Wege, gleiches Ergebnis: der Bearbeiten-Modus auf der Seite (unten rechts

@@ -1241,5 +1241,360 @@ const ORTE = [
     "gruppe": true,
     "preis": "mittel",
     "gehen": "viel"
+  },
+  {
+    "id": "das-vivet",
+    "name": "Das Vivet",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Westbahnstraße 21, 1070 Wien",
+    "beschreibung": "Café, Restaurant und Bar in einem, in der Westbahnstraße. Frühstück ab acht, an den langen Tagen bis ein Uhr früh.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2014811,
+    "lng": 16.3438957,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-demi",
+    "name": "Café Demi",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Spallartgasse 25, 1140 Wien",
+    "beschreibung": "Café und Bistro im Jutta-Steier-Park, mit beschatteter Terrasse ins Grüne. Frühstück den ganzen Tag, dazu hausgemachte Mehlspeisen.",
+    "website": "https://demi.cafe",
+    "bild": "",
+    "lat": 48.2006825,
+    "lng": 16.3041102,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "ponykarussell",
+    "name": "Ponykarussell",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-mittag"
+    ],
+    "labels": [
+      "barrierefrei",
+      "vegan"
+    ],
+    "adresse": "Karl-Kolarik-Weg 1, 1020 Wien",
+    "beschreibung": "Café im ehemaligen Ponykarussell im Prater, mit eigener Patisserie und Gastgarten. Frühstück bis zwei, danach Küche.",
+    "website": "https://www.ponykarussell.at",
+    "bild": "",
+    "lat": 48.2144665,
+    "lng": 16.4018418,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "viel"
+  },
+  {
+    "id": "pijat",
+    "name": "PIJAT",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Mariahilfer Straße 146/1, 1150 Wien",
+    "beschreibung": "Kleines Bistro an der äußeren Mariahilfer Straße mit dalmatinischer Küche. Der Name heißt im Dialekt schlicht Teller.",
+    "website": "https://pijat.at",
+    "bild": "",
+    "lat": 48.1942933,
+    "lng": 16.3350944,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "mae-aurel",
+    "name": "Mae Aurel",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Salzgries 3, 1010 Wien",
+    "beschreibung": "Brasserie im Textilviertel, Frühstück von acht Uhr bis in den Abend. Eigenes Brot, viel Vegetarisches und Veganes.",
+    "website": "https://maeaurel.com",
+    "bild": "",
+    "lat": 48.2127385,
+    "lng": 16.3729387,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "sil",
+    "name": "SiL",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "barrierefrei",
+      "hunde",
+      "vegan"
+    ],
+    "adresse": "Babenbergerstraße 5, 1010 Wien",
+    "beschreibung": "Café zwischen Burggarten und Museumsquartier mit Frühstück den ganzen Tag. Es gibt eine eigene Karte für den Hund.",
+    "website": "https://www.sil.wien",
+    "bild": "",
+    "lat": 48.2031745,
+    "lng": 16.3628708,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "klyo",
+    "name": "KLYO",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-nachmittag"
+    ],
+    "labels": [],
+    "adresse": "Uraniastraße 1, 1010 Wien",
+    "beschreibung": "Café, Restaurant und Bar in der Urania, mit Blick über den Donaukanal. Die Frühstückskarte läuft bis in die Nacht.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2115515,
+    "lng": 16.3837544,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-tagsueber",
+    "name": "Café Tagsüber",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "vegan"
+    ],
+    "adresse": "Kupkagasse 2, 1080 Wien",
+    "beschreibung": "Café in einer Seitengasse der Josefstädter Straße, am Ende des Hamerlingparks. Frühstück den ganzen Tag, Gebäck aus eigener Hand.",
+    "website": "",
+    "bild": "",
+    "lat": 48.2104698,
+    "lng": 16.346025,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-propeller",
+    "name": "Café Propeller",
+    "kategorie": "fruehstueck",
+    "weitere": [],
+    "tags": [
+      "fr-nachmittag"
+    ],
+    "labels": [
+      "vegan"
+    ],
+    "adresse": "Krongasse 22/1, 1050 Wien",
+    "beschreibung": "Kleines Café in Margareten mit knapper, guter Frühstückskarte. Brot von Öfferl, Eier aus Freilandhaltung.",
+    "website": "https://www.propeller.wien",
+    "bild": "",
+    "lat": 48.1932889,
+    "lng": 16.3614705,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "nook",
+    "name": "Nook",
+    "kategorie": "cafe",
+    "weitere": [],
+    "tags": [
+      "cafe-spezialitaet",
+      "cafe-kuchen"
+    ],
+    "labels": [
+      "vegan"
+    ],
+    "adresse": "Altgasse 12, 1130 Wien",
+    "beschreibung": "Kaffeehaus mit kleiner Greißlerei in Hietzing, unweit von Schönbrunn. Spezialitätenkaffee und täglich frisches Gebäck.",
+    "website": "",
+    "bild": "",
+    "lat": 48.1854885,
+    "lng": 16.2993797,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "cafe-diglas",
+    "name": "Café Diglas",
+    "kategorie": "cafe",
+    "weitere": [],
+    "tags": [
+      "cafe-kaffeehaus",
+      "cafe-kuchen"
+    ],
+    "labels": [],
+    "adresse": "Wollzeile 10, 1010 Wien",
+    "beschreibung": "Traditionskaffeehaus von 1923, hundert Schritte vom Stephansdom. Berühmt für die eigene Mehlspeisküche, allen voran den Topfenstrudel.",
+    "website": "https://wollzeile.diglas.at",
+    "bild": "bilder/cafe-diglas.jpg",
+    "lat": 48.2086459,
+    "lng": 16.3752673,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "mittel",
+    "gehen": "wenig"
+  },
+  {
+    "id": "kleines-cafe",
+    "name": "Kleines Café",
+    "kategorie": "cafe",
+    "weitere": [],
+    "tags": [
+      "draussen",
+      "cafe-kaffeehaus"
+    ],
+    "labels": [
+      "hunde"
+    ],
+    "adresse": "Franziskanerplatz 3, 1010 Wien",
+    "beschreibung": "In den Siebzigern von Hermann Czech gebaut und seither von Hanno Pöschl geführt. Im Sommer sitzt man draußen am Franziskanerplatz.",
+    "website": "",
+    "bild": "bilder/kleines-cafe.jpg",
+    "lat": 48.2065835,
+    "lng": 16.3743582,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "jonas-reindl",
+    "name": "Jonas Reindl",
+    "kategorie": "cafe",
+    "weitere": [],
+    "tags": [
+      "cafe-spezialitaet"
+    ],
+    "labels": [],
+    "adresse": "Währinger Straße 2-4, 1090 Wien",
+    "beschreibung": "Rösterei am Schottentor, benannt nach dem Spitznamen der Station davor. Helle Röstungen, gedacht für den Filter.",
+    "website": "https://www.jonasreindl.at",
+    "bild": "",
+    "lat": 48.2148553,
+    "lng": 16.3618949,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "gota-coffee",
+    "name": "GOTA Coffee",
+    "kategorie": "cafe",
+    "weitere": [],
+    "tags": [
+      "cafe-spezialitaet",
+      "cafe-kuchen"
+    ],
+    "labels": [
+      "vegan"
+    ],
+    "adresse": "Mariahilfer Straße 192, 1150 Wien",
+    "beschreibung": "Rösterei gegenüber dem Schwendermarkt, selbst geröstet und direkt gehandelt. Wurde zum besten Coffeeshop Europas gewählt.",
+    "website": "https://gota.coffee",
+    "bild": "",
+    "lat": 48.1915776,
+    "lng": 16.3267717,
+    "indoor": true,
+    "andrang": "ruhig",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
+  },
+  {
+    "id": "das-kaeuzchen",
+    "name": "Das Käuzchen",
+    "kategorie": "bar",
+    "weitere": [],
+    "tags": [
+      "bar-bier",
+      "bar-essen"
+    ],
+    "labels": [],
+    "adresse": "Gardegasse 8, 1070 Wien",
+    "beschreibung": "Beisl und Bar beim Volkstheater, seit über dreißig Jahren am selben Fleck. Sperrt erst um vier Uhr nachmittags auf, Küche bis spät.",
+    "website": "https://www.kaeuzchen.at",
+    "bild": "",
+    "lat": 48.2052147,
+    "lng": 16.3549839,
+    "indoor": true,
+    "andrang": "belebt",
+    "allein": true,
+    "gruppe": true,
+    "preis": "guenstig",
+    "gehen": "wenig"
   }
 ];
