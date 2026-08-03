@@ -408,11 +408,6 @@ body {
   color: var(--weiss);
 }
 
-/* Am großen Schirm steht die Trefferzahl im Kopf der Ergebnisspalte — der
-   Chip in der Reihe ist nur die Handyfassung. Muss nach .kat-chip stehen:
-   gleiche Spezifität, und der spätere gewinnt. */
-.zaehler-chip { display: none; }
-
 /* ---------- Aktionen am unteren Kartenrand ---------- */
 .karten-aktionen {
   position: absolute;
@@ -1528,15 +1523,6 @@ body.setzt-position #karte { cursor: crosshair; }
     font-size: 14.5px;
   }
   .kat-chip .sym { font-size: 17px; }
-
-  .zaehler-chip {
-    display: inline-flex;
-    align-items: center;
-    flex: 0 0 auto;
-    cursor: default;
-    color: var(--tinte-leise);
-    white-space: nowrap;
-  }
 
   /* ----- Leaflets Bedienelemente aus dem Weg ----- */
   /* Auf dem Handy wird mit zwei Fingern gezoomt; die Knöpfe wären nur im Weg.

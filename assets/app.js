@@ -1098,12 +1098,6 @@
     var behaelter = document.getElementById("kategorien");
     behaelter.innerHTML = "";
 
-    /* Erster Chip der Reihe: die Trefferzahl. Nur auf schmalen Fenstern
-       sichtbar — am Desktop steht sie in der Kopfzeile. */
-    var zaehler = document.createElement("span");
-    zaehler.className = "kat-chip zaehler-chip trefferzahl";
-    behaelter.appendChild(zaehler);
-
     Object.keys(KATEGORIEN).forEach(function (schluessel) {
       var k = KATEGORIEN[schluessel];
       var b = document.createElement("button");
@@ -1392,8 +1386,8 @@
     var text = liste.length === orte.length
       ? orte.length + " Orte"
       : liste.length + " von " + orte.length + " Orten";
-    /* Zweimal vorhanden: im Kopf der Ergebnisspalte (Desktop) und als erster
-       Chip in der Kategorienreihe (Handy). Sichtbar ist immer nur eines. */
+    /* Steht im Kopf der Ergebnisspalte. Am Handy ist der ausgeblendet: Dort
+       hat die Zahl als Chip in der Kategorienreihe nur Platz gekostet. */
     document.querySelectorAll(".trefferzahl").forEach(function (el) {
       el.textContent = text;
     });
