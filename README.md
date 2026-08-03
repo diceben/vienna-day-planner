@@ -48,7 +48,11 @@ Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/
 
 Ohne Bild bleibt es beim farbigen Tropfen mit dem Symbol der Kategorie. Dasselbe passiert, wenn der Pfad ins Leere zeigt — die Seite fällt still auf das Symbol zurück, statt ein kaputtes Bild anzuzeigen. Details in [bilder/LIESMICH.md](bilder/LIESMICH.md).
 
-28 der 69 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen. Für Cafés, Clubs und die meisten Aktivitäten gibt es auf Commons nichts Brauchbares, dort hilft nur ein eigenes Foto.
+47 der 69 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen.
+
+Die übrigen 22 stehen mit Adresse in [bilder/FEHLENDE.md](bilder/FEHLENDE.md). Zu ihnen gibt es weder auf Commons noch über Openverse etwas — es sind kleine Cafés, Bars, Clubs und Freizeitbetriebe, die niemand unter freier Lizenz fotografiert hat. Dort hilft nur ein eigenes Foto oder die Zusage des Lokals. Bilder aus der Google-Suche gehen nicht: Sie gehören den Lokalen, Fotografen oder Presseagenturen.
+
+Sechs der neuen Bilder zeigen das Haus an der Adresse, nicht das Lokal selbst — Café Aera, neue bar, Café Propeller, ZWE, KLYO und GOTA Coffee. Bei ZWE und GOTA ist das Schild im Bild, bei den anderen die richtige Hausnummer.
 
 Die Karte läuft mit [Leaflet](https://leafletjs.com) und Kacheln von CARTO auf OpenStreetMap-Basis. Beides wird zur Laufzeit von einem CDN geladen, die Seite braucht daher eine Internetverbindung.
 
