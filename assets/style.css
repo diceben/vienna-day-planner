@@ -26,6 +26,10 @@
   /* Breite der Ergebnisspalte. Die Suchpille darüber ist 386 px breit und
      sitzt 12 px vom Rand — daran hängt auch der Anfang der Chipreihe. */
   --spalte: 410px;
+
+  /* Breite des Tagesplans. Danach richtet sich, wie weit „Route vorschlagen“
+     nach links rutscht, wenn der Plan aufgeht. */
+  --plan-breite: 420px;
 }
 
 * { box-sizing: border-box; }
@@ -417,6 +421,15 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: transform .24s ease;
+}
+
+/* Ist der Tagesplan offen, liegt er genau dort, wo „Route vorschlagen“ steht.
+   Der Knopf rutscht deshalb um die Panelbreite nach links, statt sich
+   darunter zu verstecken. „Mein Tag“ selbst tritt ab (.plan-fab.offen) —
+   der Platz, den es räumt, ist im Weg mitgerechnet. */
+body:has(.plan-overlay:not([hidden])) .karten-aktionen {
+  transform: translateX(calc(-1 * var(--plan-breite) - 8px));
 }
 
 /* ---------- Filter ---------- */
@@ -862,6 +875,7 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  max-width: 14rem;
   padding: 10px 16px;
   border: none;
   border-radius: 999px;
@@ -870,12 +884,28 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   font: inherit;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
   cursor: pointer;
   box-shadow: 0 3px 14px rgba(0,0,0,.28);
+  transition: max-width .24s ease, padding .24s ease, opacity .16s ease;
 }
 
 .plan-fab:hover { background: #322d26; }
-.plan-fab.offen { visibility: hidden; }
+
+/* Solange der Plan offen ist, wird der Knopf nicht gebraucht — er schrumpft
+   auf null zusammen, statt zu verschwinden. Sonst spränge „Route vorschlagen“
+   im selben Moment um seine Breite nach rechts und danach nach links.
+   `visibility` kommt erst am Ende dazu, damit er unterwegs sichtbar bleibt
+   und danach auch von der Tastatur nicht mehr erreichbar ist. */
+.plan-fab.offen {
+  max-width: 0;
+  padding: 10px 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: max-width .24s ease, padding .24s ease, opacity .16s ease,
+              visibility 0s linear .24s;
+}
 
 .plan-fab-zahl {
   min-width: 20px;
@@ -892,18 +922,24 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
 
 .plan-fab-zahl[hidden] { display: none; }
 
+/* Reicht vom oberen Rand — unter dem Zahnrad hindurch — bis fast zum unteren.
+   Der Tagesplan ist die Stelle, an der man mehrere Orte nebeneinander abwägt;
+   dafür braucht er Höhe, nicht eine Kachel in der Ecke. */
 .plan-overlay {
   position: absolute;
+  top: 62px;
   right: 16px;
   bottom: 22px;
-  z-index: 620;
-  width: min(330px, calc(100% - 32px));
-  max-height: calc(100% - 44px);
+  /* Über Leaflets Bedienelementen und der Attribution, die bei 1000 liegen —
+     sonst zeichnen sie sich quer über den Plan. Unter der Suchpille (1200),
+     die ohnehin darüber steht. */
+  z-index: 1160;
+  width: min(var(--plan-breite), calc(100% - 32px));
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(29,26,22,0.12);
   border-radius: 12px;
-  background: rgba(255,253,249,0.90);
+  background: rgba(255,253,249,0.94);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
   box-shadow: 0 12px 36px rgba(0,0,0,.24);
@@ -917,16 +953,27 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--linie);
 }
 
 .plan-kopf h2 {
   margin: 0;
   font-family: var(--serif);
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 600;
 }
+
+/* Sitzt neben der Überschrift und sagt, wie viel der Tag schon hat. */
+.plan-summe {
+  margin-left: 10px;
+  font-size: 12.5px;
+  color: var(--tinte-leise);
+  white-space: nowrap;
+}
+
+.plan-summe[hidden] { display: none; }
+.plan-kopf-links { display: flex; align-items: baseline; min-width: 0; }
 
 .plan-schliessen {
   border: none;
@@ -943,12 +990,12 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
 .plan-koerper {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 12px 12px 16px;
+  padding: 14px 14px 16px;
 }
 
 .plan-leer {
-  margin: 8px 6px;
-  font-size: 13px;
+  margin: 6px 4px 16px;
+  font-size: 13.5px;
   color: var(--tinte-leise);
   line-height: 1.5;
 }
@@ -963,15 +1010,27 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
    sie erst beim Überfahren dazu, würde die Überschrift wachsen, unter
    dem Zeiger wegrutschen und zwischen beiden Zuständen flackern. */
 .plan-abschnitt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--tinte-leise);
-  margin: 4px -7px 0;
+  margin: 16px -7px 6px;
   padding: 4px 7px;
   border: 1px dashed transparent;
   border-radius: 5px;
+}
+
+/* Eine feine Linie zieht sich hinter der Überschrift durch — sie trennt die
+   Tagesabschnitte, ohne wie ein Kasten zu wirken. */
+.plan-abschnitt::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--linie);
 }
 
 .plan-abschnitt:first-child { margin-top: 0; }
@@ -990,13 +1049,52 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
 .plan-eintrag {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 8px;
-  margin-bottom: 5px;
+  gap: 9px;
+  padding: 8px 9px;
+  margin-bottom: 6px;
   border: 1px solid var(--linie);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--weiss);
   cursor: pointer;
+}
+
+/* Dasselbe Bild wie in der Liste, nur kleiner. Ohne Foto bleibt das farbige
+   Feld mit dem Kategoriesymbol — dieselbe Rückfallebene wie überall. */
+.plan-bild {
+  position: relative;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.plan-bild span { font-size: 15px; line-height: 1; }
+
+.plan-bild img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plan-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.plan-adresse {
+  font-size: 11.5px;
+  color: var(--tinte-leise);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Kein pointer-events: none hier — die Klasse wird schon beim dragstart
@@ -1025,9 +1123,8 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
 }
 
 .plan-name {
-  flex: 1 1 auto;
-  min-width: 0;
   font-size: 13.5px;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1046,12 +1143,17 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
 
 .plan-weg:hover { color: var(--warnung); background: var(--papier); }
 
+/* Steht außerhalb des scrollenden Körpers und bleibt deshalb unten kleben,
+   auch wenn die Liste kurz ist. */
 .plan-fuss {
-  margin-top: 12px;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 9px;
   align-items: flex-start;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--linie);
+  background: rgba(255,253,249,0.6);
 }
 
 .plan-fuss[hidden] { display: none; }
@@ -1103,6 +1205,8 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   .ort-blatt { transition: none; }
   /* Die Ergebnisspalte steht dann sofort da, statt hereinzufahren. */
   .buehne { transition: none; }
+  /* „Route vorschlagen“ springt zur Seite, statt zu rutschen. */
+  .karten-aktionen, .plan-fab { transition: none; }
 }
 
 /* ---------- Karte: Marker und Popup ---------- */
@@ -1673,7 +1777,26 @@ body.setzt-position #karte { cursor: crosshair; }
   /* Knöpfe und Overlay bleiben in der Kartenecke, nur etwas näher am Rand. */
   .karten-aktionen { right: 12px; bottom: 16px; gap: 6px; }
   .route-knopf { padding: 8px 12px; }
-  .plan-overlay { right: 12px; bottom: 16px; max-height: calc(100% - 32px); }
+
+  /* Hier hängt der Plan am Fenster statt am Kartenausschnitt: Der ist bei
+     offener Liste nur 58 vh hoch, und ein Plan mit vier Tageszeiten braucht
+     mehr. Er beginnt unter der Chipreihe (die endet bei 112) — so überdeckt
+     ihn nichts, ohne dass es auf die Stapelreihenfolge ankommt. */
+  .plan-overlay {
+    position: fixed;
+    top: 120px;
+    right: 12px;
+    left: 12px;
+    bottom: 16px;
+    width: auto;
+  }
+
+  /* Der Plan nimmt hier die volle Breite — daneben ist kein Platz, um
+     „Route vorschlagen“ hinzuschieben. Der Knopf tritt stattdessen ab. */
+  body:has(.plan-overlay:not([hidden])) .karten-aktionen {
+    transform: none;
+    visibility: hidden;
+  }
 
   /* Der Kartenbereich ist hier zu niedrig für das Routen-Popup — es löst
      sich deshalb vom Kartenausschnitt und nutzt die ganze Fensterhöhe. */

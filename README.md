@@ -68,15 +68,17 @@ Danach im Browser `http://127.0.0.1:8765` öffnen.
 
 ## Tagesplan
 
-Unten rechts auf der Karte schwebt der Knopf „Mein Tag“ mit einem Zähler. Ein Klick öffnet ein halbtransparentes Overlay in der Kartenecke, durch das die Karte leicht durchscheint.
+Unten rechts auf der Karte schwebt der Knopf „Mein Tag“ mit einem Zähler. Ein Klick öffnet am rechten Rand ein Panel, 420 Pixel breit und fast so hoch wie das Fenster — der Tagesplan ist die Stelle, an der man mehrere Orte nebeneinander abwägt, dafür braucht er Höhe. Neben der Überschrift steht, wie viele Stopps in wie vielen der vier Tageszeiten liegen.
+
+Der Knopf selbst schrumpft dabei auf null zusammen, und **„Route vorschlagen“ rutscht nach links** aus dem Weg, statt sich unter dem Panel zu verstecken. Beides läuft über dieselbe Viertelsekunde. Am Handy ist daneben kein Platz — dort treten beide Knöpfe ab und das Panel hängt fest am Fenster, unterhalb der Chipreihe.
 
 In der Liste sitzt der Knopf als farbiges Dreieck in der rechten oberen Ecke jedes Eintrags: ein Plus in der Kategoriefarbe, im Plan wechselt es auf Dunkel und zeigt einen Haken. Im Karten-Popup steht stattdessen der beschriftete Knopf „+ Zum Tag“.
 
-Das Overlay gliedert den Tag in **Vormittags, Mittags, Nachmittags und Abends**. Alle vier Überschriften bleiben stehen, auch wenn nichts darunter liegt — der Tag ist ein Gerüst, in das man einsortiert. Ein Eintrag lässt sich auf eine Überschrift ziehen und landet dann in diesem Abschnitt, auch entgegen der üblichen Zuordnung.
+Das Panel gliedert den Tag in **Vormittags, Mittags, Nachmittags und Abends**; eine feine Linie zieht sich hinter jeder Überschrift durch. Alle vier bleiben stehen, auch wenn nichts darunter liegt — der Tag ist ein Gerüst, in das man einsortiert. Jeder Stopp zeigt seine Nummer in der Kategoriefarbe, das Miniaturbild, Namen und Adresse. Ein Eintrag lässt sich auf eine Überschrift ziehen und landet dann in diesem Abschnitt, auch entgegen der üblichen Zuordnung.
 
 Ohne eigenes Zutun leitet sich der Abschnitt aus Kategorie und Reihenfolge ab: Frühstück am Vormittag, das erste Restaurant zu Mittag, ein zweites am Abend, Konzerte abends. Was zwischen Mittagessen und Abend liegt, zählt als Nachmittag. Die Liste lässt sich weiterhin frei per Ziehen umordnen. Auf der Karte tragen die geplanten Pins dieselbe Nummer und sind durch eine gestrichelte Linie in der Reihenfolge des Plans verbunden. Sobald etwas im Plan liegt, treten alle übrigen Pins zurück — blass und entfärbt, damit der eigene Tag hervorsticht. Fährt man mit der Maus über einen davon, kommt er kurz zurück und legt sich nach vorn.
 
-Das Overlay schließt über das ✕, einen Klick daneben oder die Escape-Taste. „Als Route in Google Maps“ öffnet alle Stopps als eine Route, dort entsteht die echte Wegführung. „Plan leeren“ setzt zurück.
+Das Panel schließt über das ✕, einen Klick daneben oder die Escape-Taste. Am unteren Rand kleben „Als Route in Google Maps“ — öffnet alle Stopps als eine Route, dort entsteht die echte Wegführung — und „Plan leeren“. Sie stehen außerhalb des scrollenden Bereichs und bleiben deshalb sichtbar, auch wenn die Liste kurz ist.
 
 Der Plan lebt im Browser, getrennt von den Orten, unter dem Speicher-Schlüssel `wien-karte-plan` — je Eintrag die `id` und der festgesetzte Abschnitt, sofern einer gezogen wurde. Er ist an dieses Gerät gebunden und geht niemanden sonst etwas an — ein Teilen-Link ist bewusst noch nicht gebaut. Wird ein Ort gelöscht, der im Plan steht, fällt er beim nächsten Laden still heraus.
 

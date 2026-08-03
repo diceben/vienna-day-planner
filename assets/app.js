@@ -421,6 +421,20 @@
        Gerüst, in das man einsortiert. */
     var abschnitte = abschnitteFuer(liste);
 
+    /* Neben der Überschrift: wie viele Stopps und welche Tageszeiten schon
+       belegt sind. Beantwortet die Frage „reicht das für einen Tag?“, ohne
+       dass man die Liste durchzählt. */
+    var summe = document.getElementById("plan-summe");
+    if (summe) {
+      var belegt = ROUTE.abschnitte.filter(function (a) {
+        return abschnitte.indexOf(a.id) !== -1;
+      }).length;
+      summe.textContent = liste.length === 1
+        ? "1 Stopp"
+        : liste.length + " Stopps in " + belegt + " von 4 Tageszeiten";
+      summe.hidden = liste.length === 0;
+    }
+
     var ausgegeben = 0;
     ROUTE.abschnitte.forEach(function (abschnitt) {
       var drin = [];
@@ -490,7 +504,9 @@
     li.innerHTML =
       '<span class="plan-griff" aria-hidden="true">⠿</span>' +
       '<span class="plan-nr" style="background:' + k.farbe + '">' + (i + 1) + "</span>" +
-      '<span class="plan-name">' + entschaerfe(ort.name) + "</span>" +
+      miniatur(ort, "plan-bild") +
+      '<span class="plan-text"><span class="plan-name">' + entschaerfe(ort.name) + "</span>" +
+      '<span class="plan-adresse">' + entschaerfe(ort.adresse) + "</span></span>" +
       '<button type="button" class="plan-weg" title="Aus dem Plan nehmen" aria-label="Aus dem Plan nehmen">✕</button>';
 
     li.querySelector(".plan-weg").addEventListener("click", function (e) {

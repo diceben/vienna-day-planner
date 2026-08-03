@@ -98,16 +98,19 @@
 
     <div class="plan-overlay" id="plan-overlay" role="dialog" aria-label="Mein Tagesplan" hidden>
       <div class="plan-kopf">
-        <h2>Mein Tag</h2>
+        <div class="plan-kopf-links">
+          <h2>Mein Tag</h2>
+          <span id="plan-summe" class="plan-summe" hidden></span>
+        </div>
         <button type="button" id="plan-schliessen" class="plan-schliessen" aria-label="Schließen">✕</button>
       </div>
       <div class="plan-koerper" id="plan-koerper">
         <p id="plan-leer" class="plan-leer">Noch nichts geplant. Tipp bei einem Ort auf das Plus, dann liegt er hier.</p>
         <ol id="plan-liste" class="plan-liste"></ol>
-        <div class="plan-fuss" id="plan-fuss" hidden>
-          <a id="plan-route" class="knopf" target="_blank" rel="noopener">Als Route in Google Maps</a>
-          <button type="button" id="plan-leeren" class="textknopf">Plan leeren</button>
-        </div>
+      </div>
+      <div class="plan-fuss" id="plan-fuss" hidden>
+        <a id="plan-route" class="knopf" target="_blank" rel="noopener">Als Route in Google Maps</a>
+        <button type="button" id="plan-leeren" class="textknopf">Plan leeren</button>
       </div>
     </div>
   </section>
