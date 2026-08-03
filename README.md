@@ -108,6 +108,10 @@ Die Route bevorzugt Orte, die nah beieinanderliegen, wählt aber unter den näch
 
 Das Ergebnis erscheint als nummerierte Liste im Popup. Erst mit „In den Tagesplan" wird es übernommen; liegt dort schon etwas, stehen „Plan ersetzen" und „Anhängen" nebeneinander.
 
+**Einzelne Stopps sperren.** Rechts an jeder Zeile hängt ein Schloss. Ein Klick schließt es (🔒), und dieser Stopp bleibt beim nächsten „Neu würfeln" stehen — mit seinem Ort **und** seinem Platz im Tag. Man kann also drei gute Treffer festhalten und nur den Rest neu ziehen, statt so lange zu würfeln, bis zufällig alles gleichzeitig passt. Ein zweiter Klick gibt den Stopp wieder frei; der Klick rechnet nichts, wirksam wird die Sperre erst beim nächsten Wurf. Die Zusammenfassung zählt mit („5 Stopps · 6 von 8 Punkten · 2 gesperrt"), und sind alle gesperrt, sagt eine Zeile darunter, dass Würfeln nichts mehr ändert.
+
+Die Punkte gesperrter Stopps zählen aufs Budget wie alle anderen: Wer viel festhält, hat für den Rest weniger übrig. Auch die Höchstmengen gelten weiter — ein gesperrtes Restaurant besetzt einen der beiden Plätze. Die Schlösser fallen, sobald man über „Verwerfen" zu den Vorgaben zurückgeht; dort ändert man meist Kategorien oder Zeitfenster, und damit ist die Grundlage eine andere.
+
 > **Die Tageszeit ist geschätzt.** Die Orte führen keine Öffnungszeiten, deshalb leitet die Route sie aus der Kategorie ab — Frühstückscafés am Morgen, Musik und Events am Abend, Museen tagsüber. Aktivitäten zählen abends nur mit, wenn sie drinnen stattfinden. Ein Museum mit Montagsruhe erkennt die Route nicht.
 
 Der Umkreis braucht einen aktiven Standort und wirkt je nach Lage sehr unterschiedlich: Vom Stephansdom aus liegen 56 der 69 Orte in drei Kilometern, von Penzing aus sieben. Reicht es nicht für die Pflichtkategorien, sagt die Seite das und schlägt vor, den Umkreis wegzulassen.

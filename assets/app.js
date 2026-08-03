@@ -697,8 +697,14 @@
   }
 
   /* Baut einen Tagesvorschlag. Rückgabe entweder { fehler, … } oder
-     { stopps, summe, budget }. */
-  function routeBerechnen(vorgaben) {
+     { stopps, summe, budget }.
+
+     `gesperrt` ordnet Ort-ids einen Tagesabschnitt zu. Diese Stopps werden
+     nicht gewürfelt, sondern vorbelegt: Sie stehen fest, verbrauchen ihre
+     Punkte vom Budget und belegen ihre Kategorie. Gewürfelt wird nur noch,
+     was danach übrig ist. */
+  function routeBerechnen(vorgaben, gesperrt) {
+    gesperrt = gesperrt || {};
     var fenster = ROUTE.fenster[vorgaben.fenster];
     var kandidaten = routeKandidaten(vorgaben);
 
@@ -752,6 +758,19 @@
       letzter = [c.ort.lat, c.ort.lng];
     }
 
+    /* Die gesperrten zuerst — vor allem anderen. Die Kandidatenobjekte sind
+       bei jedem Lauf neue, verbunden werden sie über die Ort-id. Danach
+       greifen alle Regeln von selbst: `frei()` lässt keinen zweiten Ort
+       derselben Höchstmenge zu, und aufgefüllt wird von hier aus. */
+    Object.keys(gesperrt).forEach(function (id) {
+      var c = kandidaten.filter(function (x) { return x.ort.id === id; })[0];
+      if (!c || gewaehlt.indexOf(c) !== -1) { return; }
+      gewaehlt.push(c);
+      summe += c.punkte;
+      proKategorie[c.kategorie] = (proKategorie[c.kategorie] || 0) + 1;
+      letzter = [c.ort.lat, c.ort.lng];
+    });
+
     fenster.mindestens.forEach(function (k) {
       if (vorgaben.kategorien.indexOf(k) === -1) { return; }
       var moegliche = kandidaten.filter(function (c) { return c.kategorie === k && frei(c); });
@@ -775,6 +794,28 @@
       return r !== 0 ? r : a.abStart - b.abStart;
     });
     verteileAbschnitte(gewaehlt, vorgaben.fenster);
+
+    /* Das Schloss hält auch den Platz im Tag. Die Verteilung hat gerade allen
+       einen Abschnitt neu zugewiesen; die gesperrten bekommen ihren gemerkten
+       zurück. */
+    gewaehlt.forEach(function (c) {
+      if (gesperrt[c.ort.id]) { c.abschnitt = gesperrt[c.ort.id]; }
+    });
+
+    /* Ein Nachlauf für den einen Fall, in dem das kollidiert: Die Verteilung
+       setzt genau ein Restaurant auf „Mittags“ und weitere auf „Abends“. Ist
+       das gesperrte in der Sortierung das zweite, stünden danach zwei am
+       Mittag. Das ungesperrte weicht dann aus. */
+    ["mittag", "abend"].forEach(function (a) {
+      var drin = gewaehlt.filter(function (c) {
+        return c.kategorie === "restaurant" && c.abschnitt === a;
+      });
+      if (drin.length < 2) { return; }
+      drin.forEach(function (c) {
+        if (Object.prototype.hasOwnProperty.call(gesperrt, c.ort.id)) { return; }
+        c.abschnitt = a === "mittag" ? "abend" : "mittag";
+      });
+    });
 
     /* Innerhalb eines Abschnitts zählt erst die Tageslogik — das Frühstück
        kommt vor der Sehenswürdigkeit —, danach die Nähe. */
@@ -1889,6 +1930,18 @@
   var routeVorgaben = null;
   var routeErgebnis = null;
 
+  /* Gesperrte Stopps: Ort-id -> Tagesabschnitt. Beides gehört zusammen, das
+     Schloss hält den Ort in der Route und an seiner Stelle im Tag. Leert sich
+     beim Weg zurück zu den Vorgaben — dort ändert man meist Kategorien oder
+     Zeitfenster, und damit ist die Grundlage eine andere. */
+  var routeGesperrt = {};
+
+  /* Nicht auf den Wert prüfen, sondern auf den Eintrag: Der Abschnitt darf
+     leer sein, gesperrt ist der Stopp trotzdem. */
+  function istGesperrt(id) {
+    return Object.prototype.hasOwnProperty.call(routeGesperrt, id);
+  }
+
   function zeichneRouteEingabe() {
     var katbox = document.getElementById("route-kategorien");
     katbox.innerHTML = "";
@@ -1977,7 +2030,7 @@
   }
 
   function routeWuerfeln() {
-    routeErgebnis = routeBerechnen(routeVorgaben);
+    routeErgebnis = routeBerechnen(routeVorgaben, routeGesperrt);
     zeigeRouteErgebnis();
   }
 
@@ -2020,20 +2073,32 @@
       if (!drin.length) { return ""; }
       var punkte = drin.map(function (c) {
         var k = KATEGORIEN[c.kategorie];
+        var zu = istGesperrt(c.ort.id);
         nummer += 1;
-        return '<li class="route-stopp">' +
+        return '<li class="route-stopp' + (zu ? " gesperrt" : "") + '">' +
           '<span class="route-nr" style="background:' + k.farbe + '">' + nummer + "</span>" +
           '<span class="route-stopp-text"><b>' + entschaerfe(c.ort.name) + "</b>" +
           '<span class="route-stopp-kat">' + k.titel + " · " + c.punkte +
-          (c.punkte === 1 ? " Punkt" : " Punkte") + "</span></span></li>";
+          (c.punkte === 1 ? " Punkt" : " Punkte") + "</span></span>" +
+          '<button type="button" class="route-schloss" data-ort="' + entschaerfe(c.ort.id) +
+          '" aria-pressed="' + (zu ? "true" : "false") +
+          '" title="' + (zu ? "Freigeben" : "Sperren, damit „Neu würfeln“ diesen Stopp stehen lässt") +
+          '" aria-label="' + entschaerfe(c.ort.name) + (zu ? " freigeben" : " sperren") + '">' +
+          (zu ? "🔒" : "🔓") + "</button></li>";
       }).join("");
       return '<li class="route-abschnitt">' + abschnitt.titel + "</li>" + punkte;
     }).join("");
 
-    var knapp = e.summe < e.budget
+    var zahlGesperrt = e.stopps.filter(function (c) { return istGesperrt(c.ort.id); }).length;
+    var alleZu = zahlGesperrt > 0 && zahlGesperrt === e.stopps.length;
+
+    var knapp = e.summe < e.budget && !alleZu
       ? '<p class="route-knapp">Mehr war mit dieser Auswahl nicht drin — ' +
         e.summe + " von " + e.budget + " Punkten.</p>"
       : "";
+    if (alleZu) {
+      knapp = '<p class="route-knapp">Alle Stopps sind gesperrt — „Neu würfeln“ ändert nichts.</p>';
+    }
 
     var knoepfe = plan.length
       ? '<button type="button" class="knopf" data-tun="ersetzen">Plan ersetzen</button>' +
@@ -2041,7 +2106,8 @@
       : '<button type="button" class="knopf" data-tun="ersetzen">In den Tagesplan</button>';
 
     box.innerHTML =
-      '<div class="route-summe">' + e.stopps.length + " Stopps · " + e.summe + " von " + e.budget + " Punkten</div>" +
+      '<div class="route-summe">' + e.stopps.length + " Stopps · " + e.summe + " von " + e.budget + " Punkten" +
+      (zahlGesperrt ? " · " + zahlGesperrt + " gesperrt" : "") + "</div>" +
       '<ol class="route-liste">' + zeilen + "</ol>" + knapp +
       '<div class="knopfreihe">' + knoepfe +
       '<button type="button" class="knopf leise" data-tun="wuerfeln">Neu würfeln</button>' +
@@ -2053,12 +2119,31 @@
     ergebnisKnopf(box, "anhaengen", function () { routeUebernehmen("anhaengen"); });
     ergebnisKnopf(box, "wuerfeln", routeWuerfeln);
     ergebnisKnopf(box, "zurueck", routeZurueck);
+
+    /* Ein Klick aufs Schloss rechnet nichts — er merkt sich den Stopp samt
+       seinem Abschnitt und zeichnet neu. Wirksam wird die Sperre erst beim
+       nächsten Würfeln. `stopPropagation` wie bei den übrigen Knöpfen: Sonst
+       fände der globale Schließen-Handler das eben ersetzte Element nicht
+       mehr im Popup und machte es zu. */
+    box.querySelectorAll(".route-schloss").forEach(function (b) {
+      b.addEventListener("click", function (klick) {
+        klick.stopPropagation();
+        var id = b.dataset.ort;
+        if (istGesperrt(id)) { delete routeGesperrt[id]; }
+        else {
+          var stopp = e.stopps.filter(function (c) { return c.ort.id === id; })[0];
+          routeGesperrt[id] = (stopp && stopp.abschnitt) || null;
+        }
+        zeigeRouteErgebnis();
+      });
+    });
   }
 
   function routeZurueck() {
     document.getElementById("route-ergebnis").hidden = true;
     document.getElementById("route-eingabe").hidden = false;
     routeErgebnis = null;
+    routeGesperrt = {};
   }
 
   function routeUebernehmen(modus) {

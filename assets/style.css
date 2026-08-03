@@ -264,8 +264,13 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  padding: 7px 0;
+  /* Kante und Einzug tragen alle Zeilen, nur sichtbar sind sie bei den
+     gesperrten. Der negative Rand holt die 9 px wieder herein, damit die
+     Nummern in beiden Zuständen auf derselben Linie stehen. */
+  border-left: 2px solid transparent;
   border-bottom: 1px solid var(--linie);
+  padding: 7px 4px 7px 7px;
+  margin-left: -9px;
 }
 
 .route-stopp:last-child { border-bottom: none; }
@@ -289,6 +294,45 @@ body {
 .route-stopp-kat {
   font-size: 11.5px;
   color: var(--tinte-leise);
+}
+
+/* Der gesperrte Stopp: leiser Grund und eine Kante in Tinte. So sieht man
+   ohne zu lesen, was beim nächsten Wurf stehen bleibt. */
+.route-stopp.gesperrt {
+  border-left-color: var(--tinte);
+  background: var(--papier-tief);
+}
+
+/* Ein randloser Icon-Knopf ganz rechts. Die Farbe des Symbols lässt sich bei
+   einem Emoji nicht setzen — offen heißt darum blass und grau, geschlossen
+   voll und satt. */
+.route-schloss {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: center;
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.4;
+  filter: grayscale(1);
+  transition: opacity 120ms ease, filter 120ms ease;
+}
+
+.route-schloss:hover { opacity: 0.75; }
+
+.route-schloss[aria-pressed="true"] {
+  opacity: 1;
+  filter: none;
+}
+
+.route-schloss:focus-visible {
+  outline: 2px solid var(--tinte);
+  outline-offset: 1px;
+  border-radius: 4px;
+  opacity: 1;
 }
 
 .route-knapp, .route-fehler {
@@ -1224,6 +1268,7 @@ body.liste-offen .leaflet-bottom.leaflet-left { transform: translateX(var(--spal
   .liste-spalte, .leaflet-bottom.leaflet-left { transition: none; }
   /* „Route vorschlagen“ springt zur Seite, statt zu rutschen. */
   .karten-aktionen, .plan-fab { transition: none; }
+  .route-schloss { transition: none; }
 }
 
 /* ---------- Karte: Marker und Popup ---------- */
