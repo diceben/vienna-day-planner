@@ -1290,12 +1290,38 @@
     if (war) { karte.invalidateSize(); }
   }
 
+  /* Breite der Ergebnisspalte, wie sie in :root steht — sie liegt über der
+     Karte und nimmt links Sicht weg. */
+  function spaltenBreite() {
+    var wert = getComputedStyle(document.documentElement).getPropertyValue("--spalte");
+    return parseFloat(wert) || 0;
+  }
+
+  /* Wohin die Karte muss, damit ein Ort samt dem, was über oder unter ihm
+     hängt, im sichtbaren Teil steht. Das lässt sich vorher ausrechnen — die
+     Karte fährt dann in einem Zug dorthin, statt erst zu zentrieren und
+     danach noch einmal nachzurücken.
+
+     `versatzY` ist der Abstand, um den der Pin von der Mitte weg soll:
+     negativ schiebt ihn nach unten (Platz fürs Popup darüber), positiv nach
+     oben (Platz fürs Ortsblatt darunter). */
+  function zielPunkt(ort, z, versatzY, spalteBeachten) {
+    var punkt = karte.project([ort.lat, ort.lng], z);
+    punkt.y += versatzY;
+    if (spalteBeachten && document.body.classList.contains("liste-offen")) {
+      punkt.x -= spaltenBreite() / 2;
+    }
+    return karte.unproject(punkt, z);
+  }
+
   /* Der Pin soll über dem Blatt sichtbar bleiben, nicht darunter liegen. */
   function zeigePinUeberBlatt(ort) {
     var blatt = document.getElementById("ort-blatt");
     var hoehe = blatt && !blatt.hidden ? blatt.getBoundingClientRect().height : 0;
-    karte.setView([ort.lat, ort.lng], Math.max(karte.getZoom(), 15), { animate: false });
-    if (hoehe > 0) { karte.panBy([0, hoehe / 2], { animate: true, duration: 0.4 }); }
+    var z = Math.max(karte.getZoom(), 15);
+    var ziel = zielPunkt(ort, z, hoehe / 2, false);
+    if (ruhigerModus.matches) { karte.setView(ziel, z, { animate: false }); }
+    else { karte.flyTo(ziel, z, { duration: 0.4 }); }
   }
 
   /* `quelle` unterscheidet Pin von Listeneintrag. Auf dem Handy soll ein Tipp
@@ -1330,18 +1356,31 @@
 
     if (handy) { markiereEintrag(); return; }
 
-    if (markerNach[id]) { markerNach[id].openPopup(); }
+    var marker = markerNach[id];
+    if (marker) {
+      /* Kommt der Klick aus der Liste, rechnen wir das Ziel selbst aus und
+         fahren einmal dorthin. Leaflets eigenes Nachrücken muss dafür weg:
+         Zwei Stellen, die dieselbe Karte verschieben, ergeben genau den Ruck
+         — erst zentrieren, dann nachschieben. Beim Klick auf einen Pin bleibt
+         es an, dort ist es die einzige Bewegung und damit die richtige. */
+      var popup = marker.getPopup();
+      if (popup) { popup.options.autoPan = !karteBewegen; }
+      marker.openPopup();
 
-    if (karteBewegen) {
-      karte.flyTo([ort.lat, ort.lng], Math.max(karte.getZoom(), 15), { duration: 0.6 });
-      /* Der Flug überschreibt das Nachrücken, das Leaflet beim Öffnen des
-         Popups vornimmt. Also nach der Animation noch einmal anstoßen,
-         damit das hohe Popup samt Bild nicht oben abgeschnitten wird. */
-      window.setTimeout(function () {
-        if (gewaehlt === id && markerNach[id] && markerNach[id].isPopupOpen()) {
-          markerNach[id].openPopup();
-        }
-      }, 700);
+      if (karteBewegen) {
+        var z = Math.max(karte.getZoom(), 15);
+        /* Popup und Pin sollen zusammen mittig stehen. Die Popuphöhe steht
+           erst nach dem Öffnen fest, ist dann aber verlässlich: Das Bild
+           darin hat eine feste Höhe, sie hängt nicht am Laden der Datei.
+           Die Pinhöhe kommt aus dem Symbol, damit die Zahl nur an einer
+           Stelle gepflegt wird. */
+        var el = popup && popup.getElement();
+        var hoch = el ? el.offsetHeight : 0;
+        var pin = marker.options.icon.options.iconSize[1];
+        var ziel = zielPunkt(ort, z, -(hoch + pin) / 2, true);
+        if (ruhigerModus.matches) { karte.setView(ziel, z, { animate: false }); }
+        else { karte.flyTo(ziel, z, { duration: 0.6 }); }
+      }
     }
 
     markiereEintrag();

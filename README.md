@@ -42,6 +42,10 @@ Die Aktionen sind zwei knappe Icons für Website und Route, dazu der Knopf „+ 
 
 Namen, die nicht in eine Zeile passen, brechen auf eine zweite um statt abgeschnitten zu werden; das betrifft rund ein Sechstel der Orte. Ein Klick auf den Eintrag wählt den Ort, zeigt ihn auf der Karte und klappt eine längere Beschreibung ganz auf. Ein weiterer Klick hebt die Auswahl wieder auf. Die Aktionen funktionieren ohne vorheriges Anklicken.
 
+**Die Karte fährt in einem Zug dorthin.** Wohin genau, steht vor dem Losfliegen fest: `zielPunkt()` in `assets/app.js` rechnet aus, wo die Mitte liegen muss, damit Pin und Popup zusammen mittig im *sichtbaren* Teil stehen — bei offener Ergebnisspalte also um deren halbe Breite nach rechts versetzt, weil die Spalte die linken 410 Pixel verdeckt. Die Popuphöhe wird nach dem Öffnen gemessen; sie ist verlässlich, weil das Bild darin eine feste Höhe hat.
+
+Vorher waren es zwei Bewegungen: Erst flog die Karte auf den Pin, dann schob Leaflet nach, damit das hohe Popup samt Bild nicht oben abgeschnitten blieb. Der Ruck dazwischen war deutlich zu sehen — 916 statt 669 Millisekunden. Leaflets Nachrücken (`autoPan`) ist für diesen Weg deshalb abgeschaltet; beim Klick auf einen Pin bleibt es an, dort ist es die einzige Bewegung.
+
 ## Miniaturbilder
 
 Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/wiener-riesenrad.jpg` oder als vollständige URL. Gezeigt wird es an vier Stellen: im Pin auf der Karte, als Quadrat links in der Liste, klein im Tagesplan und als Streifen oben im Popup.
