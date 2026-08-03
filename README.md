@@ -48,7 +48,9 @@ Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/
 
 Ohne Bild bleibt es beim farbigen Tropfen mit dem Symbol der Kategorie. Dasselbe passiert, wenn der Pfad ins Leere zeigt — die Seite fällt still auf das Symbol zurück, statt ein kaputtes Bild anzuzeigen. Details in [bilder/LIESMICH.md](bilder/LIESMICH.md).
 
-**Beide Pinformen laufen unten spitz zu** und stehen mit dieser Spitze auf der Koordinate. Beim Tropfen ist es die gedrehte Ecke, beim Bildpunkt ein Quadrat hinter dem Kreis, das unten als Dreieck hervorschaut — der Kreis selbst kann nichts hinauslassen, er beschneidet das Foto mit `overflow: hidden`.
+**Alle Pins haben dieselbe Form**, mit Foto wie ohne: ein Kreis mit Ring in der Kategoriefarbe, weißer Linie außen herum und einer Spitze darunter, die auf der Koordinate steht. Der einzige Unterschied ist der Inhalt — Foto oder Kategoriesymbol. Die Spitze ist ein um 45° gedrehtes Quadrat hinter dem Kreis; der Kreis selbst beschneidet sein Inneres mit `overflow: hidden`, damit das Foto rund bleibt, und könnte nichts hinauslassen.
+
+Früher war der Pin ohne Bild ein gedrehter Tropfen und der mit Bild ein Kreis. Solange drei von vier Orten kein Foto hatten, fiel das kaum auf; seit es umgekehrt ist, sah die Karte nach zwei Kartenwerken aus.
 
 47 der 69 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen.
 

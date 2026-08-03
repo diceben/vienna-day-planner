@@ -893,39 +893,30 @@
        dem Plan, verfällt diese Ausnahme und er graut sofort aus. */
     if (plan.length && pos === -1 && ort.id !== hervorgehoben) { geplant = " gedimmt"; }
 
-    /* Mit Foto ein runder Bildpunkt, ohne Foto der bisherige Tropfen. Beide
-       laufen unten in eine Spitze aus, die auf der Koordinate steht — beim
-       Bildpunkt ist das ein gedrehtes Quadrat hinter dem Kreis, weil der
-       Kreis wegen des Bildzuschnitts `overflow: hidden` trägt und nichts
-       hinauslassen könnte. Die Nummer sitzt im Wrapper, damit sie weder
-       rotiert noch beschnitten wird. */
-    if (ort.bild) {
-      var d = gross ? 44 : 36;
-      var spitze = gross ? 12 : 10;
-      return L.divIcon({
-        className: "",
-        html: '<div class="pinwrap">' +
-          '<i class="pin-spitze' + (gross ? " gross" : "") + '" style="background:' + k.farbe + '"></i>' +
-          '<div class="bildpin' + (gross ? " gross" : "") + geplant + '" style="border-color:' + k.farbe +
-          ";background:" + k.farbe + '">' +
-          '<span>' + k.zeichen + "</span>" +
-          '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">' +
-          "</div>" + nummer + "</div>",
-        iconSize: [d, d + spitze],
-        iconAnchor: [d / 2, d + spitze],
-        popupAnchor: [0, -(d + spitze)]
-      });
-    }
+    /* Ein Bauplan für beide: Kreis in der Kategoriefarbe mit einer Spitze
+       darunter, die auf der Koordinate steht. Die Spitze ist ein gedrehtes
+       Quadrat hinter dem Kreis — der Kreis selbst beschneidet sein Inneres
+       (`overflow: hidden`, damit das Foto rund bleibt) und könnte nichts
+       hinauslassen. Die Nummer sitzt aus demselben Grund im Wrapper.
+       Der einzige Unterschied ist, ob ein Foto darüberliegt. */
+    var d = gross ? 44 : 36;
+    var spitze = gross ? 12 : 10;
+    var klasse = ort.bild ? "bildpin" : "pin";
+    var foto = ort.bild
+      ? '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">'
+      : "";
 
-    var b = gross ? 38 : 30;
     return L.divIcon({
       className: "",
       html: '<div class="pinwrap">' +
-        '<div class="pin' + (gross ? " gross" : "") + geplant + '" style="background:' + k.farbe + '"><span>' + k.zeichen + "</span></div>" +
+        '<i class="pin-spitze' + (gross ? " gross" : "") + '" style="background:' + k.farbe + '"></i>' +
+        '<div class="' + klasse + (gross ? " gross" : "") + geplant +
+        '" style="border-color:' + k.farbe + ";background:" + k.farbe + '">' +
+        "<span>" + k.zeichen + "</span>" + foto + "</div>" +
         nummer + "</div>",
-      iconSize: [b, b],
-      iconAnchor: [b / 2, gross ? 38 : 30],
-      popupAnchor: [0, -28]
+      iconSize: [d, d + spitze],
+      iconAnchor: [d / 2, d + spitze],
+      popupAnchor: [0, -(d + spitze)]
     });
   }
 

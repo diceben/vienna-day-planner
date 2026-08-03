@@ -1228,32 +1228,36 @@ body.liste-offen .leaflet-bottom.leaflet-left { transform: translateX(var(--spal
 
 /* ---------- Karte: Marker und Popup ---------- */
 
-.pin {
+/* Orte mit und ohne Foto tragen dieselbe Form: ein Kreis mit Ring in der
+   Kategoriefarbe, weißer Linie außen herum und einer Spitze darunter. Der
+   Unterschied ist nur der Inhalt — Foto oder Kategoriesymbol. Vorher war das
+   eine ein gedrehter Tropfen und das andere ein Kreis; auf einer Karte, auf
+   der 47 von 69 Orten ein Bild tragen, sah das nach zwei Kartenwerken aus. */
+.pin, .bildpin {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50% 50% 50% 3px;
-  transform: rotate(-45deg);
-  border: 2px solid var(--weiss);
-  box-shadow: 0 2px 5px rgba(0,0,0,.3);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--weiss), 0 2px 5px rgba(0,0,0,.3);
 }
 
-.pin span {
-  transform: rotate(45deg);
-  font-size: 14px;
-  line-height: 1;
-}
+.pin span, .bildpin span { font-size: 15px; line-height: 1; }
 
-.pin.gross {
-  width: 38px;
-  height: 38px;
+.pin.gross, .bildpin.gross {
+  width: 44px;
+  height: 44px;
+  border-width: 4px;
   z-index: 1000;
 }
 
-.pin.gross span { font-size: 17px; }
+.pin.gross span, .bildpin.gross span { font-size: 18px; }
 
-/* Wrapper trägt die Nummer außerhalb des gedrehten Tropfens. */
+/* Wrapper trägt die Nummer außerhalb des Kreises, der sein Inneres beschneidet. */
 .pinwrap { position: relative; width: 100%; height: 100%; }
 
 /* Nummern-Marke und Hervorhebung geplanter Orte. */
@@ -1318,22 +1322,8 @@ body.liste-offen .leaflet-bottom.leaflet-left { transform: translateX(var(--spal
 
 .leaflet-marker-icon:hover .pin-spitze { opacity: 1; filter: none; }
 
-/* Marker mit Foto: runder Bildpunkt mit Ring in der Kategoriefarbe. */
-.bildpin {
-  position: relative;
-  z-index: 1;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 3px solid;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,.3);
-}
-
-.bildpin span { font-size: 15px; line-height: 1; }
-
+/* Das Foto füllt den Kreis und deckt Fläche und Kategoriesymbol darunter zu —
+   die bleiben als Rückfallebene stehen, falls die Datei fehlt. */
 .bildpin img {
   position: absolute;
   inset: 0;
