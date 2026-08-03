@@ -893,22 +893,27 @@
        dem Plan, verfällt diese Ausnahme und er graut sofort aus. */
     if (plan.length && pos === -1 && ort.id !== hervorgehoben) { geplant = " gedimmt"; }
 
-    /* Mit Foto ein runder Bildpunkt, ohne Foto der bisherige Tropfen.
-       Die Nummer sitzt im Wrapper, damit sie weder rotiert noch
-       vom runden Bildzuschnitt beschnitten wird. */
+    /* Mit Foto ein runder Bildpunkt, ohne Foto der bisherige Tropfen. Beide
+       laufen unten in eine Spitze aus, die auf der Koordinate steht — beim
+       Bildpunkt ist das ein gedrehtes Quadrat hinter dem Kreis, weil der
+       Kreis wegen des Bildzuschnitts `overflow: hidden` trägt und nichts
+       hinauslassen könnte. Die Nummer sitzt im Wrapper, damit sie weder
+       rotiert noch beschnitten wird. */
     if (ort.bild) {
       var d = gross ? 44 : 36;
+      var spitze = gross ? 12 : 10;
       return L.divIcon({
         className: "",
         html: '<div class="pinwrap">' +
+          '<i class="pin-spitze' + (gross ? " gross" : "") + '" style="background:' + k.farbe + '"></i>' +
           '<div class="bildpin' + (gross ? " gross" : "") + geplant + '" style="border-color:' + k.farbe +
           ";background:" + k.farbe + '">' +
           '<span>' + k.zeichen + "</span>" +
           '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">' +
           "</div>" + nummer + "</div>",
-        iconSize: [d, d],
-        iconAnchor: [d / 2, d / 2],
-        popupAnchor: [0, -(d / 2) - 2]
+        iconSize: [d, d + spitze],
+        iconAnchor: [d / 2, d + spitze],
+        popupAnchor: [0, -(d + spitze)]
       });
     }
 
@@ -1449,21 +1454,15 @@
     if (offen !== warOffen) { warteAufSpalte(); }
   }
 
-  /* Nach dem Übergang einmal nachmessen. Der Zähler ist die Rückfalllinie:
-     Läuft der Übergang nicht (reduzierte Bewegung, verstecktes Fenster),
-     kommt kein transitionend. */
+  /* Am großen Schirm legt sich die Ergebnisspalte über die Karte, ohne sie
+     schmäler zu machen — dort ändert sich nichts nachzumessen. Am Handy
+     schrumpft die Karte dagegen von schirmfüllend auf 58 vh, und davon muss
+     Leaflet erfahren. Ein Zähler genügt: Der Übergang ist dort abgeschaltet,
+     ein transitionend käme also gar nicht. */
   var spaltenZaehler = null;
   function warteAufSpalte() {
-    var buehne = document.querySelector(".buehne");
     clearTimeout(spaltenZaehler);
     spaltenZaehler = setTimeout(function () { karte.invalidateSize(); }, 260);
-    if (!buehne) { return; }
-    buehne.addEventListener("transitionend", function einmal(e) {
-      if (e.propertyName !== "grid-template-columns") { return; }
-      buehne.removeEventListener("transitionend", einmal);
-      clearTimeout(spaltenZaehler);
-      karte.invalidateSize();
-    });
   }
 
   /* ------------------------------------------------------------------

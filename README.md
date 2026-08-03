@@ -44,9 +44,11 @@ Namen, die nicht in eine Zeile passen, brechen auf eine zweite um statt abgeschn
 
 ## Miniaturbilder
 
-Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/wiener-riesenrad.jpg` oder als vollständige URL. Gezeigt wird es an drei Stellen: als runder Punkt auf der Karte, als Quadrat links in der Liste und als Streifen oben im Popup.
+Jeder Ort kann ein Bild tragen, eingetragen im Feld `bild` als Pfad wie `bilder/wiener-riesenrad.jpg` oder als vollständige URL. Gezeigt wird es an vier Stellen: im Pin auf der Karte, als Quadrat links in der Liste, klein im Tagesplan und als Streifen oben im Popup.
 
 Ohne Bild bleibt es beim farbigen Tropfen mit dem Symbol der Kategorie. Dasselbe passiert, wenn der Pfad ins Leere zeigt — die Seite fällt still auf das Symbol zurück, statt ein kaputtes Bild anzuzeigen. Details in [bilder/LIESMICH.md](bilder/LIESMICH.md).
+
+**Beide Pinformen laufen unten spitz zu** und stehen mit dieser Spitze auf der Koordinate. Beim Tropfen ist es die gedrehte Ecke, beim Bildpunkt ein Quadrat hinter dem Kreis, das unten als Dreieck hervorschaut — der Kreis selbst kann nichts hinauslassen, er beschneidet das Foto mit `overflow: hidden`.
 
 47 der 69 Orte haben derzeit ein Foto, alle von Wikimedia Commons unter freier Lizenz. Urheber und Lizenz stehen je Bild in [bilder/BILDNACHWEIS.md](bilder/BILDNACHWEIS.md). Diese Datei gehört mit veröffentlicht, weil die Lizenzen eine Nennung verlangen.
 
@@ -161,7 +163,7 @@ Die Seite hat zwei Zustände, so wie man es von Kartendiensten kennt — an beid
 
 **Ohne Filter** füllt die Karte das Fenster. Oben links schwebt die Suchpille aus Lupe und Eingabefeld, rechts daneben die Kategorien, ganz rechts das Zahnrad. Sonst nichts. Man sieht die Orte, nicht die Maschinerie.
 
-**Sobald etwas filtert**, fährt am großen Schirm links die Ergebnisspalte heraus, 410 Pixel breit. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte bleibt die Kategorienreihe, wie sie ist — die gewählte in ihrer Farbe gefüllt. Ein Klick auf eine andere wechselt direkt hinüber.
+**Sobald etwas filtert**, schiebt sich am großen Schirm von links die Ergebnisspalte über die Karte, 410 Pixel breit. Sie legt sich **darüber**, drückt die Karte also nicht zur Seite: Der Ausschnitt bleibt stehen, die Pins wandern nicht, und man verliert beim Filtern nicht die Orientierung. Ihre weiße Fläche reicht bis an den oberen Fensterrand, sodass die Suchpille darin zu liegen kommt; sie selbst bewegt sich dabei nicht, sie steht fest am Fenster. Leaflets Zoom- und Standortknöpfe rücken um die Spaltenbreite nach rechts, damit sie nicht darunter verschwinden. Im Kopf der Spalte steht die Trefferzahl, darunter die Liste. Über der Karte bleibt die Kategorienreihe, wie sie ist — die gewählte in ihrer Farbe gefüllt. Ein Klick auf eine andere wechselt direkt hinüber.
 
 Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAktiv()`: eine gewählte Kategorie, ein Suchbegriff oder ein Schalter aus dem Zahnrad. Auch der Bearbeiten-Modus hält die Spalte offen — sein Panel steht darin und wäre sonst nicht zu erreichen. Das ✕ in der Suchpille räumt alles weg und führt zurück in den ersten Zustand; es ist der einzige Weg dorthin und trägt deshalb volle Tintenfarbe und eine Trennlinie, statt sich als graues Zeichen zu verstecken.
 

@@ -601,29 +601,46 @@ body:has(.plan-overlay:not([hidden])) .karten-aktionen {
 .textknopf:hover { color: var(--tinte); }
 
 /* ---------- Bühne ----------
-   Zwei Zustände: Ohne Filter füllt die Karte das Fenster, die Ergebnisspalte
-   ist auf null gefahren. Filtert etwas, fährt sie auf 410 px heraus. Die
-   Suchpille steht fest darüber und macht die Bewegung nicht mit. */
+   Zwei Zustände: Ohne Filter ist nur die Karte da. Filtert etwas, schiebt
+   sich die Ergebnisspalte von links darüber. Die Karte behält dabei ihre
+   Größe und ihren Ausschnitt — sie wird nicht zur Seite gedrückt, sondern
+   überdeckt. Die Suchpille steht fest darüber und macht nichts davon mit. */
 
 .buehne {
+  position: relative;
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: 0 1fr;
+  grid-template-columns: 1fr;
   min-height: 0;
-  transition: grid-template-columns .22s ease;
 }
 
-body.liste-offen .buehne { grid-template-columns: var(--spalte) 1fr; }
-
+/* Liegt über der Karte, nicht daneben. Deshalb absolut und mit eigener
+   Fläche — sonst schiene die Karte durch. */
 .liste-spalte {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--spalte);
+  /* Über Leaflets Bedienelementen (1000), unter Chipreihe und Suchpille. */
+  z-index: 1050;
   display: flex;
   flex-direction: column;
-  /* Bei Breite null darf nichts hinausragen. */
   overflow: hidden;
   background: var(--weiss);
+  border-right: 1px solid var(--linie);
+  box-shadow: 2px 0 16px rgba(0,0,0,.14);
+  transform: translateX(-100%);
+  transition: transform .22s ease;
 }
 
-body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
+body.liste-offen .liste-spalte { transform: translateX(0); }
+
+/* Zoom und Standort sitzen unten links — also genau dort, wo die Spalte
+   hereinfährt. Sie rücken um deren Breite nach rechts, damit sie erreichbar
+   bleiben, und fahren in derselben Zeit zurück. */
+.leaflet-bottom.leaflet-left { transition: transform .22s ease; }
+body.liste-offen .leaflet-bottom.leaflet-left { transform: translateX(var(--spalte)); }
 
 /* Macht der Suchpille Platz, die darüber schwebt, und trägt die Trefferzahl —
    die Zeile „Ergebnisse“ aus dem Vorbild. */
@@ -1204,7 +1221,7 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   .kat-zone::before { transition: none; }
   .ort-blatt { transition: none; }
   /* Die Ergebnisspalte steht dann sofort da, statt hereinzufahren. */
-  .buehne { transition: none; }
+  .liste-spalte, .leaflet-bottom.leaflet-left { transition: none; }
   /* „Route vorschlagen“ springt zur Seite, statt zu rutschen. */
   .karten-aktionen, .plan-fab { transition: none; }
 }
@@ -1275,9 +1292,36 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   filter: none;
 }
 
+/* Die Spitze unter dem Bildpunkt: ein um 45° gedrehtes Quadrat, das hinter
+   dem Kreis sitzt und unten als Dreieck hervorschaut. Ihre untere Ecke steht
+   auf der Koordinate, genau wie die Spitze des Tropfens. */
+.pin-spitze {
+  position: absolute;
+  left: 50%;
+  top: 29px;
+  z-index: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 0 0 3px 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.pin-spitze.gross { top: 35px; width: 17px; height: 17px; }
+
+/* Der gedimmte Zustand hängt am Kreis; die Spitze zieht mit, sonst leuchtet
+   ein bunter Zipfel unter einem ausgegrauten Punkt hervor. */
+.pinwrap:has(.gedimmt) .pin-spitze {
+  opacity: .38;
+  filter: grayscale(0.75);
+  transition: opacity .15s, filter .15s;
+}
+
+.leaflet-marker-icon:hover .pin-spitze { opacity: 1; filter: none; }
+
 /* Marker mit Foto: runder Bildpunkt mit Ring in der Kategoriefarbe. */
 .bildpin {
   position: relative;
+  z-index: 1;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -1297,6 +1341,14 @@ body.liste-offen .liste-spalte { border-right: 1px solid var(--linie); }
   height: 100%;
   object-fit: cover;
 }
+
+/* Leaflet setzt in seinem eigenen Blatt
+   `.leaflet-container .leaflet-marker-pane img { width: auto }`. Das sind zwei
+   Klassen und ein Element und schlägt damit `.bildpin img`. Die Folge: Die
+   Breite wurde aus der Höhe hochgerechnet, ein Querformat lief seitlich aus
+   dem Kreis heraus und man sah nur einen senkrechten Streifen des Fotos.
+   Drei Klassen schlagen zwei. */
+.leaflet-marker-pane .pinwrap .bildpin img { width: 100%; }
 
 .bildpin.gross {
   width: 44px;
@@ -1639,18 +1691,7 @@ body.setzt-position #karte { cursor: crosshair; }
      sondern unter der Karte auftaucht. Nicht 100vh, sondern der Rest der
      Bühne: So bleibt der Seitenfuß mit dem Bearbeiten-Knopf stehen, und die
      Seite braucht trotzdem keinen Scrollbalken. */
-  /* Die Spaltenregel muss beide Selektoren nennen: Am großen Schirm steht
-     `body.liste-offen .buehne` mit der 410-Pixel-Spalte, und die ist
-     spezifischer als ein schlichtes `.buehne`. Sonst legt sich die
-     Ergebnisspalte auch hier quer, die Seite wird 410 statt 390 Pixel breit
-     und der Browser zoomt heraus. */
-  .buehne,
-  body.liste-offen .buehne {
-    grid-template-columns: 1fr;
-    min-height: 0;
-    transition: none;
-  }
-  .buehne { grid-template-rows: 1fr; }
+  .buehne { grid-template-rows: 1fr; min-height: 0; }
   body:not(.liste-offen) .liste-spalte { display: none; }
   body:not(.liste-offen) { overflow: hidden; }
 
@@ -1661,13 +1702,24 @@ body.setzt-position #karte { cursor: crosshair; }
   body.liste-offen { height: auto; min-height: 100%; }
 
   .karten-spalte { grid-row: 1; }
+
+  /* Hier steht die Liste unter der Karte im Fluss, nicht darüber: Sie nimmt
+     die volle Breite, es gibt nichts, worüber sie schweben könnte. Damit
+     fallen die absolute Lage, der Schatten und das Hereinfahren weg. */
   .liste-spalte {
+    position: static;
     grid-row: 2;
+    width: auto;
     display: block;
     overflow: visible;
     border-right: none;
     border-top: 1px solid var(--linie);
+    box-shadow: none;
+    transform: none;
+    transition: none;
   }
+  /* Zoom und Standort bleiben, wo sie sind — hier schiebt sich nichts davor. */
+  body.liste-offen .leaflet-bottom.leaflet-left { transform: none; }
   .liste { overflow: visible; }
   /* Die Trefferzahl steht hier als erster Chip in der Kategorienreihe. */
   .listen-kopf { display: none; }
