@@ -635,6 +635,30 @@
     }
   });
 
+  /* Der Bearbeiten-Schalter saß früher in einem Streifen unter der Karte.
+     Der Streifen ist weg — der Schalter schwebt jetzt als Leaflet-Steuerung
+     unten links über der Karte. Als Steuerung und nicht als abgesetzter Kasten,
+     damit Leaflet ihn über Standort und Zoom stapelt und er beim Aufschwenken
+     der Ergebnisspalte von selbst mitwandert. Zuletzt hinzugefügt heißt bei
+     den unteren Ecken: ganz oben im Stapel. */
+  var BearbeitenSteuerung = L.Control.extend({
+    options: { position: "bottomleft" },
+    onAdd: function () {
+      var c = L.DomUtil.create("div", "leaflet-bar bearbeiten-steuerung");
+      var b = L.DomUtil.create("button", "", c);
+      b.type = "button";
+      b.id = "bearbeiten-schalter";
+      b.textContent = "Bearbeiten";
+      /* Sonst zöge ein Klick die Karte mit oder zoomte beim Doppelklick. */
+      L.DomEvent.disableClickPropagation(c);
+      L.DomEvent.on(b, "click", function (e) {
+        L.DomEvent.preventDefault(e);
+        schalteBearbeiten(!bearbeiten);
+      });
+      return c;
+    }
+  });
+
   /* Linie über die Karte in der Reihenfolge des Plans. */
   function zeichneLinie() {
     if (planLinie) { karte.removeLayer(planLinie); planLinie = null; }
@@ -2226,10 +2250,6 @@
     }
   });
 
-  document.getElementById("bearbeiten-schalter").addEventListener("click", function () {
-    schalteBearbeiten(!bearbeiten);
-  });
-
   /* Plan-Knopf im Karten-Popup: dort greift die Listen-Behandlung nicht,
      darum ein eigener delegierter Klick auf dem Kartenbereich. */
   document.getElementById("karte").addEventListener("click", function (e) {
@@ -2286,6 +2306,7 @@
   });
 
   karte.addControl(new StandortSteuerung());
+  karte.addControl(new BearbeitenSteuerung());
 
   bereinigePlan();
   speicherePlan();

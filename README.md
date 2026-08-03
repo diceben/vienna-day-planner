@@ -126,7 +126,7 @@ Das nutzt die Standortabfrage des Browsers und funktioniert nur in einem sichere
 
 Es gibt zwei Wege, und sie führen zum selben Ergebnis.
 
-**Über die Seite.** Unten rechts auf „Bearbeiten“ klicken oder die Adresse mit `#bearbeiten` aufrufen. Im Bearbeiten-Modus bekommt jeder Listeneintrag ein Stift- und ein Kreuz-Symbol, dazu erscheint oben „Neuen Ort anlegen“. Mit Koordinaten hat man im Formular nichts zu tun: Adresse eintippen, auf „Position aus Adresse holen“ klicken, fertig. Alternativ „Auf Karte setzen“ drücken und die Stelle direkt anklicken. Eine Zeile über den beiden Knöpfen zeigt an, ob die Position schon steht, und ein Ring auf der Karte markiert sie.
+**Über die Seite.** Unten links auf der Karte auf „Bearbeiten“ klicken oder die Adresse mit `#bearbeiten` aufrufen. Im Bearbeiten-Modus bekommt jeder Listeneintrag ein Stift- und ein Kreuz-Symbol, dazu erscheint oben „Neuen Ort anlegen“. Mit Koordinaten hat man im Formular nichts zu tun: Adresse eintippen, auf „Position aus Adresse holen“ klicken, fertig. Alternativ „Auf Karte setzen“ drücken und die Stelle direkt anklicken. Eine Zeile über den beiden Knöpfen zeigt an, ob die Position schon steht, und ein Ring auf der Karte markiert sie.
 
 Änderungen liegen zunächst nur im Speicher des Browsers. Ein dunkler Balken über der Liste weist darauf hin, solange das der Fall ist. Über „daten.js exportieren“ lädt man die fertige Datei herunter und ersetzt damit `daten.js` im Projektordner. Danach ist der Stand dauerhaft und für alle sichtbar. „Änderungen verwerfen“ setzt auf den Inhalt der Datei zurück.
 
@@ -179,9 +179,11 @@ Was „filtert“ heißt, steht an einer Stelle in `assets/app.js`, in `filterAk
 
 Der Titel steht nur noch im Browsertab. Auf der Seite selbst wäre oben links kein Platz mehr für ihn, und Kartendienste haben dort auch keinen.
 
-**Am Handy** dasselbe Prinzip, andere Richtung: Ohne Filter füllt die Karte den Schirm, die Liste ist nicht da und es gibt nichts zu scrollen. Filtert etwas, schrumpft die Karte auf 58 Prozent der Fensterhöhe und die Liste schaut von unten herein — das Schrumpfen ist zugleich die sichtbare Antwort auf den Tipp. Der Seitenfuß mit dem Bearbeiten-Knopf bleibt in beiden Zuständen stehen; die Karte nimmt deshalb nicht 100vh, sondern den Rest der Bühne.
+**Am Handy** dasselbe Prinzip, andere Richtung: Ohne Filter füllt die Karte den Schirm, die Liste ist nicht da und es gibt nichts zu scrollen. Filtert etwas, schrumpft die Karte auf 58 Prozent der Fensterhöhe und die Liste schaut von unten herein — das Schrumpfen ist zugleich die sichtbare Antwort auf den Tipp.
 
-Leaflets Zoom- und Standortknöpfe sitzen **unten links**: Oben liegt in beiden Zuständen die Chipreihe, und unten rechts stehen „Route vorschlagen“ und „Mein Tag“.
+**Unten links** stapeln sich der Bearbeiten-Schalter, der Standortknopf und die Zoomknöpfe: Oben liegt in beiden Zuständen die Chipreihe, und unten rechts stehen „Route vorschlagen“ und „Mein Tag“. Alle drei sind Leaflet-Steuerungen im selben Stapel, deshalb rücken sie gemeinsam um die Spaltenbreite nach rechts, sobald die Ergebnisspalte aufschwenkt.
+
+Einen Seitenfuß gibt es nicht mehr — die Karte reicht bis an den unteren Fensterrand. Die Nennung von OpenStreetMap und CARTO stand dort doppelt: Leaflet setzt sie ohnehin unten rechts auf die Karte.
 
 ## Auf dem Handy
 

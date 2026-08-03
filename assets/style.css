@@ -1446,25 +1446,39 @@ body.liste-offen .leaflet-bottom.leaflet-left { transform: translateX(var(--spal
 
 .popup-plan { display: block; margin-top: 10px; }
 
-/* ---------- Fuß ---------- */
-
-.fuss {
-  flex: 0 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 26px;
-  border-top: 1px solid var(--linie);
-  background: var(--papier-tief);
-  font-size: 12px;
-  color: var(--tinte-leise);
+/* ---------- Bearbeiten ----------
+   Der Schalter schwebt unten links über der Karte, im selben Stapel wie
+   Standort und Zoom. Breiter als die runden Knöpfe darunter, weil er
+   beschriftet ist — deshalb `width: auto` gegen Leaflets feste 30 Pixel. */
+.bearbeiten-steuerung {
+  width: auto;
+  background: var(--weiss);
 }
 
-/* ---------- Bearbeiten ---------- */
+.bearbeiten-steuerung button {
+  display: block;
+  border: none;
+  background: none;
+  padding: 6px 11px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--tinte-leise);
+  cursor: pointer;
+  white-space: nowrap;
+}
 
-body.bearbeiten .fuss { background: #2b2721; color: #e8e0d4; }
-body.bearbeiten .fuss .textknopf { color: #e8e0d4; }
+.bearbeiten-steuerung button:hover { color: var(--tinte); }
+
+.bearbeiten-steuerung button:focus-visible {
+  outline: 2px solid var(--tinte);
+  outline-offset: -2px;
+}
+
+/* Im Bearbeiten-Modus dunkel — dieselbe Ansage, die vorher der Streifen
+   unter der Karte gemacht hat. */
+body.bearbeiten .bearbeiten-steuerung { background: #2b2721; }
+body.bearbeiten .bearbeiten-steuerung button { color: #e8e0d4; }
 
 .bearbeiten-panel {
   padding: 16px 20px;
@@ -1724,8 +1738,7 @@ body.setzt-position #karte { cursor: crosshair; }
   /* Ohne Filter füllt die Karte den Schirm, ganz ohne Liste — dasselbe Bild
      wie am großen Schirm, nur dass die Liste nicht seitlich hereinfährt,
      sondern unter der Karte auftaucht. Nicht 100vh, sondern der Rest der
-     Bühne: So bleibt der Seitenfuß mit dem Bearbeiten-Knopf stehen, und die
-     Seite braucht trotzdem keinen Scrollbalken. */
+     Bühne: So braucht die Seite keinen Scrollbalken. */
   .buehne { grid-template-rows: 1fr; min-height: 0; }
   body:not(.liste-offen) .liste-spalte { display: none; }
   body:not(.liste-offen) { overflow: hidden; }
@@ -1764,10 +1777,6 @@ body.setzt-position #karte { cursor: crosshair; }
      Schirm, das Blatt nimmt das untere Drittel. Erst das ✕ holt die Liste
      zurück. */
   body.ort-offen .liste-spalte { display: none; }
-  /* Der Seitenfuß stünde sonst als 53-px-Streifen unter der bildschirm-
-     füllenden Karte und machte die Seite wieder scrollbar. Die Nennung von
-     OpenStreetMap und CARTO steht ohnehin auf der Karte selbst. */
-  body.ort-offen .fuss { display: none; }
   body.ort-offen .buehne { grid-template-rows: 100vh; }
   @supports (height: 100dvh) {
     body.ort-offen .buehne { grid-template-rows: 100dvh; }
