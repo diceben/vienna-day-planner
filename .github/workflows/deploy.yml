@@ -1,0 +1,88 @@
+# Testen, dann veröffentlichen — in dieser Reihenfolge.
+#
+# Vorher lieferte GitHub Pages den Branch aus: Ein Push war rund eine Minute
+# später live, ungeprüft. Ein Testlauf nach dem Push hätte erst gemeldet, was
+# schon draußen ist. Jetzt hängt der Deploy am Testlauf: Ist er rot, wird
+# nichts veröffentlicht, und die zuletzt erfolgreiche Fassung bleibt stehen.
+#
+# Fehlerfall ist damit „veraltet", nicht „kaputt" — die freundlichere Seite.
+
+name: Testen und veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Von Hand anstoßen, etwa wenn ein Lauf an etwas Vorübergehendem scheiterte.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Läuft ein Deploy schon, nicht abwürgen — sonst bliebe Pages im Halbzustand.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Nur Chromium: Die Läufe prüfen Geometrie und Verhalten der eigenen
+      # Seite, nicht Browserunterschiede. Drei Engines wären dreimal Wartezeit
+      # für dieselbe Aussage.
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm test
+
+      # Bei Rot die Bildschirmfotos mitgeben — sonst müsste man den Fehler
+      # lokal nachstellen, um zu sehen, was die Seite gezeigt hat.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bildschirmfotos
+          path: tests/schuss/
+          retention-days: 7
+
+  deploy:
+    # Kein needs, kein Deploy: Diese Zeile ist das Tor.
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # enablement: true stellt Pages auf „GitHub Actions" um, falls es noch
+      # den Branch ausliefert. Spart das Umstellen von Hand in den
+      # Repo-Einstellungen.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # Die Seite ist statisch, es gibt nichts zu bauen — hochgeladen wird das
+      # Verzeichnis, wie es im Repo steht. Nur was nicht zur Seite gehört,
+      # fliegt vorher raus; sonst lägen 2000 Zeilen Testcode unter
+      # diceben.github.io/vienna-day-planner/tests/.
+      - run: rm -rf tests .github package.json package-lock.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,15 @@
+{
+  "name": "vienna-day-planner",
+  "version": "1.0.0",
+  "description": "Interaktive Wien-Karte, die aus Kategorien und Zeitbudget eine Tagestour vorschlaegt",
+  "homepage": "https://diceben.github.io/vienna-day-planner/",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "test": "node tests/lauf.mjs",
+    "start": "python3 -m http.server 8765"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

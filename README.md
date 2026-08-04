@@ -90,6 +90,38 @@ cd vienna-day-planner && python3 -m http.server 8765
 
 Danach im Browser `http://127.0.0.1:8765` öffnen.
 
+## Tests
+
+Sechzehn Läufe in `tests/`, rund zwei Minuten. Sie steuern einen echten Browser über [Playwright](https://playwright.dev) und messen, was auf dem Schirm passiert — Pixelmaße, Farben, Bewegungsdauern, welche Anfragen hinausgehen.
+
+```bash
+npm install                     # einmalig
+npx playwright install chromium # einmalig
+npm test                        # alle sechzehn
+npm test -- pins route          # nur passende
+```
+
+`tests/lauf.mjs` sucht sich einen freien Port, stellt den Server selbst daneben und ruft die Läufe nacheinander — nicht gleichzeitig, weil ein ausgelasteter Rechner bei Animationen andere Zahlen liefert. Jeder Lauf ist auch allein startbar (`node tests/pins.mjs`), dann muss ein Server auf Port 8766 stehen.
+
+**Der Deploy hängt daran.** `.github/workflows/deploy.yml` testet erst und veröffentlicht nur bei Grün; ist ein Lauf rot, bleibt die zuletzt erfolgreiche Fassung stehen. Der Fehlerfall ist damit „veraltet" statt „kaputt". Vorher lieferte GitHub Pages den Branch aus — jeder Push war ungeprüft eine Minute später live, und ein Testlauf danach hätte nur gemeldet, was schon draußen ist.
+
+Nur die Kartenkacheln werden durch ein einfarbiges Bild ersetzt, damit die Läufe offline und über die Zeit vergleichbar bleiben. Leaflet kommt ausdrücklich aus dem Projekt: Die Läufe sollen die Seite prüfen, die auch ausgeliefert wird.
+
+### Wozu der Aufwand
+
+Was die Läufe allein beim Bauen dieser Fassung gefangen haben — jedes Mal etwas, das im Diff unsichtbar war:
+
+| Fund | warum unsichtbar |
+|---|---|
+| 8 px Versatz einer Chipreihe | Der geleerte Wrapper steuerte weiter das `gap` der Zone bei |
+| Handyseite auf 410 px geschrumpft | `body.liste-offen .buehne` schlug `.buehne` in der Spezifität |
+| Fotos als senkrechter Streifen im Pin | Leaflets eigenes Stylesheet schlug die App-Regel |
+| Zahnrad klebte in der Suchpille | `backdrop-filter` macht das Element zum Bezugsrahmen für `position: fixed` |
+| Zwei Restaurants gleichzeitig mittags | Nur in ein paar von acht Würfen, nie beim Draufschauen |
+| Zweistufige Bewegung zur Karte | 916 statt 669 ms — messbar, nicht lesbar |
+
+Die Kehrseite: Weil echte Maße geprüft werden, macht eine **gewollte** Gestaltungsänderung die Läufe zu Recht rot. Dann gehört der Lauf mitgezogen. Ein neuer Lauf sollte einmal gegengeprobt werden — Änderung ausbauen, schauen ob er anschlägt, wieder einbauen. Sonst prüft er nichts.
+
 ## Tagesplan
 
 Unten rechts auf der Karte schwebt der Knopf „Mein Tag“ mit einem Zähler. Ein Klick öffnet am rechten Rand ein Panel, 420 Pixel breit und fast so hoch wie das Fenster — der Tagesplan ist die Stelle, an der man mehrere Orte nebeneinander abwägt, dafür braucht er Höhe. Neben der Überschrift steht, wie viele Stopps in wie vielen der vier Tageszeiten liegen.

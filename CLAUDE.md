@@ -15,9 +15,37 @@ assets/app.js      Karte, Filter, Routenvorschlag, Bearbeiten-Modus
 assets/style.css   Gestaltung
 assets/leaflet/    Leaflet 1.9.4, unverändert übernommen — nicht bearbeiten
 bilder/            Miniaturbilder + BILDNACHWEIS.md (Pflicht, siehe unten)
+tests/             16 Playwright-Läufe, ~2 Minuten
 ```
 
-**Kein Build, kein Paketmanager.** Leaflet liegt seit August 2026 in
+## Nach jeder Änderung: `npm test`
+
+Sechzehn Läufe, rund zwei Minuten. Beim ersten Mal `npm install` und
+`npx playwright install chromium`.
+
+```bash
+npm test                  # alles
+npm test -- pins route    # nur passende Läufe
+```
+
+**Der Deploy hängt daran.** `.github/workflows/deploy.yml` testet erst und
+veröffentlicht nur bei Grün. Ist ein Lauf rot, bleibt die zuletzt erfolgreiche
+Fassung stehen — der Fehlerfall ist „veraltet", nicht „kaputt". Vorher lieferte
+Pages den Branch aus, jeder Push war ungeprüft eine Minute später live.
+
+Die Läufe messen echte Geometrie: Pixelmaße, Farben, Bewegungsdauern. Das
+heißt, eine **gewollte** Gestaltungsänderung macht sie zu Recht rot — dann
+gehört der Lauf mitgezogen, nicht die Änderung zurückgenommen. Andersherum
+gilt: Wer eine Zusicherung streicht, weil sie stört, nimmt das Netz weg. Im
+Zweifel Ben fragen.
+
+Ein neuer Lauf sollte einmal **gegengeprobt** werden: die Änderung ausbauen,
+schauen ob er anschlägt, wieder einbauen. Ein Test, der das nicht tut, prüft
+nichts.
+
+**Kein Build, kein Paketmanager für die Seite selbst.** Playwright ist die
+einzige Abhängigkeit und wird nie ausgeliefert — was im Browser landet, ist
+weiterhin abhängigkeitsfrei. Leaflet liegt seit August 2026 in
 `assets/leaflet/` statt auf einem CDN — sonst wäre die Seite eine leere Fläche,
 wenn unpkg nicht erreichbar ist. Damit gehen **keine Anfragen mehr an fremde
 Rechner außer den Kartenkacheln**; das bitte so lassen und keine Schrift, kein

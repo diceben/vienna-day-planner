@@ -4,3 +4,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+# Testwerkzeug und was die Läufe unterwegs ablegen
+node_modules/
+tests/schuss/
