@@ -5,8 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wien entdecken — Karte für Besucher</title>
 <meta name="description" content="Interaktive Karte für Wien mit Frühstückscafés, Lokalen, Sehenswürdigkeiten, Museen, Events und Aktivitäten. Filterbar nach Wetter, Andrang, Preis und Weg.">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<!-- Leaflet 1.9.4 liegt in assets/leaflet/ statt auf einem CDN: Ist das CDN
+     nicht erreichbar, wäre die Seite sonst eine leere Fläche — einen Rückfall
+     gibt es nicht. Prüfsummen entfallen, die sicherten gegen ein fremdes CDN.
+     Beim Aktualisieren die Dateien von unpkg holen und die dortigen
+     SRI-Hashes gegenrechnen (siehe README). -->
+<link rel="stylesheet" href="assets/leaflet/leaflet.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -113,8 +117,7 @@
   </section>
 </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="assets/leaflet/leaflet.js"></script>
 <script src="daten.js"></script>
 <script src="assets/app.js"></script>
 </body>

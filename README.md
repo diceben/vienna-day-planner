@@ -62,7 +62,23 @@ Die übrigen 22 stehen mit Adresse in [bilder/FEHLENDE.md](bilder/FEHLENDE.md). 
 
 Sechs der neuen Bilder zeigen das Haus an der Adresse, nicht das Lokal selbst — Café Aera, neue bar, Café Propeller, ZWE, KLYO und GOTA Coffee. Bei ZWE und GOTA ist das Schild im Bild, bei den anderen die richtige Hausnummer.
 
-Die Karte läuft mit [Leaflet](https://leafletjs.com) und Kacheln von CARTO auf OpenStreetMap-Basis. Beides wird zur Laufzeit von einem CDN geladen, die Seite braucht daher eine Internetverbindung.
+## Leaflet liegt im Projekt
+
+Die Karte läuft mit [Leaflet](https://leafletjs.com) 1.9.4. Die Bibliothek liegt in `assets/leaflet/` — 159 KB für `leaflet.js` und `leaflet.css`, dazu 6 KB für die fünf PNGs, auf die das CSS zeigt; zusammen 165 KB. Vorher kam sie von unpkg. Der Grund für den Umzug: Ist das CDN nicht erreichbar, wäre die Seite eine leere Fläche, denn einen Rückfall gibt es nicht.
+
+Damit geht **keine einzige Anfrage mehr an einen fremden Rechner**, außer den Kartenkacheln von CARTO. Nachgemessen mit gekapptem Netz: Leaflet lädt, das Kartengerüst steht, alle 69 Pins sitzen, Zoom- und Bearbeiten-Knöpfe sind da, und ein Klick auf eine Kategorie filtert und schwenkt die Spalte auf — nur die Kartenbilder fehlen. Die Prüfsummen (`integrity`) sind entfallen; sie sicherten gegen ein fremdes CDN, und gegen die eigenen Dateien sichert Git.
+
+Die fünf PNGs (`marker-icon`, `marker-shadow`, `layers` …) fragt die Seite derzeit nie an: Alle Pins sind divIcons, und eine Ebenen-Steuerung gibt es nicht. Sie liegen trotzdem dabei, damit die Kopie vollständig ist und niemand später über ein 404 stolpert.
+
+**Beim Aktualisieren:** Dateien von `https://unpkg.com/leaflet@<version>/dist/` holen und gegen die dort angegebenen SRI-Hashes rechnen, bevor sie ins Projekt wandern:
+
+```bash
+openssl dgst -sha256 -binary leaflet.js | openssl base64 -A
+```
+
+Für 1.9.4 muss dabei `20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=` herauskommen, für `leaflet.css` `p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=`. Die jetzt eingecheckten Dateien sind so geprüft.
+
+Die Kacheln kommen weiter von CARTO auf OpenStreetMap-Basis — die Seite braucht dafür eine Internetverbindung. Ohne sie steht das Gerüst samt Pins, nur die Kartenbilder fehlen.
 
 ## Lokal ansehen
 

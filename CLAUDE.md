@@ -9,17 +9,23 @@ Nur README-Randnotizen und die Lizenz sind englisch.
 ## Aufbau
 
 ```
-index.html        Seitengerüst
-daten.js          alle Orte — die einzige Datei mit Inhalten
-assets/app.js     Karte, Filter, Routenvorschlag, Bearbeiten-Modus
-assets/style.css  Gestaltung
-bilder/           Miniaturbilder + BILDNACHWEIS.md (Pflicht, siehe unten)
+index.html         Seitengerüst
+daten.js           alle Orte — die einzige Datei mit Inhalten
+assets/app.js      Karte, Filter, Routenvorschlag, Bearbeiten-Modus
+assets/style.css   Gestaltung
+assets/leaflet/    Leaflet 1.9.4, unverändert übernommen — nicht bearbeiten
+bilder/            Miniaturbilder + BILDNACHWEIS.md (Pflicht, siehe unten)
 ```
 
-**Kein Build, keine Abhängigkeiten im Repo.** Leaflet kommt zur Laufzeit vom
-CDN. Ansehen: `python3 -m http.server 8765`, dann http://127.0.0.1:8765 —
-nicht per Doppelklick, sonst funktioniert die Standortabfrage nicht (`file://`
-ist kein sicherer Kontext).
+**Kein Build, kein Paketmanager.** Leaflet liegt seit August 2026 in
+`assets/leaflet/` statt auf einem CDN — sonst wäre die Seite eine leere Fläche,
+wenn unpkg nicht erreichbar ist. Damit gehen **keine Anfragen mehr an fremde
+Rechner außer den Kartenkacheln**; das bitte so lassen und keine Schrift, kein
+Skript und keine Zählpixel von außen einbauen.
+
+Ansehen: `python3 -m http.server 8765`, dann http://127.0.0.1:8765 — nicht per
+Doppelklick, sonst funktioniert die Standortabfrage nicht (`file://` ist kein
+sicherer Kontext).
 
 ## Der Kuratierungsmaßstab — wichtiger als alles andere hier
 
