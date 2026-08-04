@@ -82,6 +82,10 @@ oder `#bearbeiten`) mit anschließendem Export von `daten.js`, oder direkt in
   löscht bei allen Nutzern den gespeicherten Tagesplan.
 - **`bilder/BILDNACHWEIS.md` gehört mitveröffentlicht.** Die Fotos stammen von
   Wikimedia Commons und verlangen Namensnennung.
+- **Zu jedem Foto gehört eine kleine Fassung in `bilder/klein/`** (180 px kurze
+  Seite). Pin, Miniatur und Ortsblatt nehmen sie, nur das Popup das Original —
+  das spart 77 % beim ersten Laden. Fehlt sie, verschwindet das Bild still.
+  Der Befehl zum Erzeugen steht in der README; `tests/bilder.mjs` prüft es.
 - **Die `labels`-Werte sind gelöscht**, samt der Filtergruppe „Eigenschaften"
   im Zahnrad-Popover. Sie waren zum Testen gestreut, nicht recherchiert, und
   eine falsche Angabe bei „Barrierefrei" schickt jemanden im Rollstuhl vor eine

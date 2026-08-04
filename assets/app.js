@@ -967,7 +967,7 @@
     var spitze = gross ? 12 : 10;
     var klasse = ort.bild ? "bildpin" : "pin";
     var foto = ort.bild
-      ? '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">'
+      ? '<img src="' + entschaerfe(kleinesBild(ort.bild)) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">'
       : "";
 
     return L.divIcon({
@@ -996,12 +996,27 @@
     });
   }
 
-  /* Miniatur für Liste und Popup: Foto, sonst farbiges Feld mit Symbol. */
+  /* Ein Foto bedient vier Größen: den Pin (30 px), die Miniatur in der Liste
+     (40), das Ortsblatt am Handy (56) und das Popup (282 breit). Für die
+     ersten drei liegt in bilder/klein/ eine Fassung mit 180 px kurzer Seite —
+     das deckt selbst das Blatt auf einem Schirm mit dreifacher Dichte ab und
+     wiegt ein Viertel. Beim Popup bleibt es beim Original, dort ist die
+     Auflösung sichtbar.
+
+     Nur eigene Pfade werden umgebogen: Das Datenmodell erlaubt auch eine
+     fremde URL, und zu der gibt es keine kleine Fassung. */
+  function kleinesBild(pfad) {
+    return pfad.indexOf("bilder/") === 0 ? "bilder/klein/" + pfad.slice(7) : pfad;
+  }
+
+  /* Miniatur für Liste, Tagesplan und Ortsblatt: Foto, sonst farbiges Feld
+     mit Symbol. */
   function miniatur(ort, klasse) {
     var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
     return '<div class="' + klasse + '" style="background:' + k.farbe + '">' +
       "<span>" + k.zeichen + "</span>" +
-      (ort.bild ? '<img src="' + entschaerfe(ort.bild) + '" alt="" onerror="this.remove()">' : "") +
+      (ort.bild ? '<img src="' + entschaerfe(kleinesBild(ort.bild)) +
+        '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
       "</div>";
   }
 
@@ -1025,8 +1040,11 @@
     var k = KATEGORIEN[ort.kategorie] || KATEGORIEN.aktivitaet;
     var teile = [];
     if (ort.bild) {
+      /* Hier das Original: 282 Pixel breit angezeigt, auf einem dichten
+         Schirm doppelt so viel — die kleine Fassung wäre sichtbar weich.
+         Es lädt ohnehin erst, wenn jemand das Popup öffnet. */
       teile.push('<span class="popup-bild"><img src="' + entschaerfe(ort.bild) +
-        '" alt="" onerror="this.parentNode.remove()"></span>');
+        '" alt="" decoding="async" onerror="this.parentNode.remove()"></span>');
     }
     teile.push('<span class="popup-titel">' + entschaerfe(ort.name) + "</span>");
     teile.push('<span class="popup-adresse">' + entschaerfe(ort.adresse) + "</span>");

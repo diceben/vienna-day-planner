@@ -62,6 +62,32 @@ Die übrigen 22 stehen mit Adresse in [bilder/FEHLENDE.md](bilder/FEHLENDE.md). 
 
 Sechs der neuen Bilder zeigen das Haus an der Adresse, nicht das Lokal selbst — Café Aera, neue bar, Café Propeller, ZWE, KLYO und GOTA Coffee. Bei ZWE und GOTA ist das Schild im Bild, bei den anderen die richtige Hausnummer.
 
+### Zwei Größen
+
+Ein Foto bedient vier Anzeigegrößen: den Pin auf der Karte (30 Pixel), die Miniatur im Listeneintrag (40), das Ortsblatt am Handy (56) und das Bild im Karten-Popup (**282 breit**). Lange lud überall dieselbe Datei — beim ersten Aufruf **2639 KB**, größtenteils dafür, 30-Pixel-Kreise zu zeichnen.
+
+Deshalb liegt in `bilder/klein/` zu jedem Foto eine Fassung mit 180 Pixeln kurzer Seite. Das deckt selbst das Ortsblatt auf einem Schirm mit dreifacher Dichte ab (56 × 3 = 168) und wiegt ein Viertel. Pin, Miniatur und Blatt nehmen sie, das Popup behält das Original — bei 282 Pixeln Breite wäre die kleine Fassung sichtbar weich, und sie lädt ohnehin erst, wenn jemand das Popup öffnet.
+
+**Gemessen: 2639 → 616 KB beim ersten Aufruf, 77 Prozent weniger.** Auf Handy und Desktop gleichermaßen.
+
+`loading="lazy"` steht zusätzlich an Pins und Miniaturen, trägt aber wenig bei: Von 47 Pin-Bildern liegen am Desktop 46 ohnehin im Sichtfeld. Der Gewinn kommt fast vollständig aus der Dateigröße, nicht aus dem späteren Laden.
+
+Neue Bilder brauchen ihre kleine Fassung mit:
+
+```bash
+python3 -c "
+from PIL import Image; import glob, os
+for p in glob.glob('bilder/*.jpg'):
+    z = 'bilder/klein/' + os.path.basename(p)
+    if os.path.exists(z): continue
+    im = Image.open(p).convert('RGB'); w, h = im.size; f = 180 / min(w, h)
+    (im if f >= 1 else im.resize((round(w*f), round(h*f)), Image.LANCZOS)) \
+        .save(z, 'JPEG', quality=82, optimize=True, progressive=True)
+"
+```
+
+Fehlt eine, verschwindet das Bild still — `onerror` räumt es weg. `tests/bilder.mjs` prüft deshalb für jedes verlinkte Foto, dass die kleine Fassung da ist.
+
 ## Leaflet liegt im Projekt
 
 Die Karte läuft mit [Leaflet](https://leafletjs.com) 1.9.4. Die Bibliothek liegt in `assets/leaflet/` — 159 KB für `leaflet.js` und `leaflet.css`, dazu 6 KB für die fünf PNGs, auf die das CSS zeigt; zusammen 165 KB. Vorher kam sie von unpkg. Der Grund für den Umzug: Ist das CDN nicht erreichbar, wäre die Seite eine leere Fläche, denn einen Rückfall gibt es nicht.
