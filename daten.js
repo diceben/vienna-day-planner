@@ -11,7 +11,8 @@
                   | musik | event | aktivitaet — bestimmt Farbe und Symbol
      weitere      Liste weiterer Kategorien, meist leer
      tags         Merkmale für die kategoriespezifischen Filter
-     labels       Eigenschaften als Farbbänder, sh. LABELS in app.js
+     labels       derzeit überall leer — die früheren Werte waren
+                  erfunden und sind entfernt worden
      bild         Miniaturbild: Pfad wie bilder/riesenrad.jpg oder URL
      adresse      Straße, PLZ und Wien
      beschreibung ein bis zwei Sätze
@@ -37,10 +38,7 @@ const ORTE = [
       "fr-klassisch",
       "fr-mittag"
     ],
-    "labels": [
-      "hunde",
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Lammgasse 1",
     "beschreibung": "Gemütliches Cafe mit internationalen Speisen",
     "website": "https://www.cafemerkur.at/",
@@ -87,9 +85,7 @@ const ORTE = [
       "fr-klassisch",
       "fr-nachmittag"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Staudgasse 1, 1180 Wien",
     "beschreibung": "Kaffeehaus im achtzehnten Bezirk, mit Bücherwänden an den Wänden und ohne Hektik. Abseits der Touristenrouten.",
     "website": "https://cafeschopenhauer.at",
@@ -160,9 +156,7 @@ const ORTE = [
       "fr-fancy",
       "fr-nachmittag"
     ],
-    "labels": [
-      "barrierefrei"
-    ],
+    "labels": [],
     "adresse": "Gumpendorfer Straße 10–12, 1060 Wien",
     "beschreibung": "Café und Buchladen in einem, samt Möbeln aus zweiter Hand. Frühstück den ganzen Tag.",
     "website": "https://phil.info",
@@ -184,9 +178,7 @@ const ORTE = [
     "tags": [
       "kueche-italienisch"
     ],
-    "labels": [
-      "barrierefrei"
-    ],
+    "labels": [],
     "adresse": "Köllnerhofgasse 4, 1010 Wien",
     "beschreibung": "Italiener in der Altstadt nahe dem Schwedenplatz, Pasta und Pizza zu Preisen, die man in der Lage nicht erwartet. Abends gut gefüllt.",
     "website": "https://cavaliere.at",
@@ -209,10 +201,7 @@ const ORTE = [
       "kueche-traditionell",
       "fancy"
     ],
-    "labels": [
-      "vegan",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "Schubertring 10, 1010 Wien",
     "beschreibung": "Gehobene Wiener Küche am Ring, das Schnitzel gilt als eines der besten der Stadt. Preislich das obere Ende.",
     "website": "https://meisslundschadn.at",
@@ -232,9 +221,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Schönbrunner Schloßstraße 47, 1130 Wien",
     "beschreibung": "Sommerresidenz der Habsburger im Westen der Stadt. Der Park mit Gloriette kostet keinen Eintritt, das Schloss schon.",
     "website": "https://schoenbrunn.at",
@@ -274,9 +261,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "lgbtq"
-    ],
+    "labels": [],
     "adresse": "Kegelgasse 36–38, 1030 Wien",
     "beschreibung": "Gemeindebau von Friedensreich Hundertwasser mit unebenen Böden und bewachsenem Dach. Von außen zu besichtigen, drinnen wird gewohnt.",
     "website": "",
@@ -296,10 +281,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "vegan",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "Volksgarten, 1010 Wien",
     "beschreibung": "Nachbau eines griechischen Tempels im Volksgarten, errichtet in den 1820er-Jahren. Im Sommer stellt das Kunsthistorische Museum darin eine einzelne Skulptur aus.",
     "website": "https://khm.at",
@@ -319,9 +301,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "barrierefrei"
-    ],
+    "labels": [],
     "adresse": "Karlsplatz 10, 1040 Wien",
     "beschreibung": "Kuppelkirche aus dem 18. Jahrhundert am Karlsplatz. Ein Aufzug führt auf 32 Meter hinauf, direkt vor die Deckenfresken.",
     "website": "https://karlskirche.at",
@@ -341,11 +321,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "barrierefrei",
-      "lgbtq",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "Simmeringer Hauptstraße 234, 1110 Wien",
     "beschreibung": "Parkfriedhof im elften Bezirk, auf dem Beethoven und Falco liegen. Der Eintritt kostet nichts, Zeit dafür umso mehr.",
     "website": "https://www.friedhoefewien.at/zentralfriedhof",
@@ -365,9 +341,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "lgbtq"
-    ],
+    "labels": [],
     "adresse": "Hoher Markt 10, 1010 Wien",
     "beschreibung": "Jugendstiluhr über der Gasse am Hohen Markt. Zu jeder vollen Stunde schiebt sich eine historische Figur durchs Bild, um zwölf ziehen alle zwölf vorbei.",
     "website": "",
@@ -387,9 +361,7 @@ const ORTE = [
     "kategorie": "sehenswuerdigkeit",
     "weitere": [],
     "tags": [],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Donauturmplatz 1, 1220 Wien",
     "beschreibung": "Mit 252 Metern das höchste Bauwerk Österreichs, die Aussichtsterrasse sitzt auf 150 Metern. Bei klarer Sicht reicht der Blick bis in die Berge.",
     "website": "https://donauturm.at",
@@ -411,9 +383,7 @@ const ORTE = [
     "tags": [
       "thema-kunst"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Maria-Theresien-Platz, 1010 Wien",
     "beschreibung": "Die Gemäldegalerie der Habsburger, mit dem größten Bruegel-Bestand der Welt. Für einen Durchgang sollte man drei Stunden einplanen.",
     "website": "https://khm.at",
@@ -479,10 +449,7 @@ const ORTE = [
     "tags": [
       "thema-kunst"
     ],
-    "labels": [
-      "lgbtq",
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Prinz-Eugen-Straße 27, 1030 Wien",
     "beschreibung": "Barockes Schlossensemble mit dem Garten dazwischen. Im Oberen Belvedere hängt Klimts Kuss.",
     "website": "https://belvedere.at",
@@ -526,10 +493,7 @@ const ORTE = [
     "tags": [
       "thema-musik"
     ],
-    "labels": [
-      "lgbtq",
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Seilerstätte 30, 1010 Wien",
     "beschreibung": "Klangmuseum in der Seilerstätte, in dem man selbst dirigieren und Töne bauen kann. Bis 22 Uhr geöffnet und damit auch nach dem Abendessen möglich.",
     "website": "https://hausdermusik.com",
@@ -551,9 +515,7 @@ const ORTE = [
     "tags": [
       "thema-geschichte"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Karlsplatz 8, 1040 Wien",
     "beschreibung": "Stadtgeschichte am Karlsplatz, von den Römern bis in die Gegenwart. Die Dauerausstellung ist gratis.",
     "website": "https://wienmuseum.at",
@@ -598,9 +560,7 @@ const ORTE = [
       "thema-angewandt",
       "thema-kunst"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Stubenring 5, 1010 Wien",
     "beschreibung": "Museum für angewandte Kunst am Stubenring, mit Design, Möbeln und Mode aus mehreren Jahrhunderten. Der Bau selbst ist einen Blick wert.",
     "website": "https://mak.at",
@@ -623,10 +583,7 @@ const ORTE = [
       "genre-klassik",
       "loc-gross"
     ],
-    "labels": [
-      "hunde",
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Musikvereinsplatz 1, 1010 Wien",
     "beschreibung": "Der Goldene Saal, aus dem das Neujahrskonzert übertragen wird. Akustisch der beste Raum der Stadt.",
     "website": "https://musikverein.at",
@@ -649,9 +606,7 @@ const ORTE = [
       "genre-klassik",
       "loc-gross"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Lothringerstraße 20, 1030 Wien",
     "beschreibung": "Das zweite große Konzerthaus der Stadt, mit breiterem Programm als der Musikverein. Von Klassik bis Jazz ist alles möglich.",
     "website": "https://konzerthaus.at",
@@ -674,10 +629,7 @@ const ORTE = [
       "genre-jazz",
       "loc-klein"
     ],
-    "labels": [
-      "hunde",
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Riemergasse 11, 1010 Wien",
     "beschreibung": "Jazzclub in der Riemergasse mit Konzerten an fast jedem Abend. Internationale Namen stehen hier ebenso auf der Bühne wie die Wiener Szene.",
     "website": "https://porgy.at",
@@ -700,9 +652,7 @@ const ORTE = [
       "genre-jazz",
       "loc-klein"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Franz-Josefs-Kai 29, 1010 Wien",
     "beschreibung": "Kellergewölbe unter der Ruprechtskirche, seit 1972 mit Programm aus New-Orleans-Jazz und Blues.",
     "website": "https://jazzland.at",
@@ -725,11 +675,7 @@ const ORTE = [
       "genre-poprock",
       "loc-klein"
     ],
-    "labels": [
-      "barrierefrei",
-      "lgbtq",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "U-Bahn-Bogen 39–40, 1080 Wien",
     "beschreibung": "Musikbar im Stadtbahnbogen am Gürtel, mit Konzerten von Indie bis Elektronik. Klein genug, dass man die Band von der Theke aus sieht.",
     "website": "https://www.kramladenvienna.at",
@@ -777,10 +723,7 @@ const ORTE = [
       "genre-poprock",
       "loc-klein"
     ],
-    "labels": [
-      "reizarm",
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Lerchenfelder Gürtel 37, 1160 Wien",
     "beschreibung": "Kulturzentrum in einer alten Fabrik am Gürtel. Neben Konzerten laufen dort auch Filmabende und Poetry Slams.",
     "website": "https://theloft.at",
@@ -804,10 +747,7 @@ const ORTE = [
       "genre-metal",
       "loc-gross"
     ],
-    "labels": [
-      "reizarm",
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Baumgasse 80, 1030 Wien",
     "beschreibung": "Ehemaliger Schlachthof im dritten Bezirk, seit 1976 selbstverwaltet. Im Sommer spielen die Konzerte draußen im Hof.",
     "website": "https://arena.wien",
@@ -831,9 +771,7 @@ const ORTE = [
       "genre-metal",
       "loc-gross"
     ],
-    "labels": [
-      "barrierefrei"
-    ],
+    "labels": [],
     "adresse": "Hauffgasse 26, 1110 Wien",
     "beschreibung": "Konzertsaal in Simmering, seit den Achtzigern eine feste Größe für Rock und Punk.",
     "website": "https://szene.wien",
@@ -856,10 +794,7 @@ const ORTE = [
       "genre-jazz",
       "loc-klein"
     ],
-    "labels": [
-      "vegan",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "Floßgasse 4, 1020 Wien",
     "beschreibung": "Jazzclub in der Floßgasse mit Programm an fast jedem Abend. Der Raum ist klein, die Besetzungen wechseln ständig.",
     "website": "https://zwe.cc",
@@ -883,9 +818,7 @@ const ORTE = [
       "genre-metal",
       "loc-klein"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Landstraßer Hauptstraße 38, 1030 Wien",
     "beschreibung": "Rock- und Metal-Club in der Landstraße mit Konzerten und späten Partys. Klein, laut, schwarz gestrichen.",
     "website": "https://viper-room.at",
@@ -908,9 +841,7 @@ const ORTE = [
       "event-oper",
       "event-ballett"
     ],
-    "labels": [
-      "lgbtq"
-    ],
+    "labels": [],
     "adresse": "Opernring 2, 1010 Wien",
     "beschreibung": "Fast jeden Abend eine andere Produktion. Stehplätze gibt es ab wenigen Euro, die Schlange beginnt gut eine Stunde vor Vorstellungsbeginn.",
     "website": "https://wiener-staatsoper.at",
@@ -932,9 +863,7 @@ const ORTE = [
     "tags": [
       "event-musical"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Seilerstätte 9, 1010 Wien",
     "beschreibung": "Musicaltheater der Vereinigten Bühnen Wien im Bau von 1872. Gespielt wird in langen Serien, Karten sind meist Wochen im Voraus zu haben.",
     "website": "https://musicalvienna.at",
@@ -957,9 +886,7 @@ const ORTE = [
       "event-oper",
       "event-musical"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Währinger Straße 78, 1090 Wien",
     "beschreibung": "Haus für Operette und Spieloper im neunten Bezirk. Günstiger als die Staatsoper und meist auf Deutsch gesungen.",
     "website": "https://volksoper.at",
@@ -982,9 +909,7 @@ const ORTE = [
       "event-oper",
       "event-theater"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Linke Wienzeile 6, 1060 Wien",
     "beschreibung": "Hier wurde Beethovens Fidelio uraufgeführt, heute ist es die Bühne für Barockoper und Zeitgenössisches. Nach der Sanierung wieder am Naschmarkt in Betrieb.",
     "website": "https://theater-wien.at",
@@ -1006,9 +931,7 @@ const ORTE = [
     "tags": [
       "event-kabarett"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Wollzeile 36, 1010 Wien",
     "beschreibung": "Kleinkunstbühne in der Wollzeile, gegründet 1912. Wiener Kabarett, sprachlich fordernd für Zugereiste.",
     "website": "https://simpl.at",
@@ -1031,9 +954,7 @@ const ORTE = [
       "event-theater",
       "event-kabarett"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Maroltingergasse 43, 1160 Wien",
     "beschreibung": "Die letzte Stegreifbühne Europas, im Freien in Ottakring. Die Schauspieler bekommen nur die Handlung, den Text erfinden sie beim Spielen.",
     "website": "https://tschauner.at",
@@ -1055,9 +976,7 @@ const ORTE = [
     "tags": [
       "akt-logik"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Viaduktgasse 3, 1030 Wien",
     "beschreibung": "Der älteste Escape Room der Stadt, seit 2013 im dritten Bezirk. Die Räume sind für zwei bis sieben Leute gebaut und barrierefrei zugänglich.",
     "website": "https://escapemission.at",
@@ -1079,10 +998,7 @@ const ORTE = [
     "tags": [
       "akt-logik"
     ],
-    "labels": [
-      "reizarm",
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Mariahilfer Straße 103, 1060 Wien",
     "beschreibung": "Escape Rooms an der Mariahilfer Straße mit aufwendig gebauten Kulissen. Bis spät am Abend buchbar.",
     "website": "https://vienna.escapegameover.at",
@@ -1104,10 +1020,7 @@ const ORTE = [
     "tags": [
       "akt-sport"
     ],
-    "labels": [
-      "vegan",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "Josefsdorf 47, 1190 Wien",
     "beschreibung": "Bogenparcours im Wienerwald mit Tierattrappen als Ziele, verteilt auf vier Runden. Die Ausrüstung wird vor Ort verliehen, Vorkenntnisse braucht es keine.",
     "website": "https://bogenschiessen.erlebniswelt-kahlenberg.at",
@@ -1129,12 +1042,7 @@ const ORTE = [
     "tags": [
       "akt-sport"
     ],
-    "labels": [
-      "barrierefrei",
-      "lgbtq",
-      "vegan",
-      "geheimtipp"
-    ],
+    "labels": [],
     "adresse": "Praterstraße 9, 1020 Wien",
     "beschreibung": "Bogenschießhalle gegenüber dem Schwedenplatz mit vier Bahnen. Schnupperstunden sind auch ohne Mitgliedschaft möglich.",
     "website": "https://arco-vienna.at",
@@ -1178,9 +1086,7 @@ const ORTE = [
     "tags": [
       "akt-sport"
     ],
-    "labels": [
-      "lgbtq"
-    ],
+    "labels": [],
     "adresse": "Schlossgasse 10–12, 1050 Wien",
     "beschreibung": "Boulderhalle in Margareten mit Routen über alle Schwierigkeitsgrade. Schuhe kann man leihen, allein hinzugehen funktioniert problemlos.",
     "website": "https://blockfabrik.at",
@@ -1202,9 +1108,7 @@ const ORTE = [
       "sehenswuerdigkeit"
     ],
     "tags": [],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Riesenradplatz 1, 1020 Wien",
     "beschreibung": "Steht seit 1897 im Prater und ist 65 Meter hoch. Eine Umdrehung dauert eine gute Viertelstunde.",
     "website": "https://wienerriesenrad.com",
@@ -1226,9 +1130,7 @@ const ORTE = [
     "tags": [
       "akt-sport"
     ],
-    "labels": [
-      "reizarm"
-    ],
+    "labels": [],
     "adresse": "Roßauer Lände 45, 1090 Wien",
     "beschreibung": "Lasertag-Arena am Donaukanal, aufgebaut über zwei Ebenen. Ab etwa sechs Leuten macht es am meisten her.",
     "website": "https://maxxarena.com",
@@ -1296,10 +1198,7 @@ const ORTE = [
       "draussen",
       "fr-mittag"
     ],
-    "labels": [
-      "barrierefrei",
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Karl-Kolarik-Weg 1, 1020 Wien",
     "beschreibung": "Café im ehemaligen Ponykarussell im Prater, mit eigener Patisserie und Gastgarten. Frühstück bis zwei, danach Küche.",
     "website": "https://www.ponykarussell.at",
@@ -1365,11 +1264,7 @@ const ORTE = [
     "tags": [
       "fr-nachmittag"
     ],
-    "labels": [
-      "barrierefrei",
-      "hunde",
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Babenbergerstraße 5, 1010 Wien",
     "beschreibung": "Café zwischen Burggarten und Museumsquartier mit Frühstück den ganzen Tag. Es gibt eine eigene Karte für den Hund.",
     "website": "https://www.sil.wien",
@@ -1414,9 +1309,7 @@ const ORTE = [
       "draussen",
       "fr-nachmittag"
     ],
-    "labels": [
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Kupkagasse 2, 1080 Wien",
     "beschreibung": "Café in einer Seitengasse der Josefstädter Straße, am Ende des Hamerlingparks. Frühstück den ganzen Tag, Gebäck aus eigener Hand.",
     "website": "",
@@ -1438,9 +1331,7 @@ const ORTE = [
     "tags": [
       "fr-nachmittag"
     ],
-    "labels": [
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Krongasse 22/1, 1050 Wien",
     "beschreibung": "Kleines Café in Margareten mit knapper, guter Frühstückskarte. Brot von Öfferl, Eier aus Freilandhaltung.",
     "website": "https://www.propeller.wien",
@@ -1463,9 +1354,7 @@ const ORTE = [
       "cafe-spezialitaet",
       "cafe-kuchen"
     ],
-    "labels": [
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Altgasse 12, 1130 Wien",
     "beschreibung": "Kaffeehaus mit kleiner Greißlerei in Hietzing, unweit von Schönbrunn. Spezialitätenkaffee und täglich frisches Gebäck.",
     "website": "",
@@ -1511,9 +1400,7 @@ const ORTE = [
       "draussen",
       "cafe-kaffeehaus"
     ],
-    "labels": [
-      "hunde"
-    ],
+    "labels": [],
     "adresse": "Franziskanerplatz 3, 1010 Wien",
     "beschreibung": "In den Siebzigern von Hermann Czech gebaut und seither von Hanno Pöschl geführt. Im Sommer sitzt man draußen am Franziskanerplatz.",
     "website": "",
@@ -1558,9 +1445,7 @@ const ORTE = [
       "cafe-spezialitaet",
       "cafe-kuchen"
     ],
-    "labels": [
-      "vegan"
-    ],
+    "labels": [],
     "adresse": "Mariahilfer Straße 192, 1150 Wien",
     "beschreibung": "Rösterei gegenüber dem Schwendermarkt, selbst geröstet und direkt gehandelt. Wurde zum besten Coffeeshop Europas gewählt.",
     "website": "https://gota.coffee",
@@ -1652,9 +1537,7 @@ const ORTE = [
       "genre-poprock",
       "loc-klein"
     ],
-    "labels": [
-      "barrierefrei"
-    ],
+    "labels": [],
     "adresse": "Hernalser Gürtel 72–73, 1080 Wien",
     "beschreibung": "Club in den Stadtbahnbögen am Gürtel, seit 1998. Zwei Ebenen, Konzerte und DJ-Linien, täglich ab acht Uhr abends.",
     "website": "https://www.b72.at",

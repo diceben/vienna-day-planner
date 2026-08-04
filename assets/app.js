@@ -22,15 +22,15 @@
     aktivitaet:        { titel: "Aktivitäten",            farbe: "#2f7355", zeichen: "🎯" }
   };
 
-  /* Labels: Eigenschaften eines Ortes, schaltbar im Zahnrad-Popover. */
-  var LABELS = {
-    barrierefrei: { titel: "Barrierefrei",        zeichen: "♿" },
-    lgbtq:        { titel: "LGBTQ+-freundlich",   zeichen: "🏳️‍🌈" },
-    hunde:        { titel: "Hunde willkommen",    zeichen: "🐕" },
-    reizarm:      { titel: "Reizarm & ruhig",     zeichen: "🔇" },
-    vegan:        { titel: "Vegan & vegetarisch", zeichen: "🌱" },
-    geheimtipp:   { titel: "Geheimtipp",          zeichen: "🤫" }
-  };
+  /* Hier stand einmal LABELS: Barrierefrei, LGBTQ+-freundlich, Hunde
+     willkommen, Reizarm, Vegan, Geheimtipp — schaltbar im Zahnrad-Popover.
+     Die Werte in daten.js waren zum Testen des Filters gestreut, nicht
+     recherchiert, und der Filter ließ sie wie Tatsachen aussehen. Bei
+     „Barrierefrei“ schickt das jemanden im Rollstuhl vor eine Treppe.
+
+     Das Feld `labels` steht weiterhin leer in jedem Ort. Kommen echte,
+     geprüfte Werte, ist das Zurückholen ein kleiner Schritt: diese Tabelle,
+     die Gruppe im Popover, `aktiveLabels` und die Kästchen im Formular. */
 
   /* ------------------------------------------------------------------
      Routenvorschlag
@@ -259,7 +259,6 @@
   var ziehIndex = null;
   var aktiveKategorien = new Set();
   var aktiveSchalter = new Set();
-  var aktiveLabels = new Set();
   var suchtext = "";
   var markerNach = {};
   var gewaehlt = null;
@@ -1077,12 +1076,6 @@
         return !aktiveSchalter.has(s.id) || s.pruef(ort);
       });
       if (!alleSchalter) { return false; }
-      /* Mehrere Eigenschaften werden mit und verknüpft. */
-      var labelsOk = true;
-      aktiveLabels.forEach(function (l) {
-        if ((ort.labels || []).indexOf(l) === -1) { labelsOk = false; }
-      });
-      if (!labelsOk) { return false; }
       if (suche) {
         var heuhaufen = (ort.name + " " + ort.adresse + " " + ort.beschreibung).toLowerCase();
         if (heuhaufen.indexOf(suche) === -1) { return false; }
@@ -1196,24 +1189,6 @@
       behaelter.appendChild(b);
     });
 
-    var labelbox = document.getElementById("label-schalter");
-    labelbox.innerHTML = "";
-    Object.keys(LABELS).forEach(function (l) {
-      var d = LABELS[l];
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "chip schalt";
-      b.setAttribute("aria-pressed", "false");
-      b.dataset.label = l;
-      b.innerHTML = '<span class="schalt-zeichen" aria-hidden="true">' + d.zeichen + "</span>" + d.titel;
-      b.addEventListener("click", function () {
-        if (aktiveLabels.has(l)) { aktiveLabels.delete(l); }
-        else { aktiveLabels.add(l); }
-        aktualisiere();
-      });
-      labelbox.appendChild(b);
-    });
-
     var schalterbox = document.getElementById("schalter");
     schalterbox.innerHTML = "";
     SCHALTER.forEach(function (s) {
@@ -1239,15 +1214,12 @@
     document.querySelectorAll("[data-schalter]").forEach(function (b) {
       b.setAttribute("aria-pressed", aktiveSchalter.has(b.dataset.schalter) ? "true" : "false");
     });
-    document.querySelectorAll("[data-label]").forEach(function (b) {
-      b.setAttribute("aria-pressed", aktiveLabels.has(b.dataset.label) ? "true" : "false");
-    });
   }
 
   function aktualisiereGearZahl() {
     var span = document.getElementById("gear-zahl");
     if (!span) { return; }
-    var summe = aktiveSchalter.size + aktiveLabels.size;
+    var summe = aktiveSchalter.size;
     span.textContent = summe ? String(summe) : "";
     span.hidden = summe === 0;
   }
@@ -1519,7 +1491,6 @@
   function filterAktiv() {
     return aktiveKategorien.size > 0 ||
       aktiveSchalter.size > 0 ||
-      aktiveLabels.size > 0 ||
       suchtext.trim() !== "";
   }
 
@@ -1626,17 +1597,6 @@
     return '<div class="feld" id="merkmalfeld"><span>Merkmale</span>' + inhalt + "</div>";
   }
 
-  /* Label-Kästchen für die Farbbänder. */
-  function labelfeld(gewaehlte) {
-    var kaestchen = Object.keys(LABELS).map(function (l) {
-      var an = gewaehlte.indexOf(l) !== -1;
-      return '<label class="kaestchen"><input type="checkbox" name="label" value="' + l + '"' +
-        (an ? " checked" : "") + "> " + LABELS[l].zeichen + " " + LABELS[l].titel + "</label>";
-    }).join("");
-    return '<div class="feld"><span>Labels — erscheinen als Farbbänder</span>' +
-      '<div class="mehrfach">' + kaestchen + "</div></div>";
-  }
-
   /* Zweitkategorien: ein Ort kann in mehreren Filtern auftauchen,
      die Farbe des Pins richtet sich weiter nach der ersten. */
   function mehrfachfeld(gewaehlteWeitere) {
@@ -1672,7 +1632,6 @@
       auswahl("kategorie", "Kategorie", o.kategorie, kategorieOptionen) +
       mehrfachfeld(o.weitere || []) +
       merkmalfeld(o.kategorie, o.tags || []) +
-      labelfeld(o.labels || []) +
       feld("adresse", "Adresse", o.adresse) +
       '<label class="feld"><span>Beschreibung</span><textarea name="beschreibung">' + entschaerfe(o.beschreibung) + "</textarea></label>" +
       feld("website", "Website", o.website, "url") +
@@ -1795,9 +1754,10 @@
     var tags = Array.prototype.slice.call(f.querySelectorAll('input[name="tag"]:checked'))
       .map(function (e) { return e.value; });
 
-    var gewaehlteLabels = Object.keys(LABELS).filter(function (l) {
-      return !!f.querySelector('input[name="label"][value="' + l + '"]:checked');
-    });
+    /* `labels` ist im Formular nicht mehr zu pflegen, seit die erfundenen
+       Werte draußen sind. Was von Hand in daten.js steht, bleibt trotzdem
+       stehen — sonst löschte ein Speichern es unbemerkt weg. */
+    var bisher = orte.filter(function (o) { return o.id === formularId; })[0];
 
     var neuerOrt = {
       id: formularId || eindeutigeId(f.name.value),
@@ -1805,7 +1765,7 @@
       kategorie: f.kategorie.value,
       weitere: weitere,
       tags: tags,
-      labels: gewaehlteLabels,
+      labels: (bisher && bisher.labels) || [],
       adresse: f.adresse.value.trim(),
       beschreibung: f.beschreibung.value.trim(),
       website: f.website.value.trim(),
@@ -1873,7 +1833,8 @@
       "                  | musik | event | aktivitaet — bestimmt Farbe und Symbol",
       "     weitere      Liste weiterer Kategorien, meist leer",
       "     tags         Merkmale für die kategoriespezifischen Filter",
-      "     labels       Eigenschaften als Farbbänder, sh. LABELS in app.js",
+      "     labels       derzeit überall leer — die früheren Werte waren",
+      "                  erfunden und sind entfernt worden",
       "     bild         Miniaturbild: Pfad wie bilder/riesenrad.jpg oder URL",
       "     adresse      Straße, PLZ und Wien",
       "     beschreibung ein bis zwei Sätze",
@@ -2226,7 +2187,6 @@
   document.getElementById("zuruecksetzen").addEventListener("click", function () {
     aktiveKategorien.clear();
     aktiveSchalter.clear();
-    aktiveLabels.clear();
     suchtext = "";
     document.getElementById("suche").value = "";
     aktualisiere();

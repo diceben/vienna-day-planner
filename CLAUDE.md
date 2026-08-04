@@ -48,10 +48,14 @@ oder `#bearbeiten`) mit anschließendem Export von `daten.js`, oder direkt in
   löscht bei allen Nutzern den gespeicherten Tagesplan.
 - **`bilder/BILDNACHWEIS.md` gehört mitveröffentlicht.** Die Fotos stammen von
   Wikimedia Commons und verlangen Namensnennung.
-- **Die `labels`-Werte sind erfunden** (Barrierefrei, Vegan, Reizarm …). Sie
-  wurden zum Testen des Filters gestreut. Vor einer echten Empfehlung prüfen
-  oder löschen — eine falsche Angabe bei „Barrierefrei" schickt jemanden im
-  Rollstuhl vor eine Treppe.
+- **Die `labels`-Werte sind gelöscht**, samt der Filtergruppe „Eigenschaften"
+  im Zahnrad-Popover. Sie waren zum Testen gestreut, nicht recherchiert, und
+  eine falsche Angabe bei „Barrierefrei" schickt jemanden im Rollstuhl vor eine
+  Treppe. Das Feld steht leer bei jedem Ort; was von Hand hineingeschrieben
+  wird, reicht der Bearbeiten-Modus beim Speichern durch. **Nichts dort
+  eintragen, was nicht geprüft ist.** Kommen geprüfte Werte, gehört die
+  Filtergruppe wieder dazu — sonst liegen die Daten brach. Was dafür nötig ist,
+  steht im Kommentar an der Stelle von `LABELS` in `assets/app.js`.
 - **Öffnungszeiten kennt die Karte nicht.** Die Tageszeit im Routenvorschlag ist
   aus der Kategorie geschätzt.
 

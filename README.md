@@ -150,11 +150,11 @@ Filtern lässt sich damit nicht. Das war einmal anders — die Merkmale standen 
 
 Welche Merkmale es je Kategorie gibt, steht in `assets/app.js` unter `MERKMALE`. Die meisten hängen an einem Eintrag im Feld `tags` (z. B. `kueche-italienisch`, `genre-jazz`, `thema-kunst`) und lassen sich im Bearbeiten-Formular anhaken. Ein paar werden aus anderen Feldern abgeleitet und tragen keinen Tag: Kostenlos/Mit Eintritt aus `preis`, Indoor/Outdoor aus `indoor`, Gruppe/Duo aus `allein`. Jedes trägt eine `test`-Funktion, und `merkmaleVon(ort)` fragt sie der Reihe nach ab.
 
-**Zahnrad.** Am großen Schirm steht es ganz rechts oben, am anderen Ende der Chipreihe; am Handy sitzt es im rechten Ende der Suchpille. Es öffnet zwei Gruppen von Schaltern, die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
+**Zahnrad.** Am großen Schirm steht es ganz rechts oben, am anderen Ende der Chipreihe; am Handy sitzt es im rechten Ende der Suchpille. Es öffnet die sechs universellen Schalter (Tabelle unten), die für alle Kategorien gelten. Eine Ziffer am Rädchen zeigt, wie viele davon aktiv sind.
 
-Oben die sechs universellen Schalter (Tabelle unten), darunter die Eigenschaften aus dem Feld `labels`: Barrierefrei, LGBTQ+-freundlich, Hunde willkommen, Reizarm & ruhig, Vegan & vegetarisch, Geheimtipp. Mehrere Eigenschaften werden mit und verknüpft — wer barrierefrei und vegan wählt, sieht nur Orte, auf die beides zutrifft.
-
-> **Die Label-Werte sind derzeit erfunden.** Sie wurden gestreut, um den Filter zu testen, und sagen nichts über die echten Orte aus. Vor einer Veröffentlichung gehören sie geprüft oder gelöscht — eine falsche Angabe bei „Barrierefrei“ schickt jemanden im Rollstuhl vor eine Treppe. Ein Hinweis darauf steht auch im Popover selbst und im Kopf von `daten.js`.
+> **Die Eigenschaften-Filter sind entfernt worden.** Barrierefrei, LGBTQ+-freundlich, Hunde willkommen, Reizarm & ruhig, Vegan & vegetarisch und Geheimtipp standen früher als zweite Gruppe im Popover. Ihre Werte waren gestreut, um den Filter zu testen — nicht recherchiert. Der Filter ließ sie trotzdem wie Tatsachen aussehen, und der Warnhinweis stand nur im Popover, sichtbar bloß für den, der es aufklappte. Bei „Barrierefrei“ schickt das jemanden im Rollstuhl vor eine Treppe.
+>
+> Das Feld `labels` steht weiterhin leer bei jedem Ort. Kommen echte, geprüfte Werte, ist das Zurückholen ein kleiner Schritt: die Tabelle `LABELS` in `assets/app.js` (der Kommentar an ihrer Stelle sagt, was dazugehört), die Gruppe im Popover und die Kästchen im Formular. Wer `labels` von Hand in `daten.js` pflegt, verliert die Werte nicht — der Bearbeiten-Modus reicht durch, was er nicht anzeigen kann.
 
 | Schalter | zeigt nur Orte, die … |
 |---|---|
