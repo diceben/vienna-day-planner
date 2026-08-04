@@ -1721,10 +1721,24 @@ body.setzt-position #karte { cursor: crosshair; }
   }
   .kat-chip .sym { font-size: 17px; }
 
-  /* ----- Leaflets Bedienelemente aus dem Weg ----- */
-  /* Auf dem Handy wird mit zwei Fingern gezoomt; die Knöpfe wären nur im Weg.
-     Der Standortknopf steht ohnehin schon unten links. */
-  .leaflet-control-zoom { display: none; }
+  /* ----- Leaflets Bedienelemente ----- */
+  /* Die Zoomknöpfe waren hier einmal ausgeblendet — auf dem Handy wird ja mit
+     zwei Fingern gezoomt. Nachgemessen stimmt das nur halb: Hinein kommt man
+     mit einem Finger (Doppeltipp, gleich zwei Stufen), hinaus nur mit zwei.
+     Damit war Herauszoomen ausschließlich über eine Mehrfinger-Geste zu haben,
+     und das ist WCAG 2.5.1 (Stufe A) — wer versehentlich doppeltippte, saß auf
+     Zoomstufe 15 fest.
+
+     Sie sind deshalb wieder da, aber kleiner als am großen Schirm: 30 statt 34
+     Pixel, damit sie im Stapel unten links nicht dominieren. Nebeneffekt, der
+     hier zählt: Zoomen ist der Ausweg aus dicht stehenden Pins — eine Stufe
+     hinein senkt den Anteil schwer treffbarer Pins von 42 auf 18 Prozent. */
+  .leaflet-control-zoom a {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 18px;
+  }
 
   /* ----- Auch hier zwei Zustände ----- */
   /* Ohne Filter füllt die Karte den Schirm, ganz ohne Liste — dasselbe Bild

@@ -32,9 +32,12 @@ for (const [w, h, name] of [[390, 844, "iphone"], [420, 800, "breit"], [360, 740
   console.log(`  Chipreihe  y ${m.leiste.t}–${m.leiste.b}, ${m.scrollBreite}px Inhalt in ${m.sichtBreite}px ${m.scrollt ? "(scrollt)" : "(passt)"}`);
   console.log(`  Zähler-Chip weg: ${m.zaehlerWeg} | Namen: ${m.chipNamen.join(", ")}`);
   if (!m.zaehlerWeg) fehler.push(name + ": der Zähler-Chip steht noch in der Reihe");
-  console.log(`  Titel aus: ${!m.titelSichtbar} | Zoom aus: ${!m.zoomSichtbar} | Standort y ${m.standort ? m.standort.t : "?"}`);
+  console.log(`  Titel aus: ${!m.titelSichtbar} | Zoom an: ${m.zoomSichtbar} | Standort y ${m.standort ? m.standort.t : "?"}`);
   if (m.titelSichtbar) fehler.push(name + ": Titel noch sichtbar");
-  if (m.zoomSichtbar) fehler.push(name + ": Zoomknöpfe noch da");
+  /* Hier stand einmal die Zusicherung, dass die Zoomknöpfe auf dem Handy weg
+     sind. Sie ist umgedreht: Ohne sie war Herauszoomen nur mit zwei Fingern zu
+     haben (WCAG 2.5.1, Stufe A). Näheres in tests/erreichbarkeit.mjs. */
+  if (!m.zoomSichtbar) fehler.push(name + ": Zoomknöpfe fehlen — Herauszoomen ginge nur mit zwei Fingern");
   if (m.seitlich) fehler.push(name + ": seitlicher Überlauf");
   if (m.pille.b > m.leiste.t) fehler.push(name + ": Suchpille überlappt die Chipreihe");
   if (!m.chipNamen[0] || m.chipNamen[0].endsWith("=0px")) fehler.push(name + ": Chipnamen unsichtbar");

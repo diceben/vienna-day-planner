@@ -92,6 +92,15 @@ oder `#bearbeiten`) mit anschließendem Export von `daten.js`, oder direkt in
   steht im Kommentar an der Stelle von `LABELS` in `assets/app.js`.
 - **Öffnungszeiten kennt die Karte nicht.** Die Tageszeit im Routenvorschlag ist
   aus der Kategorie geschätzt.
+- **Die Zoomknöpfe auf dem Handy nicht wieder ausblenden.** Sie waren einmal
+  weg, weil man ja mit zwei Fingern zoomt. Hinein kommt man damit auch mit
+  einem (Doppeltipp), hinaus aber nur mit zweien — das ist WCAG 2.5.1,
+  Stufe A, und wer versehentlich doppeltippt, sitzt fest. `erreichbarkeit.mjs`
+  hält das fest.
+- **Die 36 × 46 px großen Pins nicht verkleinern und ihre Trefferfläche nicht
+  beschneiden.** Google beanstandet 30 Pins wegen Überlappung; die Ecken des
+  Kastens fangen aber Klicks *für den eigenen Pin* mit. Nachgemessen macht das
+  Beschneiden es schlechter. Näheres in der README unter „Berührungsziele".
 
 ## Portfolio
 

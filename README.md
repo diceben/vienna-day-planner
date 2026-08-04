@@ -239,7 +239,7 @@ Unter 900 Pixel Fensterbreite ordnet sich die Bedienung um und folgt dem, was ma
 
 - Die **Suchleiste** schwebt über der Karte, hier über die volle Breite statt nur über der Spalte, mit der Lupe links und dem Zahnrad rechts darin. Am großen Schirm steht das Zahnrad stattdessen frei am rechten Rand — auf 390 Pixeln wäre daneben kein Platz, und die Chipreihe braucht die volle Breite zum Wischen.
 - Darunter die **Kategorien als beschriftete Chips** in einer waagrecht scrollbaren Reihe, Symbol vorn, Name dahinter. Der Scrollbalken ist ausgeblendet, gescrollt wird trotzdem. Die Trefferzahl stand hier einmal als erster Chip — sie hat nur Platz gekostet und ist raus.
-- **Leaflets Zoomknöpfe sind ausgeblendet** — auf dem Handy wird mit zwei Fingern gezoomt, und die Knöpfe wären nur im Weg. Der Standortknopf (◉) bleibt und steht wie am großen Schirm unten links.
+- **Leaflets Zoomknöpfe stehen unten links**, etwas kleiner als am großen Schirm (30 statt 34 Pixel). Sie waren einmal ausgeblendet — auf dem Handy wird ja mit zwei Fingern gezoomt. Nachgemessen stimmte das nur halb, siehe „Berührungsziele" weiter unten. Darüber der Standortknopf (◉) und der Bearbeiten-Schalter, alle drei im selben Leaflet-Stapel.
 - Suchleiste und Chips **bleiben beim Scrollen stehen**. Sobald die Ortsliste unter ihnen hochwandert, legt sich ein papierfarbener Streifen dahinter, der nach unten weich ausläuft — sonst läse man zwischen den Pillen hindurch Textfetzen. Über der Karte, also ganz oben, bleibt alles durchsichtig.
 - **Ein Pin öffnet ein Ortsblatt**, das von unten hereinfährt: Bild, Name, Adresse, Beschreibung, dazu Website, Route und „+ Zum Tag". Solange es offen ist, **tritt die Liste ganz ab**: Die Karte füllt den Schirm, das Blatt liegt im unteren Drittel, und die Seite lässt sich nicht scrollen — es gibt nichts mehr, wohin. Die Karte rückt den Pin über die Blattoberkante. Das ✕ schließt das Blatt und stellt den Stand davor wieder her — mit Filter also samt Liste, ohne Filter die nackte Karte. Vorher sprang die Seite hinunter zum Listeneintrag, und die Karte war weg — damit verlor man genau den Zusammenhang, den man gesucht hatte. Auf dem Handy wird deshalb auch kein Leaflet-Popup mehr gebunden; das Blatt tritt an seine Stelle.
 - Ein Tipp auf einen **Listeneintrag** bleibt dagegen in der Liste: Der Eintrag klappt auf, die Seite springt nicht, kein Blatt. Liste zum Stöbern, Karte zum Verorten.
@@ -250,10 +250,34 @@ Früher stand hier ein Absatz darüber, dass es am Handy keine Merkmal-Vorschau 
 
 Das Repository liegt auf [github.com/diceben/vienna-day-planner](https://github.com/diceben/vienna-day-planner), `index.html` im Wurzelverzeichnis — genau dort, wo Pages sie erwartet.
 
-1. Im Repository unter *Settings → Pages* als Quelle „Deploy from a branch“ wählen, Branch `main` und Ordner `/ (root)`.
-2. Nach ein bis zwei Minuten ist die Seite unter <https://diceben.github.io/vienna-day-planner/> erreichbar.
+Veröffentlicht wird über `.github/workflows/deploy.yml`, nicht mehr direkt aus dem Branch. Der Workflow testet erst und lädt nur bei grüner Suite hoch; als Pages-Quelle steht deshalb **„GitHub Actions"** (das stellt `actions/configure-pages` beim ersten Lauf selbst um). Rund drei Minuten nach dem Push ist der neue Stand unter <https://diceben.github.io/vienna-day-planner/> — zwei davon sind der Testlauf.
 
-Ein späteres Update besteht aus einem einzigen Schritt: die exportierte `daten.js` committen und pushen.
+Ein Update besteht weiterhin aus einem Schritt: die exportierte `daten.js` committen und pushen. Ist ein Testlauf rot, bleibt die zuletzt erfolgreiche Fassung stehen.
+
+## Berührungsziele und was Google dazu sagt
+
+Der PageSpeed-Bericht beanstandet **30 Berührungsziele**. Alle dreißig sind Kartenpins — kein Chip, kein Knopf, kein Listeneintrag.
+
+Die Pins sind **36 × 46 Pixel** und liegen damit über dem Mindestmaß von 24 × 24. Beanstandet wird nicht die Größe, sondern die **Überlappung**: Im 1. Bezirk liegen Stephansdom, Ankeruhr, Albertina, Leopold Museum, Kunsthistorisches und Naturhistorisches Museum, Haus der Musik und Wien Museum auf engstem Raum. Nachgemessen mit echtem Trefferpunkt-Test:
+
+| | Pins im Bild | ohne freies 24 × 24-Feld |
+|---|---|---|
+| Desktop 1280 × 800, Zoom 13 | 67 | 28 (42 %) |
+| Handy 390 × 664, Zoom 13 | 57 | 30 (53 %) |
+
+**Das ist kein Fehlalarm.** Vier von zehn Pins sind schwer zu treffen. Was dagegen hilft, ist Zoom: eine Stufe hinein senkt den Anteil auf 18 Prozent, zwei auf 5.
+
+Und genau dort lag der eigentliche Fehler. Auf dem Handy waren die Zoomknöpfe ausgeblendet. Gemessen: **Hinein** ging mit einem Finger (Doppeltipp, gleich zwei Stufen), **hinaus nur mit zwei**. Damit war Herauszoomen ausschließlich über eine Mehrfinger-Geste zu haben — ein Verstoß gegen [WCAG 2.5.1 Pointer Gestures](https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures.html), **Konformitätsstufe A**, also strenger als die Berührungsziele (AA). Lighthouse prüft das nicht, weil es eine Handprüfung ist. Praktisch: Wer versehentlich doppeltippte, saß auf Zoomstufe 15 fest. Die Knöpfe sind deshalb zurück.
+
+Am Pin selbst ändert sich nichts, und das mit Absicht:
+
+- **Bündeln (Clustering)** wäre der Standardweg und hier falsch: Es bräuchte ein Plugin, und es versteckt genau die 69 kuratierten Orte, um die es auf dieser Karte geht, hinter nummerierten Blasen.
+- **Auseinanderschieben** kommt nicht in Frage. Die Position eines Pins *ist* die Information.
+- **Die Trefferfläche auf die sichtbare Form beschneiden** — 27 Prozent des 36 × 46-Kastens sind tote Ecken — klingt richtig und ist es nicht. Nachgemessen: 29 → 31 Pins ohne freies 24 × 24-Feld, erreichbare Fläche im Schnitt von 66 auf 52 Prozent. Die toten Ecken fangen Klicks nicht nur *statt* der Nachbarn, sondern auch *für den eigenen Pin*.
+- **Größere Pins** verschlimmern die Überlappung.
+- **Höherer Startzoom** würde wirken, nimmt aber den Überblick über die Stadt.
+
+Was zugesichert bleibt, hält `tests/erreichbarkeit.mjs` fest: Jeder Pin ist per Tastatur erreichbar, trägt `role="button"` und seinen Ortsnamen, und Enter öffnet ihn — ein gleichwertiger Weg, den WCAG 2.5.8 ausdrücklich zulässt und den keine Überlappung berührt. Dazu die Kategorienchips und das Suchfeld, die beide zur Liste mit großen Einträgen führen.
 
 ## Auswahl der Orte
 
